@@ -12,27 +12,40 @@ import time
 _BROWSER_PROCESS_MARKER = "LINKEDIN_MCP_BROWSER_PROCESS_MARKER"
 _POLL_SECONDS = 0.01
 _QUIET_SECONDS = 1.0
-#: The first wait after a scan that could not run, doubled after each further
-#: one up to the cap. A scan that fails fails at once (a missing or forbidden
-#: ``ps``, a timeout), so retrying it every _POLL_SECONDS is a fork and an exec
+#: The first wait after a scan that did not answer, doubled after each further
+#: one up to the cap. A scan that cannot run fails at once (a missing or
+#: forbidden ``ps``), so retrying it every _POLL_SECONDS is a fork and an exec
 #: a hundred times a second, forever, in every orphaned guardian: measured
 #: 2026-11-21 as 43 of them holding a Mac's CPU at 53-61% system time inside a
 #: sandbox that refuses to run ``ps`` at all.
 _BLIND_POLL_SECONDS = 0.5
 _BLIND_POLL_CAP_SECONDS = 5.0
-#: How long scans may keep failing before the guardian gives up and exits. It
-#: can neither see nor kill anything while blind, so holding on longer only
-#: keeps the lease and the load, and the load is what keeps a loaded host's
-#: ``ps`` failing.
+#: How long scans that cannot run may keep failing before the guardian gives
+#: up and exits. It can neither see nor kill anything while blind, so holding
+#: on longer only keeps the lease and the load. A ``ps`` cut off by its bound
+#: ran, so it is slow rather than blind and never counts toward this: giving
+#: up on it would release the lease while the browser it cannot see yet still
+#: holds the profile.
 _BLIND_LIMIT_SECONDS = 600.0
-#: How long one ``ps`` may take outside Linux. It prints every process's
+#: The bound on the first ``ps`` outside Linux. It prints every process's
 #: environment, which is slow on a Mac even without load; see the process scan
-#: entries in docs/daemon-measurements.md. A scan cut off by this bound proves
-#: nothing and is asked again, so a bound that a loaded host's ``ps`` keeps
-#: exceeding holds the profile and leaves the browser running for as long as
-#: the load lasts, up to _BLIND_LIMIT_SECONDS. The bound only has to stop a
-#: ``ps`` that never returns.
+#: entries in docs/daemon-measurements.md. A scan cut off by it proves nothing
+#: and is asked again with the bound doubled, up to _SNAPSHOT_CAP_SECONDS, so a
+#: loaded host's ``ps`` gets to answer and the browser is killed; the profile
+#: stays held until then. The cap only has to stop a ``ps`` that never returns.
 _SNAPSHOT_SECONDS = 5.0
+_SNAPSHOT_CAP_SECONDS = 60.0
+#: The cap on the wait between scans that keep finding the same groups after
+#: SIGKILL, doubled from _POLL_SECONDS while they stay. A group that outlives
+#: SIGKILL is held in the kernel (an uninterruptible wait on a hung network
+#: home, say), and scanning again every _POLL_SECONDS changes nothing while it
+#: costs a full scan each time. The lease is kept for as long as that lasts,
+#: with no deadline: the process still has the profile open.
+_STUCK_POLL_CAP_SECONDS = 5.0
+
+
+class _ScanCutOff(Exception):
+    """``ps`` ran past its bound: slow, which is not blind."""
 
 
 def _linux_groups(markers: set[str]) -> set[int] | None:
@@ -63,7 +76,14 @@ def _linux_groups(markers: set[str]) -> set[int] | None:
     return groups
 
 
-def _ps_groups(markers: set[str]) -> set[int] | None:
+def _ps_groups(
+    markers: set[str], timeout: float = _SNAPSHOT_SECONDS
+) -> set[int] | None:
+    """The groups holding a marked process, or None when ``ps`` cannot run.
+
+    Raises:
+        _ScanCutOff: ``ps`` ran past ``timeout``.
+    """
     ps = next(
         (
             candidate
@@ -79,8 +99,10 @@ def _ps_groups(markers: set[str]) -> set[int] | None:
             [ps, "eww", "-A", "-o", "pid=", "-o", "pgid=", "-o", "command="],
             check=True,
             capture_output=True,
-            timeout=_SNAPSHOT_SECONDS,
+            timeout=timeout,
         ).stdout
+    except subprocess.TimeoutExpired as exc:  # before its base class below
+        raise _ScanCutOff from exc
     except (OSError, subprocess.SubprocessError):
         return None
 
@@ -101,12 +123,21 @@ def _ps_groups(markers: set[str]) -> set[int] | None:
     return groups
 
 
-def _marked_groups(markers: set[str]) -> set[int] | None:
+def _marked_groups(
+    markers: set[str], timeout: float = _SNAPSHOT_SECONDS
+) -> set[int] | None:
+    """The groups holding a marked process, or None when no scan can run.
+
+    ``timeout`` bounds ``ps``, which Linux does not need.
+
+    Raises:
+        _ScanCutOff: ``ps`` ran past ``timeout``.
+    """
     if not markers:
         return set()
     if sys.platform.startswith("linux"):
         return _linux_groups(markers)
-    return _ps_groups(markers)
+    return _ps_groups(markers, timeout)
 
 
 def _drain(markers: set[str]) -> None:
@@ -114,12 +145,23 @@ def _drain(markers: set[str]) -> None:
     quiet_since: float | None = None
     blind_since: float | None = None
     blind_wait = _BLIND_POLL_SECONDS
+    scan_seconds = _SNAPSHOT_SECONDS
+    seen: set[int] | None = None
+    kill_wait = _POLL_SECONDS
     while True:
-        groups = _marked_groups(markers)
+        cut_off = False
+        try:
+            groups = _marked_groups(markers, scan_seconds)
+        except _ScanCutOff:
+            groups, cut_off = None, True
+            scan_seconds = min(scan_seconds * 2, _SNAPSHOT_CAP_SECONDS)
         if groups is None:
             quiet_since = None
+            seen = None
             now = time.monotonic()
-            if blind_since is None:
+            if cut_off or blind_since is None:
+                # A ps that was cut off ran: slow, not blind, so no spell of
+                # blindness has started yet.
                 blind_since = now
             elif now - blind_since >= _BLIND_LIMIT_SECONDS:
                 return
@@ -136,7 +178,16 @@ def _drain(markers: set[str]) -> None:
                     os.killpg(group, signal.SIGKILL)
                 except OSError:
                     pass
-        elif quiet_since is None:
+            # Groups still there after SIGKILL are scanned less and less
+            # often, and never given up on: the lease stays held.
+            if groups == seen:
+                kill_wait = min(kill_wait * 2, _STUCK_POLL_CAP_SECONDS)
+            else:
+                seen, kill_wait = groups, _POLL_SECONDS
+            time.sleep(kill_wait)
+            continue
+        seen = None
+        if quiet_since is None:
             quiet_since = time.monotonic()
         elif time.monotonic() - quiet_since >= _QUIET_SECONDS:
             return

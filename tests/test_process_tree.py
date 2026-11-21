@@ -2789,7 +2789,7 @@ def test_crash_guardian_requires_a_quiet_interval_after_an_empty_scan(
     now = [0.0]
     killed: list[int] = []
 
-    def marked(_markers: set[str]) -> set[int]:
+    def marked(_markers: set[str], *_: object) -> set[int]:
         return next(snapshots, set())
 
     def sleep(_seconds: float) -> None:
@@ -2810,6 +2810,7 @@ def test_crash_guardian_requires_a_quiet_interval_after_an_empty_scan(
     assert killed == [456]
 
 
+@_POSIX_ONLY
 def test_crash_guardian_backs_off_and_gives_up_when_it_cannot_scan(
     monkeypatch: pytest.MonkeyPatch,
 ):
@@ -2828,7 +2829,8 @@ def test_crash_guardian_backs_off_and_gives_up_when_it_cannot_scan(
         if len(waits) > 1000:
             raise AssertionError("the guardian never gave up")
 
-    monkeypatch.setattr(process_guardian, "_marked_groups", lambda _markers: None)
+    monkeypatch.setattr(process_guardian, "_marked_groups", lambda _markers, *_: None)
+    monkeypatch.setattr(process_guardian.os, "getpgrp", lambda: 100)
     monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
     monkeypatch.setattr(process_guardian.time, "sleep", sleep)
 
@@ -2840,14 +2842,187 @@ def test_crash_guardian_backs_off_and_gives_up_when_it_cannot_scan(
     assert len(waits) < 200
 
 
+@_POSIX_ONLY
+def test_crash_guardian_starts_a_new_blind_spell_after_a_scan_that_worked(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A scan that works again ends the blind spell, and its clock with it.
+
+    Otherwise a guardian that was blind once, then spent the limit draining a
+    group it can see but not kill, gives up at its next failed scan.
+    """
+    now = [0.0]
+    waits: list[float] = []
+    scans = iter([None, None, {456}])
+
+    def marked(_markers: set[str], *_: object) -> set[int] | None:
+        groups = next(scans, None)
+        if groups is not None:
+            # Seeing that group, for as long as the guardian may stay blind.
+            now[0] += process_guardian._BLIND_LIMIT_SECONDS
+        return groups
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+        if len(waits) > 1000:
+            raise AssertionError("the guardian never gave up")
+
+    monkeypatch.setattr(process_guardian, "_marked_groups", marked)
+    monkeypatch.setattr(process_guardian.os, "getpgrp", lambda: 100)
+    monkeypatch.setattr(process_guardian.os, "killpg", lambda _group, _signal: None)
+    monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(process_guardian.time, "sleep", sleep)
+
+    process_guardian._drain({"marker"})
+
+    second = waits[waits.index(process_guardian._POLL_SECONDS) + 1 :]
+    assert second[:5] == [0.5, 1.0, 2.0, 4.0, 5.0]
+    assert sum(second) >= process_guardian._BLIND_LIMIT_SECONDS
+
+
+@_POSIX_ONLY
+def test_crash_guardian_waits_out_a_ps_slower_than_its_bound(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A ``ps`` cut off by its bound is slow, not blind.
+
+    It is asked again with a longer bound, for longer than the guardian may stay
+    blind, until it answers and the browser it names is killed: giving up on
+    it would release the lease while that browser still holds the profile.
+    """
+    now = [0.0]
+    waits: list[float] = []
+    bounds: list[float] = []
+    killed: list[int] = []
+    answered = [False]
+    rows = b"  902   902 /chromium LINKEDIN_MCP_BROWSER_PROCESS_MARKER=marker\n"
+    # ps keeps running past any bound it is given for twice the blind limit,
+    # and then past any bound shorter than this.
+    slow_until = 2 * process_guardian._BLIND_LIMIT_SECONDS
+    needs = 12.0
+
+    def run(*_args: Any, timeout: float, **_kwargs: Any) -> Any:
+        bounds.append(timeout)
+        if timeout < needs or now[0] < slow_until:
+            # What `subprocess.run` does with a child that needs longer than
+            # it is given, without spending the seconds.
+            now[0] += timeout
+            raise subprocess.TimeoutExpired(cmd="ps", timeout=timeout)
+        if answered[0]:
+            return SimpleNamespace(stdout=b"")
+        answered[0] = True
+        return SimpleNamespace(stdout=rows)
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+        if now[0] > 4 * process_guardian._BLIND_LIMIT_SECONDS:
+            raise AssertionError("the slow ps never got to answer")
+
+    monkeypatch.setattr(process_guardian, "_marked_groups", process_guardian._ps_groups)
+    monkeypatch.setattr(process_guardian.Path, "is_file", lambda _self: True)
+    monkeypatch.setattr(process_guardian.subprocess, "run", run)
+    monkeypatch.setattr(process_guardian.os, "getpgrp", lambda: 100)
+    monkeypatch.setattr(
+        process_guardian.os, "killpg", lambda group, _signal: killed.append(group)
+    )
+    monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(process_guardian.time, "sleep", sleep)
+
+    process_guardian._drain({"marker"})
+
+    assert killed == [902]
+    assert bounds[:5] == [5.0, 10.0, 20.0, 40.0, 60.0]
+    assert max(bounds) == process_guardian._SNAPSHOT_CAP_SECONDS
+    # The waits between cut-off scans still back off.
+    assert waits[:5] == [0.5, 1.0, 2.0, 4.0, 5.0]
+
+
+class _StillThere(Exception):
+    """The fake clock ran out while the guardian kept holding on."""
+
+
+@_POSIX_ONLY
+def test_crash_guardian_backs_off_from_a_group_sigkill_cannot_end(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A group that outlives SIGKILL is scanned less and less often.
+
+    It is held in the kernel, so a scan every _POLL_SECONDS changes nothing
+    while it costs a full ``ps`` or /proc walk each time. The lease is still
+    kept: the process has the profile open.
+    """
+    now = [0.0]
+    waits: list[float] = []
+    kills: list[int] = []
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+        if now[0] > 3600:
+            raise _StillThere
+        if len(waits) > 5000:
+            raise AssertionError("the guardian never slowed down")
+
+    monkeypatch.setattr(process_guardian, "_marked_groups", lambda _markers, *_: {456})
+    monkeypatch.setattr(process_guardian.os, "getpgrp", lambda: 100)
+    monkeypatch.setattr(
+        process_guardian.os, "killpg", lambda group, _signal: kills.append(group)
+    )
+    monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(process_guardian.time, "sleep", sleep)
+
+    with pytest.raises(_StillThere):
+        process_guardian._drain({"marker"})
+
+    assert waits[0] == process_guardian._POLL_SECONDS
+    assert waits[1:4] == pytest.approx([0.02, 0.04, 0.08])
+    assert max(waits) == process_guardian._STUCK_POLL_CAP_SECONDS
+    # An hour at the cap instead of 360,000 scans at _POLL_SECONDS.
+    assert len(waits) < 1000
+    assert set(kills) == {456} and len(kills) == len(waits)
+
+
+@_POSIX_ONLY
+def test_crash_guardian_scans_again_at_once_when_another_group_appears(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    now = [0.0]
+    waits: list[float] = []
+    killed: list[int] = []
+    snapshots = iter([{456}, {456}, {456, 789}])
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+
+    monkeypatch.setattr(
+        process_guardian, "_marked_groups", lambda _markers, *_: next(snapshots, set())
+    )
+    monkeypatch.setattr(process_guardian.os, "getpgrp", lambda: 100)
+    monkeypatch.setattr(
+        process_guardian.os, "killpg", lambda group, _signal: killed.append(group)
+    )
+    monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(process_guardian.time, "sleep", sleep)
+
+    process_guardian._drain({"marker"})
+
+    poll = process_guardian._POLL_SECONDS
+    assert waits[:3] == [poll, 2 * poll, poll]
+    assert sorted(killed) == [456, 456, 456, 789]
+
+
 def test_crash_guardian_scan_waits_for_a_ps_slowed_by_load(
     monkeypatch: pytest.MonkeyPatch,
 ):
     """A slow ``ps`` still answers, and the guardian has to wait for it.
 
-    A scan cut off by its bound is asked again, so a bound that a loaded host's
-    ``ps`` keeps exceeding never lets the drain see the browser at all: the
-    profile stays held and the browser keeps running.
+    A scan cut off by its bound proves nothing, so until a bound lets a loaded
+    host's ``ps`` finish, the drain cannot see the browser at all: the profile
+    stays held and the browser keeps running. The first bound is generous for
+    that reason.
     """
     answers_after = 3.0
     rows = b"  902   902 /chromium LINKEDIN_MCP_BROWSER_PROCESS_MARKER=marker\n"
