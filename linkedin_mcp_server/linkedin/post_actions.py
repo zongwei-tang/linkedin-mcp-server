@@ -63,8 +63,10 @@ REACTIONS: tuple[Reaction, ...] = (
     "funny",
 )
 #: The type code LinkedIn writes on a reacted post's icon for each reaction.
-#: PRAISE was read live; the others are the codes LinkedIn's reaction icons
-#: carry in the feed (like-, praise-, empathy-, interest-consumption).
+#: PRAISE and EMPATHY were confirmed live through react_to_post on
+#: 2026-11-20, as was Like chosen from the menu. The other codes are the ones
+#: LinkedIn's reaction icons carry in the feed (like-, praise-, empathy-,
+#: interest-consumption), not yet confirmed by a reaction of our own.
 REACTION_TYPES: dict[Reaction, str] = {
     "like": "LIKE",
     "celebrate": "PRAISE",
