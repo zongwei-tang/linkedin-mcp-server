@@ -22,7 +22,9 @@ position, so no label is read.
 Verified live 2026-11-20 through the MCP tools on one followed profile:
 follow (already_followed, no click), unfollow through the confirmation,
 unfollow again (already_unfollowed, no click), follow back, each confirmed by
-a reload.
+a reload. Verified again 2026-11-21 across server processes, with the browser
+closed between them, after the confirmation fix: the unfollow and the follow
+back were both still there in the next process.
 """
 
 from __future__ import annotations
