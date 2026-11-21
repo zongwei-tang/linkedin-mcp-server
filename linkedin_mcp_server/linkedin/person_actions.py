@@ -15,6 +15,11 @@ locale:
 
 The icon names are identifiers, not words, and the confirmation is read by
 position, so no label is read.
+
+Verified live 2026-11-20 through the MCP tools on one followed profile:
+follow (already_followed, no click), unfollow through the confirmation,
+unfollow again (already_unfollowed, no click), follow back, each confirmed by
+a reload.
 """
 
 from __future__ import annotations
