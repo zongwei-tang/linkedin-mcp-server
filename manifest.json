@@ -125,6 +125,58 @@
       "description": "Remove the signed-in member's like from a LinkedIn post"
     },
     {
+      "name": "get_saved_posts",
+      "description": "List the posts and articles you saved"
+    },
+    {
+      "name": "get_my_groups",
+      "description": "List the groups you belong to, with links to read each one"
+    },
+    {
+      "name": "get_followers",
+      "description": "List the people who follow you"
+    },
+    {
+      "name": "get_following",
+      "description": "List the people and pages you follow"
+    },
+    {
+      "name": "get_group_details",
+      "description": "Read a group's description and recent posts by its group ID"
+    },
+    {
+      "name": "get_event_details",
+      "description": "Read an event's time, place, organizer and details"
+    },
+    {
+      "name": "get_school_profile",
+      "description": "Read a school's or university's page"
+    },
+    {
+      "name": "get_school_alumni",
+      "description": "Read where a school's alumni live and work, and who they are"
+    },
+    {
+      "name": "get_article",
+      "description": "Read a LinkedIn article (a /pulse/ page) in full"
+    },
+    {
+      "name": "get_newsletter",
+      "description": "Read a newsletter's description and its editions"
+    },
+    {
+      "name": "search_groups",
+      "description": "Find groups by keyword, with group IDs for reading details"
+    },
+    {
+      "name": "search_events",
+      "description": "Find events by keyword, with links for reading details"
+    },
+    {
+      "name": "search_schools",
+      "description": "Find schools and universities by keyword"
+    },
+    {
       "name": "get_invitations",
       "description": "List your pending connection invitations, received or sent"
     },

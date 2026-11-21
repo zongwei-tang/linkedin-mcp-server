@@ -1137,6 +1137,9 @@ async def _single_capture_facade_scenario(method: str) -> dict[str, Any]:
             elif method == "read_post":
                 arguments = {"post": "urn:li:activity:7212345678901234567"}
                 result = await extractor.read_post(**arguments)
+            elif method == "read_page":
+                arguments = {"kind": "group", "reference": "1234567", "max_scrolls": 2}
+                result = await extractor.read_page(**arguments)
             elif method == "get_invitations":
                 arguments = {"direction": "sent", "max_scrolls": 2}
                 result = await extractor.get_invitations(**arguments)
@@ -1500,6 +1503,7 @@ TOOL_FACADE_METHODS = {
     "set_person_followed",
     "set_company_followed",
     "set_job_saved",
+    "read_page",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1589,6 +1593,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         ),
         "search-posts.json": await _single_capture_facade_scenario("search_posts"),
         "read-post.json": await _single_capture_facade_scenario("read_post"),
+        "read-page.json": await _single_capture_facade_scenario("read_page"),
         "invitations.json": await _single_capture_facade_scenario("get_invitations"),
         "connections.json": await _single_capture_facade_scenario("get_connections"),
         "notifications.json": await _single_capture_facade_scenario(

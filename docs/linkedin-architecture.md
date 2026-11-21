@@ -28,7 +28,7 @@ a page-owning collaborator.
 | `feed` | `FEED_POST_BOUNDARIES_JS`, `FeedReader` | `page-owning` |
 | `feed_payload` | `POST_SLUG_URL_RE`, `append_permalink_references()`, `build_feed_references()`, `is_feed_payload_response()`, `is_permalink_payload_response()`, `permalink_paths_from_payload()` | `browser-free` |
 | `fields` | `COMPANY_SECTIONS`, `PERSON_SECTIONS`, `parse_company_sections()`, `parse_person_sections()` | `browser-free` |
-| `identifiers` | `company_page_url()`, `job_id_from_path()`, `job_id_from_search_query()`, `job_view_url()`, `messaging_thread_url()`, `normalize_company_identifier()`, `normalize_job_id()`, `normalize_opaque_id()`, `normalize_person_identifier()`, `normalize_post_reference()`, `normalize_profile_urn()`, `normalize_thread_id()`, `person_profile_url()`, `post_page_url()`, `reply_thread_id()` | `browser-free` |
+| `identifiers` | `company_page_url()`, `job_id_from_path()`, `job_id_from_search_query()`, `job_view_url()`, `messaging_thread_url()`, `normalize_company_identifier()`, `normalize_job_id()`, `normalize_opaque_id()`, `normalize_person_identifier()`, `normalize_post_reference()`, `normalize_profile_urn()`, `normalize_route_reference()`, `normalize_thread_id()`, `person_profile_url()`, `post_page_url()`, `reply_thread_id()` | `browser-free` |
 | `invitation_actions` | `INVITATION_PRESENT_JS`, `INVITATION_ROW_JS`, `InvitationActions`, `ROW_KEY_PREFIX` | `page-owning` |
 | `job_actions` | `JobActions`, `SAVED_PAGES_READ`, `SAVE_BUTTON_JS`, `SaveStatus`, `SavedJobIds`, `saved_job_ids_from()` | `page-owning` |
 | `job_pages` | `APPLY_READY_JS`, `APPLY_SIGNALS_JS`, `EASY_APPLY_CLOSED_JS`, `EASY_APPLY_DISCARD_SELECTOR`, `EASY_APPLY_NEXT_SELECTOR`, `EASY_APPLY_OPEN_JS`, `EASY_APPLY_STEP_JS`, `EasyApplyDraftLeftError`, `EasyApplyFormRead`, `JOB_IDS_JS`, `JobApplyRead`, `JobPageCapture`, `JobPageReader`, `ORGANIC_BEFORE_NOTICE_JS`, `PROMOTED_JOB_IDS_JS`, `SEARCH_CARD_JS`, `SearchCardOutcome` | `page-owning` |
@@ -38,6 +38,7 @@ a page-owning collaborator.
 | `message_sender` | `MessageSender` | `page-owning` |
 | `navigation` | `PageNavigator`, `WaitUntil` | `page-owning` |
 | `network` | `CONNECTIONS_URL`, `INVITATION_URLS`, `InvitationDirection`, `NOTIFICATIONS_URL`, `NetworkReader`, `PROFILE_VIEWS_URL` | `browser-free` |
+| `pages` | `PAGE_KINDS`, `PageKind`, `PageReader`, `PageTarget`, `page_target()` | `browser-free` |
 | `person` | `PersonReader` | `page-owning` |
 | `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS` | `page-owning` |
 | `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
@@ -58,7 +59,7 @@ a page-owning collaborator.
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
@@ -72,6 +73,7 @@ a page-owning collaborator.
 - `message_sender` -> `contracts`, `identifiers`, `navigation`, `session`
 - `navigation` -> `session`
 - `network` -> `capture`, `connection_actions`, `contracts`
+- `pages` -> `capture`, `contracts`, `identifiers`
 - `person` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `search_urls`, `session`, `text`
 - `person_actions` -> `identifiers`, `navigation`, `session`
 - `post_actions` -> `identifiers`, `navigation`, `session`
@@ -105,6 +107,7 @@ a page-owning collaborator.
 - `ignore_invitation`
 - `read_company`
 - `read_job`
+- `read_page`
 - `read_person`
 - `read_post`
 - `reply_to_conversation`
@@ -134,6 +137,7 @@ a page-owning collaborator.
 - `_jobs`
 - `_message_sender`
 - `_network`
+- `_pages`
 - `_person`
 - `_person_actions`
 - `_post_actions`

@@ -66,6 +66,7 @@ PUBLIC_SIGNATURES = {
     "set_person_followed": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'",
     "set_company_followed": "(self, company: 'str', followed: 'bool') -> 'dict[str, Any]'",
     "set_job_saved": "(self, job_id: 'str', saved: 'bool') -> 'dict[str, Any]'",
+    "read_page": "(self, kind: 'PageKind', reference: 'str | None' = None, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -105,6 +106,7 @@ DELEGATES = {
     "set_person_followed": ("_person_actions", "set_person_followed"),
     "set_company_followed": ("_company_actions", "set_company_followed"),
     "set_job_saved": ("_job_actions", "set_job_saved"),
+    "read_page": ("_pages", "read_page"),
 }
 
 DELEGATE_CALLS = {
@@ -144,6 +146,7 @@ DELEGATE_CALLS = {
     "set_person_followed": "self._person_actions.set_person_followed(username, followed)",
     "set_company_followed": "self._company_actions.set_company_followed(company, followed)",
     "set_job_saved": "self._job_actions.set_job_saved(job_id, saved)",
+    "read_page": "self._pages.read_page(kind, reference, max_scrolls)",
 }
 
 FACADE_STATE = {
@@ -159,6 +162,7 @@ FACADE_STATE = {
     "_jobs",
     "_message_sender",
     "_network",
+    "_pages",
     "_person",
     "_person_actions",
     "_post_actions",

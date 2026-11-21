@@ -20,6 +20,8 @@ ReferenceKind = Literal[
     "article",
     "newsletter",
     "school",
+    "group",
+    "event",
     "conversation",
     "external",
 ]
@@ -111,6 +113,16 @@ _SECTION_CONTEXTS = {
     "connections": "connection",
     "notifications": "notification",
     "profile_views": "profile viewer",
+    "saved_posts": "saved post",
+    "groups": "group",
+    "followers": "follower",
+    "following": "following",
+    "group": "group page",
+    "event": "event",
+    "school": "school",
+    "alumni": "alumni",
+    "article": "article",
+    "newsletter": "newsletter",
 }
 
 _DEFAULT_REFERENCE_CAP = 12
@@ -149,6 +161,14 @@ _REFERENCE_CAPS = {
     "connections": 50,
     "notifications": 30,
     "profile_views": 20,
+    # List pages: one reference per entry, so the cap is the entries returned.
+    "saved_posts": 30,
+    "groups": 30,
+    "followers": 50,
+    "following": 50,
+    "alumni": 50,
+    "group": 20,
+    "event": 20,
 }
 
 # A label must carry at least one letter or digit in any script, so the class is
@@ -170,6 +190,8 @@ _CONNECTIONS_FOLLOW_RE = re.compile(r"\bconnections follow this page\b", re.IGNO
 _COMPANY_PATH_RE = re.compile(r"^/company/([^/?#]+)")
 _PERSON_PATH_RE = re.compile(r"^/in/([^/?#]+)")
 _SCHOOL_PATH_RE = re.compile(r"^/school/([^/?#]+)")
+_GROUP_PATH_RE = re.compile(r"^/groups/([0-9]+)")
+_EVENT_PATH_RE = re.compile(r"^/events/([^/?#]+)")
 _NEWSLETTER_PATH_RE = re.compile(r"^/newsletters/([^/?#]+)")
 _PULSE_PATH_RE = re.compile(r"^/pulse/([^/?#]+)")
 _FEED_PATH_RE = re.compile(r"^/feed/update/([^/?#]+)")
@@ -344,6 +366,12 @@ def classify_link(href: str) -> tuple[ReferenceKind, str] | None:
 
     if match := _SCHOOL_PATH_RE.match(path):
         return "school", f"/school/{match.group(1)}/"
+
+    if match := _GROUP_PATH_RE.match(path):
+        return "group", f"/groups/{match.group(1)}/"
+
+    if match := _EVENT_PATH_RE.match(path):
+        return "event", f"/events/{match.group(1)}/"
 
     # Both job routes are read with the grammar normalize_job_id uses, so every
     # job reference emitted here is one a job tool accepts.

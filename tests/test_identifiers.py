@@ -24,6 +24,7 @@ from linkedin_mcp_server.linkedin.identifiers import (
     normalize_person_identifier,
     normalize_post_reference,
     normalize_profile_urn,
+    normalize_route_reference,
     normalize_thread_id,
     person_profile_url,
     post_page_url,
@@ -859,3 +860,44 @@ class TestNormalizePostReference:
         assert post_page_url(f"/posts/{_POST_SLUG}/") == (
             f"https://www.linkedin.com/posts/{_POST_SLUG}/"
         )
+
+
+class TestNormalizeRouteReference:
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "1234567",
+            " 1234567 ",
+            "https://www.linkedin.com/groups/1234567/",
+            "linkedin.com/groups/1234567/about/",
+        ],
+    )
+    def test_reduces_a_group_to_its_id(self, value: str):
+        assert (
+            normalize_route_reference(
+                value, route="groups", field="group_id", numeric=True
+            )
+            == "1234567"
+        )
+
+    @pytest.mark.parametrize(
+        "value", ["abc", "https://www.linkedin.com/in/ada/", "../feed", "12/34"]
+    )
+    def test_refuses_what_names_no_group(self, value: str):
+        with pytest.raises(InvalidReferenceError):
+            normalize_route_reference(
+                value, route="groups", field="group_id", numeric=True
+            )
+
+    def test_a_slug_route_keeps_the_organization_grammar(self):
+        assert (
+            normalize_route_reference(
+                "https://www.linkedin.com/school/uc-berkeley/people/",
+                route="school",
+                field="school",
+                slug=True,
+            )
+            == "uc-berkeley"
+        )
+        with pytest.raises(InvalidReferenceError):
+            normalize_route_reference("a+b", route="school", field="school", slug=True)

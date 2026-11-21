@@ -59,6 +59,7 @@ __all__ = [
     "normalize_person_identifier",
     "normalize_post_reference",
     "normalize_profile_urn",
+    "normalize_route_reference",
     "normalize_thread_id",
     "person_profile_url",
     "post_page_url",
@@ -648,3 +649,31 @@ def normalize_post_reference(value: str) -> str:
 def post_page_url(path: str) -> str:
     """The URL of a path ``normalize_post_reference`` returned."""
     return f"https://www.linkedin.com{path}"
+
+
+def normalize_route_reference(
+    value: str,
+    *,
+    route: str,
+    field: str,
+    numeric: bool = False,
+    slug: bool = False,
+) -> str:
+    """The segment after ``/<route>/``, from a link to it or from the segment itself.
+
+    For the pages whose own address names them: a group (``/groups/<id>/``),
+    an event, a school, an article (``/pulse/<slug>/``), a newsletter. The same
+    syntax rules as every other id apply, so nothing here can name another
+    path. ``numeric`` is for routes whose ids are only digits, where a bare
+    word is a wrong value rather than a slug; ``slug`` holds the segment to
+    the organization-slug grammar a company page uses, which schools share.
+    """
+    reference = normalize_opaque_id(value, field=field, route=(route,))
+    if numeric and not _NUMERIC_ID.fullmatch(reference):
+        raise _not_an_id(field)
+    if slug and not _COMPANY_SLUG.fullmatch(reference):
+        raise InvalidReferenceError(
+            f"{field} is not a LinkedIn page slug. Pass the part after /{route}/ "
+            "in the page's URL."
+        )
+    return reference

@@ -121,6 +121,19 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_connections` | List your first-degree connections, most recently added first. |
 | `get_notifications` | Read your notifications, newest first, with links to what they mention. |
 | `get_profile_views` | Read who viewed your profile; how many are named depends on your plan. |
+| `get_saved_posts` | List the posts and articles you saved. |
+| `get_my_groups` | List the groups you belong to, with links to read each one. |
+| `get_followers` | List the people who follow you. |
+| `get_following` | List the people and pages you follow. |
+| `get_group_details` | Read a group's description and recent posts by its group ID. |
+| `get_event_details` | Read an event's time, place, organizer and details. |
+| `get_school_profile` | Read a school's or university's page. |
+| `get_school_alumni` | Read where a school's alumni live and work, and who they are. |
+| `get_article` | Read a LinkedIn article (a /pulse/ page) in full. |
+| `get_newsletter` | Read a newsletter's description and its editions. |
+| `search_groups` | Find groups by keyword, with group IDs for reading details. |
+| `search_events` | Find events by keyword, with links for reading details. |
+| `search_schools` | Find schools and universities by keyword. |
 | `get_session_status` | Check your saved login and browser state without opening a browser. |
 | `close_session` | Close the shared browser session without deleting your saved login. |
 | `open_login` | Docker: show the LinkedIn sign-in inside the chat, in clients that show MCP Apps. |

@@ -83,6 +83,19 @@ TOOL_DELEGATES = {
     "unfollow_company": "set_company_followed",
     "save_job": "set_job_saved",
     "unsave_job": "set_job_saved",
+    "get_saved_posts": "read_page",
+    "get_my_groups": "read_page",
+    "get_followers": "read_page",
+    "get_following": "read_page",
+    "get_group_details": "read_page",
+    "get_event_details": "read_page",
+    "get_school_profile": "read_page",
+    "get_school_alumni": "read_page",
+    "get_article": "read_page",
+    "get_newsletter": "read_page",
+    "search_groups": "read_page",
+    "search_events": "read_page",
+    "search_schools": "read_page",
 }
 
 
@@ -123,6 +136,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_jobs",
         "_message_sender",
         "_network",
+        "_pages",
         "_person",
         "_person_actions",
         "_post_actions",

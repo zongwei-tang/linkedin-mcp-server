@@ -57,6 +57,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.set_person_followed = AsyncMock(return_value=result)
     mock.set_company_followed = AsyncMock(return_value=result)
     mock.set_job_saved = AsyncMock(return_value=result)
+    mock.read_page = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -76,6 +77,7 @@ _TOOL_MODULES = (
     "feed",
     "post",
     "network",
+    "page",
 )
 
 
@@ -213,6 +215,40 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
         ),
         ("post", "like_post", {"post": "/feed/"}, "post is not a LinkedIn post"),
         (
+            "page",
+            "get_group_details",
+            {"group_id": "abc"},
+            "group_id is not a LinkedIn id",
+        ),
+        (
+            "page",
+            "get_event_details",
+            {"event": "../feed"},
+            "event is not a LinkedIn id",
+        ),
+        (
+            "page",
+            "get_school_profile",
+            {"school": "a b"},
+            "school is not a LinkedIn id",
+        ),
+        (
+            "page",
+            "get_school_alumni",
+            {"school": "a/b"},
+            "school is not a LinkedIn id",
+        ),
+        ("page", "get_article", {"article": "/feed/"}, "article is not a LinkedIn id"),
+        (
+            "page",
+            "get_newsletter",
+            {"newsletter": "/feed/"},
+            "newsletter is not a LinkedIn id",
+        ),
+        ("page", "search_groups", {"keywords": "  "}, "Missing keywords"),
+        ("page", "search_events", {"keywords": ""}, "Missing keywords"),
+        ("page", "search_schools", {"keywords": " "}, "Missing keywords"),
+        (
             "person",
             "follow_person",
             {"linkedin_username": "../feed"},
@@ -315,10 +351,12 @@ async def test_invalid_reference_is_rejected_before_extractor(
     from linkedin_mcp_server.tools.job import register_job_tools
     from linkedin_mcp_server.tools.messaging import register_messaging_tools
     from linkedin_mcp_server.tools.network import register_network_tools
+    from linkedin_mcp_server.tools.page import register_page_tools
     from linkedin_mcp_server.tools.person import register_person_tools
     from linkedin_mcp_server.tools.post import register_post_tools
 
     register_by_module = {
+        "page": register_page_tools,
         "company": register_company_tools,
         "job": register_job_tools,
         "messaging": register_messaging_tools,
@@ -390,6 +428,19 @@ _A_VALID_CALL = [
     ("network", "get_connections", {}),
     ("network", "get_notifications", {}),
     ("network", "get_profile_views", {}),
+    ("page", "get_saved_posts", {}),
+    ("page", "get_my_groups", {}),
+    ("page", "get_followers", {}),
+    ("page", "get_following", {}),
+    ("page", "get_group_details", {"group_id": "1234567"}),
+    ("page", "get_event_details", {"event": "7262891234567890123"}),
+    ("page", "get_school_profile", {"school": "uc-berkeley"}),
+    ("page", "get_school_alumni", {"school": "uc-berkeley"}),
+    ("page", "get_article", {"article": "engines-ada"}),
+    ("page", "get_newsletter", {"newsletter": "ai-weekly-7012345678901234567"}),
+    ("page", "search_groups", {"keywords": "data"}),
+    ("page", "search_events", {"keywords": "AI"}),
+    ("page", "search_schools", {"keywords": "Berkeley"}),
     ("network", "ignore_invitation", {"linkedin_username": "alice"}),
 ]
 
@@ -2997,6 +3048,65 @@ class TestIgnoreInvitationTool:
         assert tool.annotations.read_only_hint is False
         assert tool.annotations.destructive_hint is True
         assert tool.annotations.idempotent_hint is False
+
+
+class TestPageTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "arguments", "kind", "reference"),
+        [
+            ("get_saved_posts", {}, "saved_posts", None),
+            ("get_my_groups", {}, "my_groups", None),
+            ("get_followers", {}, "followers", None),
+            ("get_following", {}, "following", None),
+            ("get_group_details", {"group_id": "1234567"}, "group", "1234567"),
+            (
+                "get_event_details",
+                {"event": "7262891234567890123"},
+                "event",
+                "7262891234567890123",
+            ),
+            ("get_school_profile", {"school": "uc-berkeley"}, "school", "uc-berkeley"),
+            (
+                "get_school_alumni",
+                {"school": "uc-berkeley"},
+                "school_alumni",
+                "uc-berkeley",
+            ),
+            ("get_article", {"article": "engines-ada"}, "article", "engines-ada"),
+            ("get_newsletter", {"newsletter": "ai-7012"}, "newsletter", "ai-7012"),
+            ("search_groups", {"keywords": "data"}, "search_groups", "data"),
+            ("search_events", {"keywords": "AI"}, "search_events", "AI"),
+            ("search_schools", {"keywords": "Berkeley"}, "search_schools", "Berkeley"),
+        ],
+    )
+    async def test_each_reads_its_own_kind(
+        self, serve_extractor, tool_name, arguments, kind, reference
+    ):
+        expected = {"url": "u", "sections": {"x": "y"}}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.page import register_page_tools
+
+        mcp = FastMCP("test")
+        register_page_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(tool_name, arguments)
+
+        assert result.structured_content == expected
+        mock_extractor.read_page.assert_awaited_once_with(
+            kind, reference, max_scrolls=None
+        )
+
+    async def test_they_are_all_read_only(self):
+        from linkedin_mcp_server.tools.page import register_page_tools
+
+        mcp = FastMCP("test")
+        register_page_tools(mcp)
+        tools = await mcp.list_tools()
+        assert len(tools) == 13
+        assert all(
+            t.annotations and t.annotations.read_only_hint is True for t in tools
+        )
 
 
 class TestSaveJobTools:

@@ -100,6 +100,10 @@
         "coroutine": true,
         "signature": "(self, job_id: 'str') -> 'dict[str, Any]'"
       },
+      "read_page": {
+        "coroutine": true,
+        "signature": "(self, kind: 'PageKind', reference: 'str | None' = None, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
       "read_person": {
         "coroutine": true,
         "signature": "(self, username: 'str', requested: 'set[str]', callbacks: 'ProgressCallback | None' = None, max_scrolls: 'int | None' = None, *, main_profile_already_loaded: 'bool' = False, allow_self_alias: 'bool' = False) -> 'dict[str, Any]'"
@@ -178,6 +182,7 @@
       "ignore_invitation",
       "read_company",
       "read_job",
+      "read_page",
       "read_person",
       "read_post",
       "reply_to_conversation",
@@ -304,6 +309,39 @@
           },
           "required": [
             "linkedin_username"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_article": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "article": {
+              "description": "The slug after /pulse/, or the article's URL, as a kind\n\"article\" reference gives it.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
+            }
+          },
+          "required": [
+            "article"
           ],
           "type": "object"
         },
@@ -494,6 +532,39 @@
           "type": "object"
         }
       },
+      "get_event_details": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "event": {
+              "description": "The event's id as its /events/<id>/ link carries it, or the\nlink itself, as search_events returns it.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
+            }
+          },
+          "required": [
+            "event"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_feed": {
         "input": {
           "additionalProperties": false,
@@ -506,6 +577,91 @@
               "type": "integer"
             }
           },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_followers": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_following": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_group_details": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "group_id": {
+              "description": "The group's numeric id, or a /groups/<id>/ link as\nget_my_groups and search_groups return it.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more posts (1-50, default 10)."
+            }
+          },
+          "required": [
+            "group_id"
+          ],
           "type": "object"
         },
         "output": {
@@ -605,6 +761,32 @@
           "type": "object"
         }
       },
+      "get_my_groups": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_my_profile": {
         "input": {
           "additionalProperties": false,
@@ -636,6 +818,39 @@
               "description": "Comma-separated list of extra sections to read.\nThe main profile page is always included.\nAvailable sections: experience, education, interests, honors, volunteering, languages, certifications, skills, projects, courses, publications, patents, test_scores, organizations, recommendations (received), recommendations_given, contact_info, posts, comments (comments the person wrote), reactions (posts the person reacted to)\nExamples: \"experience,education\", \"contact_info\", \"skills,projects\"\nDefault (None) reads only the main profile page."
             }
           },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_newsletter": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
+            },
+            "newsletter": {
+              "description": "The segment after /newsletters/, or the newsletter's\nURL, as a kind \"newsletter\" reference gives it.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "newsletter"
+          ],
           "type": "object"
         },
         "output": {
@@ -796,6 +1011,98 @@
               "type": "string"
             }
           },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_saved_posts": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_school_alumni": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more alumni (1-50, default 5)."
+            },
+            "school": {
+              "description": "The slug after /school/ (e.g. \"stanford-university\"), or a\nschool page URL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "school"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_school_profile": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
+            },
+            "school": {
+              "description": "The slug after /school/ (e.g. \"stanford-university\"), or a\nschool page URL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "school"
+          ],
           "type": "object"
         },
         "output": {
@@ -984,6 +1291,72 @@
               "maximum": 50,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          "required": [
+            "keywords"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "search_events": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "keywords": {
+              "description": "What to search for.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
+            }
+          },
+          "required": [
+            "keywords"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "search_groups": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "keywords": {
+              "description": "What to search for.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
             }
           },
           "required": [
@@ -1207,6 +1580,39 @@
               "maximum": 10,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          "required": [
+            "keywords"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "search_schools": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "keywords": {
+              "description": "What to search for.",
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations (1-50, default 5)."
             }
           },
           "required": [

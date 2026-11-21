@@ -1097,3 +1097,21 @@ class TestClassifyLink:
         assert len(references) == 1
         assert references[0]["kind"] == "conversation"
         assert references[0]["url"] == "/messaging/thread/2-xyz/"
+
+
+def test_group_and_event_links_are_references_their_tools_take():
+    from linkedin_mcp_server.linkedin.link_metadata import classify_link
+
+    assert classify_link("https://www.linkedin.com/groups/1234567/about/") == (
+        "group",
+        "/groups/1234567/",
+    )
+    assert classify_link(
+        "https://www.linkedin.com/events/7262891234567890123/?trk=x"
+    ) == (
+        "event",
+        "/events/7262891234567890123/",
+    )
+    # The list pages themselves name no group or event.
+    assert classify_link("https://www.linkedin.com/groups/") is None
+    assert classify_link("https://www.linkedin.com/events/") is None
