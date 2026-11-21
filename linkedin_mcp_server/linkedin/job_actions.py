@@ -30,12 +30,16 @@ without reading what either text says.
 from __future__ import annotations
 
 from collections.abc import Awaitable, Callable
+import logging
 from typing import TYPE_CHECKING, Any, Literal
 
 from linkedin_mcp_server.core.destination import linkedin_element
 from linkedin_mcp_server.core.exceptions import (
+    AccountRestrictedError,
     ActionOutcomeError,
+    AuthenticationError,
     LinkedInOperationError,
+    RateLimitError,
 )
 from linkedin_mcp_server.linkedin.identifiers import job_view_url, normalize_job_id
 from linkedin_mcp_server.linkedin.job_policy import SAFETY_REDIRECT_PATH
@@ -45,8 +49,16 @@ from linkedin_mcp_server.linkedin.session import NAV_DELAY, PageSession
 if TYPE_CHECKING:
     from linkedin_mcp_server.linkedin.jobs import JobReader
 
+logger = logging.getLogger(__name__)
+
 SaveStatus = Literal["saved", "unsaved", "already_saved", "already_unsaved"]
 SavedJobIds = Callable[[], Awaitable[list[str]]]
+
+#: Refusals that carry their own code and recovery (a relogin, no retry, a
+#: retry_after). They subclass LinkedInOperationError, so a handler that turns
+#: a failed read after the click into ActionOutcomeError would swallow them
+#: and report outcome_unknown instead: each such handler lets them out first.
+_REFUSALS = (AuthenticationError, AccountRestrictedError, RateLimitError)
 
 #: How many pages of the saved list are read for the state. A posting saved
 #: further back is handled by the second click, not missed.
@@ -165,6 +177,8 @@ class JobActions:
         await self._toggle(url, job_id)
         try:
             now = job_id in await self._saved_job_ids()
+        except _REFUSALS:
+            raise
         except ActionOutcomeError:
             raise
         except LinkedInOperationError as exc:
@@ -188,9 +202,25 @@ class JobActions:
         # fails, the posting is left opposite to what was asked, and the error
         # has to say so rather than look like nothing happened.
         flipped = "unsaved" if saved else "saved"
+        tool = "save_job" if saved else "unsave_job"
         try:
             await self._toggle(url, job_id)
-            again = job_id in await self._saved_job_ids()
+        except _REFUSALS:
+            # Retrying after the refusal is safe: the state is read first.
+            logger.warning(
+                "Job %s was left %s: the click to put it back was refused",
+                job_id,
+                flipped,
+            )
+            raise
+        except ActionOutcomeError as exc:
+            # The click back went through unconfirmed: either state is possible.
+            raise ActionOutcomeError(
+                f"Job {job_id} was {flipped} by the click that told its state "
+                "apart, and the click to put it back went through unconfirmed "
+                f"({exc}). Whether it is saved is unknown. Check get_saved_jobs "
+                "before retrying."
+            ) from exc
         except Exception as exc:
             # The reason is the second attempt's; its "Nothing was clicked"
             # would read as if the first click never happened.
@@ -199,8 +229,21 @@ class JobActions:
                 f"Job {job_id} is now {flipped}, the opposite of what was "
                 f"asked: telling its state apart took a click that {flipped} "
                 f"it, and the click to put it back failed: {reason}. Call "
-                f"{'save_job' if saved else 'unsave_job'} again, or check "
-                "get_saved_jobs."
+                f"{tool} again, or check get_saved_jobs."
+            ) from exc
+        # The click back was confirmed by the button's text, so the posting is
+        # most likely as asked; only the list can say.
+        try:
+            again = job_id in await self._saved_job_ids()
+        except _REFUSALS:
+            raise
+        except ActionOutcomeError:
+            raise
+        except Exception as exc:
+            raise ActionOutcomeError(
+                f"Job {job_id}'s Save button was clicked twice, to tell its "
+                "state apart and to put it back, but the saved list could not "
+                f"be read after it ({exc}). Check get_saved_jobs before retrying."
             ) from exc
         if again == saved:
             status = "already_saved" if saved else "already_unsaved"

@@ -20,8 +20,11 @@ import pytest
 from patchright.async_api import async_playwright
 
 from linkedin_mcp_server.core.exceptions import (
+    AccountRestrictedError,
     ActionOutcomeError,
+    AuthenticationError,
     LinkedInOperationError,
+    RateLimitError,
 )
 from linkedin_mcp_server.linkedin import job_actions
 from linkedin_mcp_server.linkedin.job_actions import JobActions
@@ -87,13 +90,22 @@ class SavedList:
     """The saved-jobs list as the tracker reads it: what the page says, or a
     posting saved long ago that the pages read never reach."""
 
-    def __init__(self, page, *, deep: bool = False):
+    def __init__(
+        self,
+        page,
+        *,
+        deep: bool = False,
+        fail_on_read: dict[int, Exception] | None = None,
+    ):
         self.page = page
         self.deep = deep
+        self.fail_on_read = fail_on_read or {}
         self.reads = 0
 
     async def __call__(self) -> list[str]:
         self.reads += 1
+        if self.reads in self.fail_on_read:
+            raise self.fail_on_read[self.reads]
         saved = await self.page.evaluate(
             "() => document.querySelector('[data-who=\"save\"]').dataset.saved === 'true'"
         )
@@ -139,24 +151,43 @@ async def act(
     deep: bool = False,
     ignore: bool = False,
     gone_on_load: int | None = None,
+    ignore_on_load: int | None = None,
+    fail_on_load: dict[int, Exception] | None = None,
+    fail_on_read: dict[int, Exception] | None = None,
+    saved_ids: list[str] | None = None,
 ):
-    """Run one save or unsave; ``gone_on_load`` takes the Save button off the
-    page at that load of the posting, counting from one."""
+    """Run one save or unsave.
+
+    Loads of the posting and reads of the saved list count from one:
+    ``gone_on_load`` takes the Save button off the page at that load,
+    ``ignore_on_load`` makes the page ignore clicks from that load on, and
+    ``fail_on_load``/``fail_on_read`` raise at those. ``saved_ids`` is a saved
+    list that never changes, whatever the button does.
+    """
     await page.goto(URL)
     await page.set_content(html)
     if ignore:
         await page.evaluate("() => document.body.setAttribute('data-ignore', '')")
     session = PageSession(page)
-    actions = JobActions(session, PageNavigator(session), SavedList(page, deep=deep))
+    saved_list = (
+        AsyncMock(return_value=saved_ids)
+        if saved_ids is not None
+        else SavedList(page, deep=deep, fail_on_read=fail_on_read)
+    )
+    actions = JobActions(session, PageNavigator(session), saved_list)
     loads = 0
 
     async def load(_url):
         nonlocal loads
         loads += 1
+        if fail_on_load and loads in fail_on_load:
+            raise fail_on_load[loads]
         if loads == gone_on_load:
             await page.evaluate(
                 "() => document.querySelector('[data-who=\"save\"]').remove()"
             )
+        if loads == ignore_on_load:
+            await page.evaluate("() => document.body.setAttribute('data-ignore', '')")
 
     with (
         patch.object(actions._navigator, "_navigate_to_page", side_effect=load),
@@ -232,8 +263,88 @@ async def test_a_posting_without_an_apply_link_is_not_clicked(dom_page):
 
 
 async def test_a_click_that_changes_nothing_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="did not change"):
+    # Clicked, so the account may have changed: an unknown outcome.
+    with pytest.raises(ActionOutcomeError, match="did not change"):
         await act(dom_page, posting(), True, ignore=True)
+
+
+async def test_a_listed_posting_still_listed_after_its_click_is_an_error(dom_page):
+    with pytest.raises(ActionOutcomeError, match="still is after its"):
+        await act(dom_page, posting(saved=True), False, saved_ids=[JOB, "111"])
+    assert await clicks(dom_page) == 1
+
+
+async def test_a_list_that_never_takes_the_posting_after_two_clicks_is_an_error(
+    dom_page,
+):
+    with pytest.raises(ActionOutcomeError, match="clicked twice, but"):
+        await act(dom_page, posting(saved=False), True, saved_ids=["111"])
+    assert await clicks(dom_page) == 2
+
+
+@pytest.mark.parametrize(
+    ("refusal", "unsave_listed", "fail_on_load", "fail_on_read", "made"),
+    [
+        # Reading the list after the one click: unsaving a listed posting.
+        (AuthenticationError("signed out"), True, None, 2, 1),
+        (AccountRestrictedError(), True, None, 2, 1),
+        (RateLimitError("slow down", suggested_wait_time=30), True, None, 2, 1),
+        # Opening the posting to click it back, after unsaving an unlisted one
+        # saved it.
+        (RateLimitError("slow down", suggested_wait_time=30), False, 2, None, 1),
+        # Reading the list after the click back.
+        (AuthenticationError("signed out"), False, None, 3, 2),
+    ],
+    ids=[
+        "auth-after-click",
+        "restricted-after-click",
+        "rate-limit-after-click",
+        "rate-limit-before-click-back",
+        "auth-after-click-back",
+    ],
+)
+async def test_a_refusal_after_a_click_keeps_its_own_error(
+    dom_page, refusal, unsave_listed, fail_on_load, fail_on_read, made
+):
+    # Its code, retry_after and the relogin it starts would be lost as an
+    # unknown outcome.
+    with pytest.raises(type(refusal)) as caught:
+        await act(
+            dom_page,
+            posting(saved=unsave_listed),
+            False,
+            fail_on_load={fail_on_load: refusal} if fail_on_load else None,
+            fail_on_read={fail_on_read: refusal} if fail_on_read else None,
+        )
+    assert caught.value is refusal
+    assert await clicks(dom_page) == made
+
+
+async def test_a_list_unread_after_a_confirmed_click_back_does_not_say_flipped(
+    dom_page,
+):
+    # The click back changed the button, so the posting is most likely as
+    # asked: only the last read of the list failed.
+    unread = LinkedInOperationError("The saved-jobs list could not be read")
+
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(dom_page, posting(saved=False), False, fail_on_read={3: unread})
+
+    message = str(caught.value)
+    assert "could not be read after it" in message
+    assert "is now saved" not in message
+    assert "the click to put it back failed" not in message
+    assert await clicks(dom_page) == 2
+
+
+async def test_an_unconfirmed_click_back_says_the_state_is_unknown(dom_page):
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(dom_page, posting(saved=False), False, ignore_on_load=2)
+
+    message = str(caught.value)
+    assert "Whether it is saved is unknown" in message
+    assert "is now saved" not in message
+    assert await clicks(dom_page) == 2
 
 
 async def test_an_unlabelled_button_beside_the_apply_link_is_not_clicked(dom_page):
