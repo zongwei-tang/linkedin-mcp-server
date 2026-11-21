@@ -43,6 +43,13 @@ SavedJobIds = Callable[[], Awaitable[list[str]]]
 #: further back is handled by the second click, not missed.
 SAVED_PAGES_READ = 3
 
+#: The saved list's own way of saying it ends where LinkedIn stopped serving
+#: it. The tracker drops the `start` offset and serves the first page again
+#: (see JobReader.get_saved_jobs), so every list longer than one page ends this
+#: way. That is a list read as far as it can be read, not a failed read: a
+#: posting past it is the second-click case above.
+_LIST_ENDS = frozenset({"pagination_stopped"})
+
 
 def saved_job_ids_from(jobs: JobReader) -> SavedJobIds:
     """The saved-jobs list as job ids, refusing a read that failed.
@@ -53,10 +60,21 @@ def saved_job_ids_from(jobs: JobReader) -> SavedJobIds:
 
     async def saved_job_ids() -> list[str]:
         listed = await jobs.get_saved_jobs(max_pages=SAVED_PAGES_READ, stage="saved")
-        if listed.get("section_errors"):
+        errors = listed.get("section_errors") or {}
+        failure = next(
+            (
+                error
+                for error in errors.values()
+                if error.get("error_type") not in _LIST_ENDS
+            ),
+            None,
+        )
+        if failure is not None:
             raise LinkedInOperationError(
                 "The saved-jobs list could not be read, so whether the posting "
-                "is saved is unknown. Check get_saved_jobs before retrying."
+                f"is saved is unknown ({failure.get('error_type')}: "
+                f"{failure.get('error_message')}). Check get_saved_jobs before "
+                "retrying."
             )
         return [str(job) for job in listed.get("job_ids") or []]
 

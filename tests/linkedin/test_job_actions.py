@@ -44,3 +44,38 @@ async def test_a_failed_read_is_never_taken_for_an_empty_list():
 
     with pytest.raises(LinkedInOperationError, match="could not be read"):
         await saved_job_ids_from(jobs)()
+
+
+async def test_a_list_that_ends_where_linkedin_stops_paging_is_read():
+    # Every list longer than one page ends this way, because the tracker drops
+    # the offset; refusing it refused every account with saved jobs.
+    jobs = _jobs(
+        {
+            "url": "u",
+            "sections": {"saved_jobs": "x"},
+            "job_ids": ["1"],
+            "section_errors": {
+                "saved_jobs": {
+                    "error_type": "pagination_stopped",
+                    "error_message": "LinkedIn did not keep offset 10",
+                }
+            },
+        }
+    )
+
+    assert await saved_job_ids_from(jobs)() == ["1"]
+
+
+async def test_a_refused_read_says_why():
+    jobs = _jobs(
+        {
+            "url": "u",
+            "sections": {},
+            "section_errors": {
+                "saved_jobs": {"error_type": "rate_limit", "error_message": "blocked"}
+            },
+        }
+    )
+
+    with pytest.raises(LinkedInOperationError, match="rate_limit: blocked"):
+        await saved_job_ids_from(jobs)()
