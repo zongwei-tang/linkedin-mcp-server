@@ -1142,3 +1142,41 @@ def test_a_card_wide_group_or_event_anchor_is_kept_without_a_label():
         ("event", "/events/7488972365415194624/"),
     ]
     assert all("text" not in r for r in refs)
+
+
+def test_a_followed_showcase_page_is_a_reference_of_its_own_kind():
+    """get_followed_pages lists showcase pages beside companies and schools.
+
+    It is its own kind, not a company: the company tools refuse /showcase/
+    URLs, so a company reference to one is one this server would refuse.
+    """
+    refs = build_references(
+        [
+            {
+                "href": "https://www.linkedin.com/showcase/microsoft-azure/life/",
+                "text": "Microsoft Azure",
+            },
+            {
+                "href": "https://www.linkedin.com/company/microsoft/",
+                "text": "Microsoft",
+            },
+        ],
+        "followed_pages",
+    )
+
+    assert refs == [
+        {
+            "kind": "showcase",
+            "url": "/showcase/microsoft-azure/",
+            "text": "Microsoft Azure",
+            "context": "followed page",
+        },
+        {
+            "kind": "company",
+            "url": "/company/microsoft/",
+            "text": "Microsoft",
+            "context": "followed page",
+        },
+    ]
+    # The route itself names no page.
+    assert classify_link("https://www.linkedin.com/showcase/") is None

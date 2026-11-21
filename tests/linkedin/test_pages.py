@@ -280,6 +280,57 @@ async def test_a_page_answered_with_another_part_of_the_site_returns_no_text(
     assert "/dashboard/" in error["error_message"]
 
 
+@pytest.mark.parametrize(
+    ("kind", "reference", "landed"),
+    [
+        ("my_events", None, f"{L}/mynetwork/grow/"),
+        ("followed_pages", None, f"{L}/mynetwork/"),
+        ("content_analytics", None, f"{L}/analytics/"),
+        ("search_schools", "Berkeley", f"{L}/search/results/all/?keywords=Berkeley"),
+        # A shared prefix is not a shared page: the match stops at a segment.
+        ("search_schools", "Berkeley", f"{L}/search/results/schoolsx/"),
+    ],
+)
+async def test_a_sibling_page_in_the_same_part_of_the_site_returns_no_text(
+    mock_page, kind, reference, landed
+):
+    # The likeliest fallback for a page the account lacks is its neighbour,
+    # whose text must not come back under the asked section's name.
+    reader = _reader(mock_page, landed=landed)
+    with patch.object(
+        reader._capture,
+        "capture",
+        new_callable=AsyncMock,
+        return_value=ExtractedSection(text="Ada", references=[]),
+    ):
+        result = await reader.read_page(kind, reference)
+
+    section = page_target(kind, reference).section
+    assert result["sections"] == {}
+    assert result["section_errors"][section]["error_type"] == "page_redirected"
+
+
+@pytest.mark.parametrize(
+    ("kind", "landed", "section"),
+    [
+        ("my_events", f"{L}/mynetwork/network-manager/events/attending/", "events"),
+        ("dashboard", f"{L}/dashboard?trk=nav", "dashboard"),
+    ],
+)
+async def test_a_landing_beneath_an_own_page_is_kept(mock_page, kind, landed, section):
+    # A sub-tab, a dropped trailing slash or a tracking query is the same page.
+    reader = _reader(mock_page, landed=landed)
+    with patch.object(
+        reader._capture,
+        "capture",
+        new_callable=AsyncMock,
+        return_value=ExtractedSection(text="Ada", references=[]),
+    ):
+        result = await reader.read_page(kind)
+
+    assert result["sections"] == {section: "Ada"}
+
+
 async def test_a_deeper_landing_in_the_same_part_of_the_site_is_kept(mock_page):
     # A canonical slug or a sub-tab is the same page, not a redirect.
     reader = _reader(mock_page, landed=f"{L}/pulse/engines-ada-lovelace-1a2b/")

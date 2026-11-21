@@ -368,7 +368,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (events -> raw text) and optional
             references (the events and their organizers) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(ctx, "get_my_events", "my_events", None, max_scrolls)
 
@@ -392,7 +392,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (newsletters -> raw text) and optional
             references (the newsletters and their authors) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(
             ctx, "get_my_newsletters", "my_newsletters", None, max_scrolls
@@ -417,8 +417,9 @@ def register_page_tools(
 
         Returns:
             Dict with url, sections (followed_pages -> raw text) and optional
-            references (the pages) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            references (the pages: kind company, school or showcase; no tool
+            reads a showcase page yet) and section_errors. A page LinkedIn answers with another
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(
             ctx, "get_followed_pages", "followed_pages", None, max_scrolls
@@ -442,7 +443,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (catch_up -> raw text) and optional
             references (the people each update is about) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(ctx, "get_catch_up", "catch_up", None, max_scrolls)
 
@@ -466,7 +467,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (people_you_may_know -> raw text) and optional
             references (the suggested profiles) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(
             ctx, "get_suggested_people", "people_you_may_know", None, max_scrolls
@@ -493,7 +494,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (dashboard -> raw text) and optional
             references and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(ctx, "get_my_dashboard", "dashboard", None, max_scrolls)
 
@@ -518,7 +519,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (search_appearances -> raw text) and optional
             references and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(
             ctx, "get_search_appearances", "search_appearances", None, max_scrolls
@@ -545,7 +546,7 @@ def register_page_tools(
         Returns:
             Dict with url, sections (content_analytics -> raw text) and optional
             references (your top posts) and section_errors. A page LinkedIn answers with another
-            part of the site comes back as a page_redirected section error.
+            page, even one in the same part of the site, comes back as a page_redirected section error.
         """
         return await _read(
             ctx, "get_content_analytics", "content_analytics", None, max_scrolls

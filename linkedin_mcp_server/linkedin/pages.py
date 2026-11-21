@@ -6,10 +6,12 @@ build their address from the segment the page's own URL carries, refused before
 the browser starts when it is not one; the search kinds take keywords.
 
 These addresses are LinkedIn's public routes, not measured markup. A read that
-LinkedIn sends to another part of the site (the feed, a sign-in wall, a page
-the account cannot see) returns a ``page_redirected`` section error instead of
-that other page's text, judged by the first segment of the address it landed
-on. The first live read of each kind is still checked by hand.
+LinkedIn sends to another page (the feed, a sign-in wall, a sibling page in the
+same part of the site when the account cannot see the one asked for) returns a
+``page_redirected`` section error instead of that other page's text, judged by
+the path it landed on: the page's own path or beneath it, or, for a page named
+by its slug, the part of the site. The first live read of each kind is still
+checked by hand.
 """
 
 from __future__ import annotations
@@ -169,9 +171,20 @@ def page_target(kind: str, reference: str | None = None) -> PageTarget:
     )
 
 
-def _area(url: str) -> str:
-    """The first path segment of *url*: the part of the site it belongs to."""
-    return urlparse(url).path.strip("/").split("/", 1)[0]
+def _landed_within(landed: str, target: str, *, area_only: bool) -> bool:
+    """Whether *landed* is *target*'s page or beneath it, query aside.
+
+    A page named by its slug is judged by its part of the site alone, because
+    LinkedIn canonicalises the slug (an article gains its id). Every other page
+    has a fixed path, and a sibling of it in the same part of the site (My
+    Network's Grow page for its events) is another page.
+    """
+    landed_path = urlparse(landed).path.rstrip("/")
+    target_path = urlparse(target).path.rstrip("/")
+    if area_only:
+        target_path = "/" + target_path.strip("/").split("/", 1)[0]
+    # The "/" keeps the match on a segment boundary: /schoolsx is not /schools.
+    return landed_path == target_path or landed_path.startswith(target_path + "/")
 
 
 def redirected_section_error(target: str, landed: str) -> dict[str, str]:
@@ -216,7 +229,9 @@ class PageReader:
         if (
             extracted.text
             and extracted.text != RATE_LIMITED_SECTION_TEXT
-            and _area(landed) != _area(target.url)
+            and not _landed_within(
+                landed, target.url, area_only=kind in _REFERENCED_PAGES
+            )
         ):
             return {
                 "url": target.url,

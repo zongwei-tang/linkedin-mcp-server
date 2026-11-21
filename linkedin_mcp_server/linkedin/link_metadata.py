@@ -20,6 +20,7 @@ ReferenceKind = Literal[
     "article",
     "newsletter",
     "school",
+    "showcase",
     "group",
     "event",
     "conversation",
@@ -206,6 +207,10 @@ _CONNECTIONS_FOLLOW_RE = re.compile(r"\bconnections follow this page\b", re.IGNO
 _COMPANY_PATH_RE = re.compile(r"^/company/([^/?#]+)")
 _PERSON_PATH_RE = re.compile(r"^/in/([^/?#]+)")
 _SCHOOL_PATH_RE = re.compile(r"^/school/([^/?#]+)")
+# A showcase page is a kind of its own, never a company: the company tools
+# refuse /showcase/ URLs (see identifiers.normalize_company_identifier), so a
+# company reference to one would be refused by this server's own tools.
+_SHOWCASE_PATH_RE = re.compile(r"^/showcase/([^/?#]+)")
 _GROUP_PATH_RE = re.compile(r"^/groups/([0-9]+)")
 _EVENT_PATH_RE = re.compile(r"^/events/([^/?#]+)")
 _NEWSLETTER_PATH_RE = re.compile(r"^/newsletters/([^/?#]+)")
@@ -388,6 +393,9 @@ def classify_link(href: str) -> tuple[ReferenceKind, str] | None:
 
     if match := _SCHOOL_PATH_RE.match(path):
         return "school", f"/school/{match.group(1)}/"
+
+    if match := _SHOWCASE_PATH_RE.match(path):
+        return "showcase", f"/showcase/{match.group(1)}/"
 
     if match := _GROUP_PATH_RE.match(path):
         return "group", f"/groups/{match.group(1)}/"
