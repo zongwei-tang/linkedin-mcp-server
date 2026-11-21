@@ -9,7 +9,7 @@ raw innerText for the LLM to parse, plus post-permalink references.
 """
 
 import logging
-from typing import Annotated, Any
+from typing import Annotated, Any, Literal
 
 from fastmcp import Context, FastMCP
 from pydantic import Field
@@ -210,7 +210,7 @@ def register_post_tools(
     @tool_errors
     async def unlike_post(post: str, ctx: Context) -> dict[str, Any]:
         """
-        Remove the signed-in member's like from one LinkedIn post.
+        Remove the signed-in member's like, or any other reaction, from a post.
 
         A post you have not reacted to is left alone and reported
         already_unliked, so a repeated call clicks nothing. The change is
@@ -231,5 +231,47 @@ def register_post_tools(
         logger.info("Unliking post: %s", post)
         await ctx.report_progress(progress=0, total=100, message="Opening the post")
         result = await extractor.set_post_liked(post, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="React to Post",
+        annotations=_WRITE,
+        tags={"post", "actions"},
+    )
+    @tool_errors
+    async def react_to_post(
+        post: str,
+        reaction: Literal[
+            "like", "celebrate", "support", "love", "insightful", "funny"
+        ],
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Leave one LinkedIn post with exactly this reaction from you.
+
+        Replaces a different reaction you already gave it. A post already
+        showing this reaction is left alone and reported already_reacted, so a
+        repeated call clicks nothing. The reaction is confirmed by loading the
+        post again. Take any reaction back with unlike_post.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            reaction: One of "like", "celebrate", "support", "love",
+                "insightful", "funny".
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, post (its path), reaction and status: "reacted" or
+            "already_reacted".
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="react_to_post")
+        logger.info("Reacting %s to post: %s", reaction, post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.set_post_reaction(post, reaction)
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result

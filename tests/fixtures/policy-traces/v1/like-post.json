@@ -70,7 +70,7 @@
       "call": "set_post_liked",
       "kind": "evaluate",
       "operation": "post_like",
-      "program_digest": "d44ee1c5eeeb"
+      "program_digest": "8cde75693087"
     },
     {
       "call": "set_post_liked",
@@ -114,7 +114,7 @@
       "call": "set_post_liked",
       "kind": "evaluate",
       "operation": "post_like",
-      "program_digest": "d44ee1c5eeeb"
+      "program_digest": "8cde75693087"
     },
     {
       "call": "set_post_liked",
@@ -185,7 +185,7 @@
       "call": "set_post_liked",
       "kind": "evaluate",
       "operation": "post_like",
-      "program_digest": "d44ee1c5eeeb"
+      "program_digest": "8cde75693087"
     }
   ],
   "result": {

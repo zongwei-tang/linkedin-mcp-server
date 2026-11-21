@@ -420,6 +420,37 @@ async def _like_post_scenario() -> dict[str, Any]:
     return recorder.trace({"method": "set_post_liked", "arguments": arguments}, result)
 
 
+async def _react_to_post_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_post_reaction__celebrate",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    post = "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+    page.goto_landings.extend([post, post])
+    page.declare_locator("button[data-mcp-like-caret]", "post_reaction_caret")
+    page.declare_locator("button[data-mcp-reaction]", "post_reaction_choice")
+    page.script(
+        "evaluate:post_like",
+        {"carets": 1, "likes": 1, "pressed": False, "reaction": None},
+        {"carets": 1, "likes": 1, "pressed": True, "reaction": "PRAISE"},
+        # The reload has to show the reaction's own code too.
+        {"carets": 1, "likes": 1, "pressed": True, "reaction": "PRAISE"},
+    )
+    page.script("evaluate:reaction_menu_prepare", True)
+    page.script("evaluate:reaction_choice", {"added": 6})
+    extractor = _extractor(page)
+    arguments = {"post": "urn:li:activity:7212345678901234567", "reaction": "celebrate"}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_post_reaction"):
+            result = await extractor.set_post_reaction(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "set_post_reaction", "arguments": arguments}, result
+    )
+
+
 async def _ignore_invitation_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "ignore_invitation__ignored",
@@ -1360,6 +1391,7 @@ TOOL_FACADE_METHODS = {
     "get_profile_views",
     "set_post_liked",
     "ignore_invitation",
+    "set_post_reaction",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1393,6 +1425,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "dismiss-job.json": await _dismiss_job_scenario(),
         "like-post.json": await _like_post_scenario(),
         "ignore-invitation.json": await _ignore_invitation_scenario(),
+        "react-to-post.json": await _react_to_post_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

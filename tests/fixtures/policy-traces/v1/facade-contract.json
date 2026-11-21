@@ -139,6 +139,10 @@
       "set_post_liked": {
         "coroutine": true,
         "signature": "(self, post: 'str', liked: 'bool') -> 'dict[str, Any]'"
+      },
+      "set_post_reaction": {
+        "coroutine": true,
+        "signature": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'"
       }
     },
     "tool_methods": [
@@ -171,7 +175,8 @@
       "search_people",
       "search_posts",
       "send_message",
-      "set_post_liked"
+      "set_post_liked",
+      "set_post_reaction"
     ],
     "tool_schemas": {
       "archive_conversation": {
@@ -805,6 +810,38 @@
           },
           "required": [
             "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "react_to_post": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "post": {
+              "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\").",
+              "type": "string"
+            },
+            "reaction": {
+              "description": "One of \"like\", \"celebrate\", \"support\", \"love\",\n\"insightful\", \"funny\".",
+              "enum": [
+                "like",
+                "celebrate",
+                "support",
+                "love",
+                "insightful",
+                "funny"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "post",
+            "reaction"
           ],
           "type": "object"
         },

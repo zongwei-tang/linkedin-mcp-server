@@ -76,6 +76,7 @@ TOOL_DELEGATES = {
     "like_post": "set_post_liked",
     "unlike_post": "set_post_liked",
     "ignore_invitation": "ignore_invitation",
+    "react_to_post": "set_post_reaction",
 }
 
 

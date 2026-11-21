@@ -53,6 +53,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.read_post = AsyncMock(return_value=result)
     mock.set_post_liked = AsyncMock(return_value=result)
     mock.ignore_invitation = AsyncMock(return_value=result)
+    mock.set_post_reaction = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -214,6 +215,12 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
         ),
         ("post", "unlike_post", {"post": "/in/ada/"}, "post is not a LinkedIn post"),
         (
+            "post",
+            "react_to_post",
+            {"post": "/feed/", "reaction": "love"},
+            "post is not a LinkedIn post",
+        ),
+        (
             "messaging",
             "reply_to_conversation",
             {"thread_id": "2+abc", "message": "Hello", "confirm_send": False},
@@ -351,6 +358,11 @@ _A_VALID_CALL = [
     ("post", "get_post_details", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "like_post", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "unlike_post", {"post": "urn:li:activity:7212345678901234567"}),
+    (
+        "post",
+        "react_to_post",
+        {"post": "urn:li:activity:7212345678901234567", "reaction": "celebrate"},
+    ),
     ("network", "get_invitations", {}),
     ("network", "get_connections", {}),
     ("network", "get_notifications", {}),
@@ -2962,6 +2974,40 @@ class TestIgnoreInvitationTool:
         assert tool.annotations.read_only_hint is False
         assert tool.annotations.destructive_hint is True
         assert tool.annotations.idempotent_hint is False
+
+
+class TestReactTool:
+    async def test_it_forwards_post_and_reaction(self, serve_extractor):
+        expected = {"url": "u", "post": "/p/", "reaction": "love", "status": "reacted"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            "react_to_post",
+            {"post": "urn:li:activity:7212345678901234567", "reaction": "love"},
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_post_reaction.assert_awaited_once_with(
+            "urn:li:activity:7212345678901234567", "love"
+        )
+
+    async def test_an_unknown_reaction_is_refused_by_the_schema(self):
+        from fastmcp.exceptions import ValidationError
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        with pytest.raises(ValidationError, match="reaction"):
+            await mcp.call_tool(
+                "react_to_post",
+                {"post": "urn:li:activity:7212345678901234567", "reaction": "angry"},
+            )
 
 
 class TestLikeTools:

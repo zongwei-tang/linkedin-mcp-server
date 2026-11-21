@@ -25,7 +25,7 @@ work, health checks, or background maintenance.
 - `archive_conversation` is a write action too: it moves a thread out of the
   user's inbox. Use it only when the user explicitly asks to archive that
   thread.
-- `like_post` and `unlike_post` are write actions others can see. Use them only
+- `like_post`, `react_to_post` and `unlike_post` are write actions others can see. Use them only
   on a post the user named.
 - `ignore_invitation` removes a pending invitation for good. Use it only for
   the sender the user named.
@@ -62,7 +62,7 @@ instances, clear profiles, or replace the user's browser session.
 - Messages: `get_inbox`, `get_conversation`, and `search_conversations`.
 - Writes: `send_message`, `reply_to_conversation` (answer an existing thread,
   InMail included), `connect_with_person`, `archive_conversation`,
-  `like_post`, `unlike_post`, `ignore_invitation` and `dismiss_job`, subject to the explicit authorization rules above.
+  `like_post`, `react_to_post`, `unlike_post`, `ignore_invitation` and `dismiss_job`, subject to the explicit authorization rules above.
 - Session: `get_session_status` says whether a login is saved without opening
   a browser or a login window; it does not prove LinkedIn still accepts it.
 - Cleanup: use `close_session` only when the user asks to end the managed

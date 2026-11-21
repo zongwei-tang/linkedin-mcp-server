@@ -26,7 +26,7 @@ from linkedin_mcp_server.linkedin.message_sender import MessageSender
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.network import InvitationDirection, NetworkReader
 from linkedin_mcp_server.linkedin.person import PersonReader
-from linkedin_mcp_server.linkedin.post_actions import PostActions
+from linkedin_mcp_server.linkedin.post_actions import PostActions, Reaction
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
 from linkedin_mcp_server.linkedin.session import PageSession
@@ -262,6 +262,10 @@ class LinkedInExtractor:
     ) -> dict[str, Any]:
         """List pending connection invitations, received or sent."""
         return await self._network.get_invitations(direction, max_scrolls)
+
+    async def set_post_reaction(self, post: str, reaction: Reaction) -> dict[str, Any]:
+        """Leave one post with exactly this reaction."""
+        return await self._post_actions.set_post_reaction(post, reaction)
 
     async def ignore_invitation(self, username: str) -> dict[str, Any]:
         """Ignore the pending invitation one person sent."""

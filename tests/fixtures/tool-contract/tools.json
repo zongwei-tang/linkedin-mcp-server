@@ -1005,6 +1005,55 @@
       "fastmcp": {
         "tags": [
           "actions",
+          "post"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Leave one LinkedIn post with exactly this reaction from you.\n\nReplaces a different reaction you already gave it. A post already\nshowing this reaction is left alone and reported already_reacted, so a\nrepeated call clicks nothing. The reaction is confirmed by loading the\npost again. Take any reaction back with unlike_post.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "post": {
+          "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\").",
+          "type": "string"
+        },
+        "reaction": {
+          "description": "One of \"like\", \"celebrate\", \"support\", \"love\",\n\"insightful\", \"funny\".",
+          "enum": [
+            "like",
+            "celebrate",
+            "support",
+            "love",
+            "insightful",
+            "funny"
+          ],
+          "type": "string"
+        }
+      },
+      "required": [
+        "post",
+        "reaction"
+      ],
+      "type": "object"
+    },
+    "name": "react_to_post",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "React to Post"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
           "messaging"
         ]
       }
@@ -1457,7 +1506,7 @@
       "openWorldHint": true,
       "readOnlyHint": false
     },
-    "description": "Remove the signed-in member's like from one LinkedIn post.\n\nA post you have not reacted to is left alone and reported\nalready_unliked, so a repeated call clicks nothing. The change is\nconfirmed by loading the post again. Comments are never touched.",
+    "description": "Remove the signed-in member's like, or any other reaction, from a post.\n\nA post you have not reacted to is left alone and reported\nalready_unliked, so a repeated call clicks nothing. The change is\nconfirmed by loading the post again. Comments are never touched.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {

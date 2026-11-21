@@ -121,6 +121,10 @@
       "description": "List your pending connection invitations, received or sent"
     },
     {
+      "name": "react_to_post",
+      "description": "React to a LinkedIn post with like, celebrate, support, love, insightful or funny"
+    },
+    {
       "name": "ignore_invitation",
       "description": "Ignore the pending connection invitation one person sent you"
     },

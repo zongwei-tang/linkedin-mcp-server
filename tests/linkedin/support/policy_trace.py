@@ -701,6 +701,8 @@ def semantic_program_id(program: str) -> str:
         ("addedTotal: added.length", "thread_menu_survey"),
         ("result.dismiss = dismiss.length", "job_search_card"),
         ("likes[0].setAttribute(mark", "post_like"),
+        ("button.setAttribute(before", "reaction_menu_prepare"),
+        ("added[index].setAttribute(mark", "reaction_choice"),
         ("buttons[0].setAttribute(mark", "invitation_row"),
         ("present: !!document.querySelector('[componentkey=", "invitation_present"),
         ("return {ids: ids, scoped", "job_ids"),

@@ -18,6 +18,15 @@ No label is read: the Like button's text and `aria-label` are translated.
 Verified live 2026-11-20 through the MCP tools on one post: like, like again
 (already_liked, no click), unlike, unlike again (already_unliked, no click),
 each confirmed by a reload.
+
+Reactions other than Like, measured 2026-11-20 by choosing Celebrate and
+taking it back: the `l` caret opens six new buttons, Like, Celebrate,
+Support, Love, Insightful, Funny in that order, with no icon and only a
+translated label each, so a reaction is chosen by its position. Once reacted,
+the post's button holds an image whose class carries LinkedIn's own reaction
+type, `data-test-reactions-icon-type-PRAISE` for Celebrate, which is a code
+rather than a word and is what confirms the reaction. Clicking that button
+takes any reaction back.
 """
 
 from __future__ import annotations
@@ -35,26 +44,56 @@ from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.session import NAV_DELAY, PageSession
 
 LikeStatus = Literal["liked", "unliked", "already_liked", "already_unliked"]
+Reaction = Literal["like", "celebrate", "support", "love", "insightful", "funny"]
+ReactionStatus = Literal["reacted", "already_reacted"]
+
+#: The reactions menu, in the order it lists them.
+REACTIONS: tuple[Reaction, ...] = (
+    "like",
+    "celebrate",
+    "support",
+    "love",
+    "insightful",
+    "funny",
+)
+#: The type code LinkedIn writes on a reacted post's icon for each reaction.
+#: PRAISE was read live; the others are the codes LinkedIn's reaction icons
+#: carry in the feed (like-, praise-, empathy-, interest-consumption).
+REACTION_TYPES: dict[Reaction, str] = {
+    "like": "LIKE",
+    "celebrate": "PRAISE",
+    "support": "APPRECIATION",
+    "love": "EMPATHY",
+    "insightful": "INTEREST",
+    "funny": "ENTERTAINMENT",
+}
 
 _LIKE_MARK = "data-mcp-like"
+_CARET_MARK = "data-mcp-like-caret"
+_BEFORE_MARK = "data-mcp-before-menu"
+_CHOICE_MARK = "data-mcp-reaction"
 # How long a post page gets to render its action bar, and a click to show.
 _POST_READY_TIMEOUT = 10.0
 _LIKE_TIMEOUT = 5.0
+_MENU_TIMEOUT = 5.0
 _POLL = 0.25
 
 # Finds the post's own Like button and marks it. Returns how many post-level
 # carets and Like buttons it saw, so a page that does not match the measured
 # shape is reported as such rather than clicked.
 POST_LIKE_JS = r"""(mark) => {
-    for (const old of document.querySelectorAll('[' + mark + ']')) {
-        old.removeAttribute(mark);
+    for (const name of [mark, mark + '-caret']) {
+        for (const old of document.querySelectorAll('[' + name + ']')) {
+            old.removeAttribute(name);
+        }
     }
     const outsideComments = (el) => !el.closest('article[data-id]');
     const carets = [...document.querySelectorAll(
         'button[data-finite-scroll-hotkey="l"]'
     )].filter(outsideComments);
-    const result = {carets: carets.length, likes: 0, pressed: null};
+    const result = {carets: carets.length, likes: 0, pressed: null, reaction: null};
     if (carets.length !== 1) return result;
+    carets[0].setAttribute(mark + '-caret', '');
     let likes = [];
     let node = carets[0].parentElement;
     for (let depth = 0; node && depth < 3; depth++, node = node.parentElement) {
@@ -66,8 +105,38 @@ POST_LIKE_JS = r"""(mark) => {
     result.likes = likes.length;
     if (likes.length !== 1) return result;
     result.pressed = likes[0].getAttribute('aria-pressed') === 'true';
+    for (const el of likes[0].querySelectorAll('*')) {
+        const code = (el.getAttribute('class') || '').match(
+            /data-test-reactions-icon-type-([A-Z_]+)/
+        );
+        if (code) {
+            result.reaction = code[1];
+            break;
+        }
+    }
     likes[0].setAttribute(mark, '');
     return result;
+}"""
+
+# Marks every button on the page, so the reactions menu's buttons are the ones
+# the caret click adds.
+REACTION_MENU_PREPARE_JS = r"""(before) => {
+    for (const button of document.querySelectorAll('button')) {
+        button.setAttribute(before, '');
+    }
+    return true;
+}"""
+
+# Marks the reaction at ``index`` among the buttons the caret click added,
+# once there are exactly the six the menu lists.
+REACTION_CHOICE_JS = r"""(opts) => {
+    const {before, mark, index} = opts;
+    for (const old of document.querySelectorAll('[' + mark + ']')) {
+        old.removeAttribute(mark);
+    }
+    const added = [...document.querySelectorAll('button:not([' + before + '])')];
+    if (added.length === 6) added[index].setAttribute(mark, '');
+    return {added: added.length};
 }"""
 
 
@@ -76,6 +145,7 @@ class _LikeControl:
     carets: int
     likes: int
     pressed: bool | None
+    reaction: str | None = None
 
     @property
     def found(self) -> bool:
@@ -141,6 +211,7 @@ class PostActions:
             carets=int(found.get("carets", 0)),
             likes=int(found.get("likes", 0)),
             pressed=found.get("pressed"),
+            reaction=found.get("reaction"),
         )
 
     async def _open_and_read(self, url: str) -> _LikeControl:
@@ -162,6 +233,83 @@ class PostActions:
             )
         return control
 
+    async def set_post_reaction(self, post: str, reaction: Reaction) -> dict[str, Any]:
+        """Leave one post with exactly this reaction from the signed-in member.
+
+        A post already showing that reaction is left alone. Like on a post with
+        no reaction is the Like button itself; every other case chooses from
+        the reactions menu, by position. The post must then show the
+        reaction's type code, after the click and again after a reload.
+
+        Returns:
+            {url, post, reaction, status: "reacted" | "already_reacted"}
+        """
+        if reaction not in REACTION_TYPES:
+            raise ValueError(f"reaction must be one of {list(REACTIONS)}")
+        path = normalize_post_reference(post)
+        url = post_page_url(path)
+        before = await self._open_and_read(url)
+        if _shows(before, reaction):
+            return _reaction_result(url, path, reaction, "already_reacted")
+
+        if reaction == "like" and not before.pressed:
+            await self._click(f"button[{_LIKE_MARK}]")
+        else:
+            await self._choose_from_menu(url, reaction)
+        if not await self._wait_until(lambda control: _shows(control, reaction)):
+            current = await self._read()
+            raise LinkedInOperationError(
+                f"{reaction!r} was chosen on {url}, but the post shows "
+                f"{_described(current)}. Read it again before retrying."
+            )
+        await self._session.delay(NAV_DELAY)
+        after = await self._open_and_read(url)
+        if not _shows(after, reaction):
+            raise LinkedInOperationError(
+                f"{url} showed {reaction!r} after the click, but "
+                f"{_described(after)} after a reload, so LinkedIn may not have "
+                "kept it."
+            )
+        return _reaction_result(url, path, reaction, "reacted")
+
+    async def _click(self, selector: str) -> None:
+        async with linkedin_element(
+            self._session.page.locator(selector), timeout=5000
+        ) as element:
+            await element.click(timeout=5000)
+
+    async def _choose_from_menu(self, url: str, reaction: Reaction) -> None:
+        page = self._session.page
+        await page.evaluate(REACTION_MENU_PREPARE_JS, _BEFORE_MARK)
+        await self._click(f"button[{_CARET_MARK}]")
+        options = {
+            "before": _BEFORE_MARK,
+            "mark": _CHOICE_MARK,
+            "index": REACTIONS.index(reaction),
+        }
+        deadline = self._session.monotonic() + _MENU_TIMEOUT
+        found = await page.evaluate(REACTION_CHOICE_JS, options)
+        while found["added"] != 6 and self._session.monotonic() < deadline:
+            await self._session.delay(_POLL)
+            found = await page.evaluate(REACTION_CHOICE_JS, options)
+        if found["added"] != 6:
+            await page.keyboard.press("Escape")
+            raise LinkedInOperationError(
+                f"The reactions menu of {url} showed {found['added']} new "
+                "buttons, where the six reactions were expected. Nothing was "
+                "chosen."
+            )
+        await self._click(f"button[{_CHOICE_MARK}]")
+
+    async def _wait_until(self, done) -> bool:
+        deadline = self._session.monotonic() + _LIKE_TIMEOUT
+        while self._session.monotonic() < deadline:
+            await self._session.delay(_POLL)
+            control = await self._read()
+            if control.found and done(control):
+                return True
+        return False
+
     async def _wait_for(self, liked: bool) -> bool:
         deadline = self._session.monotonic() + _LIKE_TIMEOUT
         while self._session.monotonic() < deadline:
@@ -170,3 +318,30 @@ class PostActions:
             if control.found and control.pressed == liked:
                 return True
         return False
+
+
+def _shows(control: _LikeControl, reaction: Reaction) -> bool:
+    """Whether the post shows exactly ``reaction`` from the signed-in member.
+
+    A liked post's button was not read live with an icon, so Like is also
+    accepted from a pressed button that carries no type code at all.
+    """
+    if not control.pressed:
+        return False
+    if control.reaction == REACTION_TYPES[reaction]:
+        return True
+    return reaction == "like" and control.reaction is None
+
+
+def _described(control: _LikeControl) -> str:
+    if not control.found:
+        return "no readable reaction button"
+    if not control.pressed:
+        return "no reaction"
+    return f"reaction type {control.reaction or 'without a type code'}"
+
+
+def _reaction_result(
+    url: str, path: str, reaction: Reaction, status: ReactionStatus
+) -> dict[str, Any]:
+    return {"url": url, "post": path, "reaction": reaction, "status": status}

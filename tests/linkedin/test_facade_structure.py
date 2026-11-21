@@ -62,6 +62,7 @@ PUBLIC_SIGNATURES = {
     "get_profile_views": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
     "set_post_liked": "(self, post: 'str', liked: 'bool') -> 'dict[str, Any]'",
     "ignore_invitation": "(self, username: 'str') -> 'dict[str, Any]'",
+    "set_post_reaction": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -97,6 +98,7 @@ DELEGATES = {
     "get_profile_views": ("_network", "get_profile_views"),
     "set_post_liked": ("_post_actions", "set_post_liked"),
     "ignore_invitation": ("_invitation_actions", "ignore_invitation"),
+    "set_post_reaction": ("_post_actions", "set_post_reaction"),
 }
 
 DELEGATE_CALLS = {
@@ -132,6 +134,7 @@ DELEGATE_CALLS = {
     "get_profile_views": "self._network.get_profile_views(max_scrolls)",
     "set_post_liked": "self._post_actions.set_post_liked(post, liked)",
     "ignore_invitation": "self._invitation_actions.ignore_invitation(username)",
+    "set_post_reaction": "self._post_actions.set_post_reaction(post, reaction)",
 }
 
 FACADE_STATE = {
