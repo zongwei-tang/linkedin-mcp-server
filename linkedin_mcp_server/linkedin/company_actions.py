@@ -117,7 +117,7 @@ class CompanyActions:
                 "change. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
-        after = await self._open_and_read(url)
+        after = await self._open_and_read(url, clicked=True)
         if after["followed"] != followed:
             raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
@@ -139,7 +139,17 @@ class CompanyActions:
             raise LinkedInOperationError("The company page could not be read")
         return found
 
-    async def _open_and_read(self, url: str) -> dict[str, Any]:
+    async def _open_and_read(
+        self, url: str, *, clicked: bool = False
+    ) -> dict[str, Any]:
+        """Open the company page and read its own follow button.
+
+        ``clicked`` is the reload after a click: the account may already have
+        changed, so a button that cannot be found is an unknown outcome rather
+        than nothing done. Refusals (a sign-in wall, a rate limit) are raised
+        as they are either way, never wrapped, so they keep their own code and
+        recovery.
+        """
         await self._navigator._navigate_to_page(url)
         await self._session.check_rate_limit()
         await self._session.dismiss_modal()
@@ -148,6 +158,12 @@ class CompanyActions:
         while not found["found"] and self._session.monotonic() < deadline:
             await self._session.delay(_POLL)
             found = await self._read()
+        if not found["found"] and clicked:
+            raise ActionOutcomeError(
+                f"{url} showed the change after the click, but its follow "
+                "button could not be found after a reload, so whether LinkedIn "
+                "kept it is not confirmed. Read the page again before retrying."
+            )
         if not found["found"]:
             raise LinkedInOperationError(
                 f"The follow button of {url} could not be found. Nothing was clicked."

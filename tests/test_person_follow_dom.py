@@ -22,7 +22,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from patchright.async_api import async_playwright
 
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin import person_actions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.person_actions import PersonActions
@@ -46,6 +49,9 @@ const log = (what) => {
     entries.push(what);
     document.body.dataset.log = JSON.stringify(entries);
 };
+document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') log('escape');
+});
 const card = document.querySelector('[data-who="top"]');
 const show = (followed) => {
     card.innerHTML = (followed ? '%s' : '%s') + (followed ? 'Folge ich' : 'Folgen');
@@ -71,11 +77,12 @@ card.addEventListener('click', () => {
     const followed = !!card.querySelector('#check-outline-small');
     if (!followed) { if (!document.body.hasAttribute('data-ignore')) show(true); return; }
     if (document.body.hasAttribute('data-no-ask')) { show(false); return; }
-    // A suggestion card in <aside>, rendered as the click lands: an icon
-    // button and two plain ones, like the confirmation's shape.
+    // A suggestion card in <aside>, rendered as the click lands, shaped
+    // exactly like the confirmation: a close button around an xmark icon and
+    // two plain buttons. Only being in <aside> tells it apart.
     if (document.body.hasAttribute('data-aside-card')) {
         document.querySelector('aside').insertAdjacentHTML('beforeend',
-            '<div><button data-who="aside-close"><svg id="close-small"></svg></button>'
+            '<div><button data-who="aside-close"><svg id="xmark-small"></svg></button>'
             + '<p>Grace</p><button data-who="aside-1">Nachricht</button>'
             + '<button data-who="aside-2">Vernetzen</button></div>');
     }
@@ -84,9 +91,13 @@ card.addEventListener('click', () => {
     if (document.body.hasAttribute('data-busy-page')) {
         const section = document.createElement('section');
         for (let i = 0; i < 109; i++) section.appendChild(document.createElement('button'));
-        // And a card that also holds two plain buttons, but no close button.
+        // And a card that also holds two plain buttons beside an icon button
+        // that is not an xmark, so it has no close button.
         section.insertAdjacentHTML('beforeend',
-            '<div><button>Verbinden</button><button>Nachricht</button></div>');
+            '<div><button><svg id="close-small"></svg></button>'
+            + '<button>Verbinden</button><button>Nachricht</button></div>');
+        // An icon with an empty id and no test hook names nothing.
+        section.insertAdjacentHTML('beforeend', '<button><svg id=""></svg></button>');
         document.querySelector('main').appendChild(section);
     }
     ask();
@@ -231,13 +242,41 @@ async def test_a_confirmation_of_another_shape_is_closed_unconfirmed(dom_page):
 
 
 async def test_a_click_that_changes_nothing_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="did not change"):
+    # Clicked, so the account may have changed: an unknown outcome, and
+    # whatever the click opened is closed.
+    with pytest.raises(ActionOutcomeError, match="did not change"):
         await act(dom_page, profile(False), True, body_attrs=["data-ignore"])
+    assert await log(dom_page) == ["top", "escape"]
 
 
 async def test_a_follow_the_reload_does_not_show_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="not after a reload"):
+    with pytest.raises(ActionOutcomeError, match="not after a reload"):
         await act(dom_page, profile(False), True, reload_html=profile(False))
+
+
+TWO_TOP_CARD_BUTTONS = (
+    '<div><div><button data-who="top2"><svg id="plus-outline-small"></svg>'
+    'Folgen</button></div><button aria-expanded="false">Mehr</button></div>'
+)
+
+
+@pytest.mark.parametrize(
+    "reload_html",
+    [
+        profile(False, top_card=False),
+        profile(False).replace(
+            "</section><section>", f"{TWO_TOP_CARD_BUTTONS}</section><section>", 1
+        ),
+    ],
+    ids=["no-top-card", "two-follow-buttons"],
+)
+async def test_a_top_card_unreadable_after_the_click_is_an_unknown_outcome(
+    dom_page, reload_html
+):
+    # The click went through: saying nothing was clicked would be wrong.
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(dom_page, profile(False), True, reload_html=reload_html)
+    assert "Nothing was clicked" not in str(caught.value)
 
 
 async def test_buttons_rendered_elsewhere_while_it_asks_are_ignored(dom_page):
@@ -263,11 +302,7 @@ async def test_a_late_confirmation_is_waited_for_and_an_aside_card_never_clicked
 
 async def test_two_top_card_follow_buttons_are_not_guessed_between(dom_page):
     html = profile(False).replace(
-        "</section><section>",
-        '<div><div><button data-who="top2"><svg id="plus-outline-small"></svg>'
-        'Folgen</button></div><button aria-expanded="false">Mehr</button></div>'
-        "</section><section>",
-        1,
+        "</section><section>", f"{TWO_TOP_CARD_BUTTONS}</section><section>", 1
     )
     with pytest.raises(LinkedInOperationError, match="Nothing was clicked"):
         await act(dom_page, html, True)

@@ -239,7 +239,7 @@ class PostActions:
                 "change. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
-        after = await self._open_and_read(url)
+        after = await self._open_and_read(url, clicked=True)
         if after.pressed != liked:
             raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
@@ -260,8 +260,15 @@ class PostActions:
             reaction=found.get("reaction"),
         )
 
-    async def _open_and_read(self, url: str) -> _LikeControl:
-        """Open the post and read its Like button once the action bar renders."""
+    async def _open_and_read(self, url: str, *, clicked: bool = False) -> _LikeControl:
+        """Open the post and read its Like button once the action bar renders.
+
+        ``clicked`` is the reload after a click: the post may already have
+        changed, so an action bar that cannot be read is an unknown outcome
+        rather than nothing done. Refusals (a sign-in wall, a rate limit) are
+        raised as they are either way, never wrapped, so they keep their own
+        code and recovery.
+        """
         await self._navigator._navigate_to_page(url)
         await self._session.check_rate_limit()
         await self._session.dismiss_modal()
@@ -271,11 +278,17 @@ class PostActions:
             await self._session.delay(_POLL)
             control = await self._read()
         if not control.found:
-            raise LinkedInOperationError(
+            error = ActionOutcomeError if clicked else LinkedInOperationError
+            tail = (
+                "The click before this reload went through, so the post may "
+                "have changed. Read it again before retrying."
+                if clicked
+                else "Nothing was clicked."
+            )
+            raise error(
                 f"The Like button of {url} could not be found: the page showed "
                 f"{control.carets} post reaction controls and {control.likes} "
-                "Like buttons beside them, where one of each was expected. "
-                "Nothing was clicked."
+                f"Like buttons beside them, where one of each was expected. {tail}"
             )
         return control
 
@@ -309,7 +322,7 @@ class PostActions:
                 f"{_described(current)}. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
-        after = await self._open_and_read(url)
+        after = await self._open_and_read(url, clicked=True)
         if not _shows(after, reaction):
             raise ActionOutcomeError(
                 f"{url} showed {reaction!r} after the click, but "

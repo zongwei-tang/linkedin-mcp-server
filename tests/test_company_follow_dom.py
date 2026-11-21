@@ -22,7 +22,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from patchright.async_api import async_playwright
 
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin import company_actions
 from linkedin_mcp_server.linkedin.company_actions import CompanyActions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
@@ -197,10 +200,20 @@ async def test_a_confirmation_without_its_confirm_button_is_closed(dom_page):
 
 
 async def test_a_click_that_changes_nothing_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="did not change"):
+    # Clicked, so the account may have changed: an unknown outcome.
+    with pytest.raises(ActionOutcomeError, match="did not change"):
         await act(dom_page, company(False), True, body_attrs=["data-ignore"])
 
 
 async def test_a_follow_the_reload_does_not_show_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="not after a reload"):
+    with pytest.raises(ActionOutcomeError, match="not after a reload"):
         await act(dom_page, company(False), True, reload_html=company(False))
+
+
+async def test_a_follow_button_missing_after_the_click_is_an_unknown_outcome(
+    dom_page,
+):
+    # The click went through: saying nothing was clicked would be wrong.
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(dom_page, company(False), True, reload_html=company(None))
+    assert "Nothing was clicked" not in str(caught.value)

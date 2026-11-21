@@ -19,7 +19,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from patchright.async_api import async_playwright
 
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin import invitation_actions
 from linkedin_mcp_server.linkedin.invitation_actions import InvitationActions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
@@ -177,7 +180,7 @@ async def test_a_row_that_stays_is_an_error(dom_page):
         patch.object(actions._navigator, "_navigate_to_page", new_callable=AsyncMock),
         patch.object(PageSession, "check_rate_limit", new_callable=AsyncMock),
         patch.object(PageSession, "dismiss_modal", new_callable=AsyncMock),
-        pytest.raises(LinkedInOperationError, match="stayed in the list"),
+        pytest.raises(ActionOutcomeError, match="stayed in the list"),
     ):
         await actions.ignore_invitation("ada")
     assert await chosen(dom_page) == ["ada:ignore"]
@@ -186,7 +189,7 @@ async def test_a_row_that_stays_is_an_error(dom_page):
 async def test_an_invitation_back_after_the_reload_is_an_error(dom_page):
     html = page(row("ada", "111"))
 
-    with pytest.raises(LinkedInOperationError, match="back after a reload"):
+    with pytest.raises(ActionOutcomeError, match="back after a reload"):
         await act(dom_page, html, "ada", reload_html=page(row("ada", "111")))
 
 
@@ -197,5 +200,5 @@ async def test_the_last_invitation_leaving_an_empty_list_is_confirmed(dom_page):
 
 
 async def test_a_reload_that_renders_nothing_cannot_confirm(dom_page):
-    with pytest.raises(LinkedInOperationError, match="did not render"):
+    with pytest.raises(ActionOutcomeError, match="did not render"):
         await act(dom_page, page(row("ada", "111")), "ada", reload_html="<main></main>")

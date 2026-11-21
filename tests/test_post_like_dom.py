@@ -210,6 +210,43 @@ async def test_a_click_the_page_ignores_is_an_error(dom_page):
     assert await pressed(dom_page) == ["post"]
 
 
+async def test_an_unlike_the_reload_does_not_show_is_an_error(dom_page):
+    with pytest.raises(ActionOutcomeError, match="not after a reload"):
+        await act(dom_page, post_page(True), False, reload_html=post_page(True))
+
+
+async def test_an_unlike_click_the_page_ignores_is_an_error(dom_page):
+    await dom_page.goto(POST_URL)
+    await dom_page.set_content(post_page(True))
+    await dom_page.evaluate("() => document.body.setAttribute('data-ignore', '')")
+    session = PageSession(dom_page)
+    actions = PostActions(session, PageNavigator(session))
+    with (
+        patch.object(actions._navigator, "_navigate_to_page", new_callable=AsyncMock),
+        patch.object(PageSession, "check_rate_limit", new_callable=AsyncMock),
+        patch.object(PageSession, "dismiss_modal", new_callable=AsyncMock),
+        pytest.raises(ActionOutcomeError, match="did not change"),
+    ):
+        await actions.set_post_liked(POST, False)
+    assert await pressed(dom_page) == ["post"]
+
+
+@pytest.mark.parametrize(
+    ("pressed_before", "liked"),
+    [(True, False), (False, True)],
+    ids=["unlike", "like"],
+)
+async def test_an_action_bar_missing_after_the_click_is_an_unknown_outcome(
+    dom_page, pressed_before, liked
+):
+    # The click went through: saying nothing was clicked would be wrong.
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(
+            dom_page, post_page(pressed_before), liked, reload_html="<main></main>"
+        )
+    assert "Nothing was clicked" not in str(caught.value)
+
+
 async def test_a_page_without_one_post_caret_is_not_clicked(dom_page):
     # Two post-level carets: the page is not the measured shape.
     html = post_page(False).replace(

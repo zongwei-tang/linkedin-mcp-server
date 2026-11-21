@@ -118,9 +118,10 @@ CONFIRM_UNFOLLOW_JS = r"""(opts) => {
         .filter((button) => !button.closest('aside'));
     const plain = added.filter((button) => !button.querySelector('svg, img'));
     // The close button as measured: around an xmark icon, by id or test hook.
+    // An empty id with no test hook names nothing, and must not throw.
     const closers = added.filter((button) => [...button.querySelectorAll(
         'svg[id], [data-test-icon]'
-    )].some((icon) => (icon.id || icon.getAttribute('data-test-icon')).startsWith('xmark')));
+    )].some((icon) => (icon.id || icon.getAttribute('data-test-icon') || '').startsWith('xmark')));
     const dialogs = new Map();
     for (const button of plain) {
         let node = button.parentElement;
@@ -185,7 +186,7 @@ class PersonActions:
                 "not change. Read the profile again before retrying."
             )
         await self._session.delay(NAV_DELAY)
-        after = await self._open_and_read(url)
+        after = await self._open_and_read(url, clicked=True)
         if after["followed"] != followed:
             raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
@@ -207,7 +208,17 @@ class PersonActions:
             raise LinkedInOperationError("The profile page could not be read")
         return found
 
-    async def _open_and_read(self, url: str) -> dict[str, Any]:
+    async def _open_and_read(
+        self, url: str, *, clicked: bool = False
+    ) -> dict[str, Any]:
+        """Open the profile and read its top card's follow button.
+
+        ``clicked`` is the reload after a click: the account may already have
+        changed, so a top card that cannot be read is an unknown outcome
+        rather than nothing done. Refusals (a sign-in wall, a rate limit) are
+        raised as they are either way, never wrapped, so they keep their own
+        code and recovery.
+        """
         await self._navigator._navigate_to_page(url)
         await self._session.check_rate_limit()
         await self._session.dismiss_modal()
@@ -216,6 +227,14 @@ class PersonActions:
         while found["followed"] is None and self._session.monotonic() < deadline:
             await self._session.delay(_POLL)
             found = await self._read()
+        if clicked and (found["followed"] is None or found["candidates"] != 1):
+            raise ActionOutcomeError(
+                f"{url} showed the change after the click, but after a reload "
+                f"its top card showed {found['candidates']} follow buttons "
+                "beside a More button where one was expected, so whether "
+                "LinkedIn kept it is not confirmed. Read the profile again "
+                "before retrying."
+            )
         if found["followed"] is None:
             raise LinkedInOperationError(
                 f"The follow button of {url} could not be found in its top card. "
