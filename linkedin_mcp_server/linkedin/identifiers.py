@@ -57,9 +57,11 @@ __all__ = [
     "normalize_job_id",
     "normalize_opaque_id",
     "normalize_person_identifier",
+    "normalize_post_reference",
     "normalize_profile_urn",
     "normalize_thread_id",
     "person_profile_url",
+    "post_page_url",
 ]
 
 # linkedin.com and every host under it. There is no canonical host to normalize
@@ -604,3 +606,45 @@ def normalize_profile_urn(value: str) -> str:
             "result returned it, with no URL, path or query around it."
         )
     return value
+
+
+# The three entity types a post permalink is built from, as feed_payload reads
+# them out of LinkedIn's own payloads. Comment and reaction URNs name no page.
+_POST_URN = re.compile(r"urn:li:(?:activity|ugcPost|share):[0-9]+")
+# A `/posts/` slug, which LinkedIn writes as `<author>_<title>-<type>-<id>-<hash>`:
+# word characters and hyphens only, so nothing in it is path syntax.
+_POST_SLUG = re.compile(r"[A-Za-z0-9_-]+")
+_FEED_UPDATE_ROUTE = ["feed", "update"]
+
+
+def normalize_post_reference(value: str) -> str:
+    """The site-relative path of one post, from its URN or either permalink form.
+
+    Accepts every shape this server prints in a ``feed_post`` reference
+    (``/feed/update/<urn>/`` and ``/posts/<slug>``), either one as a full URL,
+    and a bare post URN. A bare number is refused: it could be an activity, a
+    share or a ugcPost id, and each one names a different post or none.
+    """
+    value = value.strip()
+    if _POST_URN.fullmatch(value):
+        return f"/feed/update/{value}/"
+    segments = _linkedin_segments(value, want="post URL")
+    if segments is not None and len(segments) == 3:
+        if [segment.lower() for segment in segments[:2]] == _FEED_UPDATE_ROUTE:
+            urn = _decoded(segments[2])
+            if urn is not None and _POST_URN.fullmatch(urn):
+                return f"/feed/update/{urn}/"
+    if segments is not None and len(segments) == 2 and segments[0].lower() == "posts":
+        slug = _decoded(segments[1])
+        if slug is not None and _POST_SLUG.fullmatch(slug):
+            return f"/posts/{slug}/"
+    raise InvalidReferenceError(
+        "post is not a LinkedIn post. Pass a post URN (urn:li:activity:<id>) or "
+        "a permalink a previous result returned (/feed/update/<urn>/ or "
+        "/posts/<slug>)."
+    )
+
+
+def post_page_url(path: str) -> str:
+    """The URL of a path ``normalize_post_reference`` returned."""
+    return f"https://www.linkedin.com{path}"

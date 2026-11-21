@@ -9,7 +9,14 @@ from linkedin_mcp_server.linkedin.capture import (
     CapturePlan,
     SectionCapture,
 )
-from linkedin_mcp_server.linkedin.contracts import RATE_LIMITED_SECTION_TEXT
+from linkedin_mcp_server.linkedin.contracts import (
+    RATE_LIMITED_SECTION_TEXT,
+    single_section_result,
+)
+from linkedin_mcp_server.linkedin.identifiers import (
+    normalize_post_reference,
+    post_page_url,
+)
 from linkedin_mcp_server.linkedin.link_metadata import Reference
 from linkedin_mcp_server.linkedin.search_urls import build_content_search_url
 
@@ -107,3 +114,31 @@ class PostSearch:
         if section_errors:
             result["section_errors"] = section_errors
         return result
+
+    async def read_post(
+        self, post: str, max_scrolls: int | None = None
+    ) -> dict[str, Any]:
+        """Read one post, with the comments its page renders.
+
+        The post page loads its first comments as it is scrolled, so the page
+        is read the way an activity list is: wait for content, scroll, then
+        take ``<main>``. Further replies behind a "load more" control are not
+        opened, because that control has no locale-independent identity.
+
+        Args:
+            post: A post URN or either permalink form a ``feed_post``
+                reference carries. Refused with ``InvalidReferenceError``
+                before any navigation when it names no post.
+            max_scrolls: Scroll iterations to load comments (default 10).
+
+        Returns:
+            {url, sections: {post: text}} plus optional ``references``
+            (author, commenters, mentioned companies) and ``section_errors``.
+        """
+        url = post_page_url(normalize_post_reference(post))
+        extracted = await self._capture.capture(
+            url,
+            section_name="post",
+            plan=CapturePlan(CaptureMode.ACTIVITY, max_scrolls),
+        )
+        return single_section_result(url, "post", extracted)

@@ -105,6 +105,26 @@
       "description": "Dismiss a job from job search so later searches no longer show it"
     },
     {
+      "name": "get_post_details",
+      "description": "Read one LinkedIn post in full, with the comments its page shows"
+    },
+    {
+      "name": "get_invitations",
+      "description": "List your pending connection invitations, received or sent"
+    },
+    {
+      "name": "get_connections",
+      "description": "List your first-degree LinkedIn connections, most recently added first"
+    },
+    {
+      "name": "get_notifications",
+      "description": "Read your LinkedIn notifications, newest first"
+    },
+    {
+      "name": "get_profile_views",
+      "description": "Read who viewed your LinkedIn profile recently"
+    },
+    {
       "name": "search_people",
       "description": "Search for people on LinkedIn by keywords, location, connection degree (1st/2nd/3rd), current company, and mutual connections"
     },

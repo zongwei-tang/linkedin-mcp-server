@@ -281,3 +281,68 @@ def test_one_requested_page_is_five_scrolls():
     changed scroll budget belongs in a diff that says so.
     """
     assert posts_module._CONTENT_SCROLLS_PER_REQUESTED_PAGE == 5
+
+
+class TestReadPost:
+    async def test_a_slug_permalink_is_read_as_one_activity_capture(self, mock_page):
+        search = _search(mock_page)
+        refs: list[Reference] = [
+            {"kind": "person", "url": "/in/ada/", "context": "post"}
+        ]
+        with patch.object(
+            search._capture,
+            "capture",
+            new_callable=AsyncMock,
+            return_value=extracted("Ada Lovelace\nEngines can compose music.", refs),
+        ) as mock_extract:
+            result = await search.read_post(
+                "https://www.linkedin.com/posts/ada_engines-activity-1234567890123-Ab",
+                max_scrolls=4,
+            )
+
+        url = "https://www.linkedin.com/posts/ada_engines-activity-1234567890123-Ab/"
+        assert mock_extract.await_args_list == [
+            call(url, section_name="post", plan=CapturePlan(CaptureMode.ACTIVITY, 4))
+        ]
+        assert result == {
+            "url": url,
+            "sections": {"post": "Ada Lovelace\nEngines can compose music."},
+            "references": {"post": refs},
+        }
+
+    async def test_a_urn_is_read_at_its_update_page(self, mock_page):
+        search = _search(mock_page)
+        with patch.object(
+            search._capture,
+            "capture",
+            new_callable=AsyncMock,
+            return_value=extracted("body"),
+        ) as mock_extract:
+            result = await search.read_post("urn:li:share:7212345678901234567")
+
+        assert result["url"] == (
+            "https://www.linkedin.com/feed/update/urn:li:share:7212345678901234567/"
+        )
+        assert mock_extract.call_args.args[0] == result["url"]
+
+    async def test_a_rate_limited_post_is_an_error_not_content(self, mock_page):
+        search = _search(mock_page)
+        with patch.object(
+            search._capture,
+            "capture",
+            new_callable=AsyncMock,
+            return_value=extracted(RATE_LIMITED_SECTION_TEXT),
+        ):
+            result = await search.read_post("urn:li:activity:7212345678901234567")
+
+        assert result["sections"] == {}
+        assert result["section_errors"] == {"post": rate_limited_section_error()}
+
+    async def test_a_value_that_names_no_post_never_navigates(self, mock_page):
+        from linkedin_mcp_server.core.exceptions import InvalidReferenceError
+
+        search = _search(mock_page)
+        with patch.object(search._capture, "capture", new_callable=AsyncMock) as cap:
+            with pytest.raises(InvalidReferenceError):
+                await search.read_post("https://www.linkedin.com/in/ada/")
+        cap.assert_not_awaited()

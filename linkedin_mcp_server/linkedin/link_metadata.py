@@ -106,6 +106,11 @@ _SECTION_CONTEXTS = {
     "jobs": "jobs",
     "saved_jobs": "saved jobs",
     "feed": "feed",
+    "post": "post",
+    "invitations": "invitation",
+    "connections": "connection",
+    "notifications": "notification",
+    "profile_views": "profile viewer",
 }
 
 _DEFAULT_REFERENCE_CAP = 12
@@ -136,6 +141,14 @@ _REFERENCE_CAPS = {
     # Kept in sync with the literal cap=50 in feed_payload.build_feed_references
     # where SDUI-derived /posts/<slug> permalinks are appended.
     "feed": 50,
+    # The author, everyone who commented, and the people and companies they
+    # mention.
+    "post": 30,
+    # One profile per entry, so the cap is the most entries a call returns.
+    "invitations": 30,
+    "connections": 50,
+    "notifications": 30,
+    "profile_views": 20,
 }
 
 # A label must carry at least one letter or digit in any script, so the class is

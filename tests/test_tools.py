@@ -50,6 +50,11 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.search_companies = AsyncMock(return_value=result)
     mock.search_posts = AsyncMock(return_value=result)
     mock.get_company_employees = AsyncMock(return_value=result)
+    mock.read_post = AsyncMock(return_value=result)
+    mock.get_invitations = AsyncMock(return_value=result)
+    mock.get_connections = AsyncMock(return_value=result)
+    mock.get_notifications = AsyncMock(return_value=result)
+    mock.get_profile_views = AsyncMock(return_value=result)
     mock.extract_page = AsyncMock(
         return_value=ExtractedSection(text="some text", references=[])
     )
@@ -57,7 +62,15 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     return mock
 
 
-_TOOL_MODULES = ("person", "company", "job", "messaging", "feed", "post")
+_TOOL_MODULES = (
+    "person",
+    "company",
+    "job",
+    "messaging",
+    "feed",
+    "post",
+    "network",
+)
 
 
 @pytest.fixture
@@ -177,6 +190,18 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
             "reply_to_conversation",
             {"thread_id": "/feed/", "message": "Hello", "confirm_send": False},
             "thread_id is not a LinkedIn id",
+        ),
+        (
+            "post",
+            "get_post_details",
+            {"post": "/feed/"},
+            "post is not a LinkedIn post",
+        ),
+        (
+            "post",
+            "get_post_details",
+            {"post": "7212345678901234567"},
+            "post is not a LinkedIn post",
         ),
         (
             "messaging",
@@ -311,6 +336,11 @@ _A_VALID_CALL = [
     ),
     ("feed", "get_feed", {}),
     ("post", "search_posts", {"keywords": "python"}),
+    ("post", "get_post_details", {"post": "urn:li:activity:7212345678901234567"}),
+    ("network", "get_invitations", {}),
+    ("network", "get_connections", {}),
+    ("network", "get_notifications", {}),
+    ("network", "get_profile_views", {}),
 ]
 
 
@@ -2882,6 +2912,105 @@ class TestFeedTools:
 
         with pytest.raises(ValidationError, match="num_posts"):
             await mcp.call_tool("get_feed", {"num_posts": 51})
+
+
+class TestPostDetailsAndNetworkTools:
+    async def test_get_post_details_forwards_the_post_unchanged(
+        self, mock_context, serve_extractor
+    ):
+        expected = {"url": "u", "sections": {"post": "body"}}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        tool_fn = await get_tool_fn(mcp, "get_post_details")
+        result = await tool_fn("/posts/ada_x-activity-1234567890123-Ab", mock_context)
+
+        assert result == expected
+        mock_extractor.read_post.assert_awaited_once_with(
+            "/posts/ada_x-activity-1234567890123-Ab", max_scrolls=None
+        )
+
+    @pytest.mark.parametrize(
+        ("tool_name", "arguments", "method", "expected_call"),
+        [
+            (
+                "get_invitations",
+                {"direction": "sent", "max_scrolls": 2},
+                "get_invitations",
+                (("sent",), {"max_scrolls": 2}),
+            ),
+            (
+                "get_invitations",
+                {},
+                "get_invitations",
+                (("received",), {"max_scrolls": None}),
+            ),
+            ("get_connections", {}, "get_connections", ((), {"max_scrolls": None})),
+            (
+                "get_notifications",
+                {"max_scrolls": 5},
+                "get_notifications",
+                ((), {"max_scrolls": 5}),
+            ),
+            (
+                "get_profile_views",
+                {},
+                "get_profile_views",
+                ((), {"max_scrolls": None}),
+            ),
+        ],
+    )
+    async def test_network_tools_forward_their_arguments(
+        self, serve_extractor, tool_name, arguments, method, expected_call
+    ):
+        expected = {"url": "u", "sections": {"x": "y"}}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.network import register_network_tools
+
+        mcp = FastMCP("test")
+        register_network_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(tool_name, arguments)
+
+        assert result.structured_content == expected
+        args, kwargs = expected_call
+        getattr(mock_extractor, method).assert_awaited_once_with(*args, **kwargs)
+
+    async def test_an_unknown_invitation_direction_is_refused_by_the_schema(self):
+        from linkedin_mcp_server.tools.network import register_network_tools
+
+        mcp = FastMCP("test")
+        register_network_tools(mcp)
+        from fastmcp.exceptions import ValidationError
+
+        with pytest.raises(ValidationError, match="direction"):
+            await mcp.call_tool("get_invitations", {"direction": "archived"})
+
+    @pytest.mark.parametrize(
+        "tool_name",
+        [
+            "get_post_details",
+            "get_invitations",
+            "get_connections",
+            "get_notifications",
+            "get_profile_views",
+        ],
+    )
+    async def test_the_new_reads_are_marked_read_only(self, tool_name):
+        from linkedin_mcp_server.tools.network import register_network_tools
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        register_network_tools(mcp)
+        tool = await mcp.get_tool(tool_name)
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is True
 
 
 class TestPostTools:

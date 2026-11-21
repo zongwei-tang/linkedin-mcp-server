@@ -23,6 +23,7 @@ from linkedin_mcp_server.linkedin.job_policy import JobsTrackerStage
 from linkedin_mcp_server.linkedin.jobs import JobReader
 from linkedin_mcp_server.linkedin.message_sender import MessageSender
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
+from linkedin_mcp_server.linkedin.network import InvitationDirection, NetworkReader
 from linkedin_mcp_server.linkedin.person import PersonReader
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
@@ -66,6 +67,7 @@ class LinkedInExtractor:
         job_pages = JobPageReader(session, navigator, content)
         self._jobs = JobReader(navigator, capture, job_pages)
         self._posts = PostSearch(capture)
+        self._network = NetworkReader(capture)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -238,6 +240,32 @@ class LinkedInExtractor:
             max_pages=max_pages,
             content_type=content_type,
         )
+
+    async def read_post(
+        self, post: str, max_scrolls: int | None = None
+    ) -> dict[str, Any]:
+        """Read one post and the comments its page renders."""
+        return await self._posts.read_post(post, max_scrolls)
+
+    async def get_invitations(
+        self,
+        direction: InvitationDirection = "received",
+        max_scrolls: int | None = None,
+    ) -> dict[str, Any]:
+        """List pending connection invitations, received or sent."""
+        return await self._network.get_invitations(direction, max_scrolls)
+
+    async def get_connections(self, max_scrolls: int | None = None) -> dict[str, Any]:
+        """List the signed-in member's connections."""
+        return await self._network.get_connections(max_scrolls)
+
+    async def get_notifications(self, max_scrolls: int | None = None) -> dict[str, Any]:
+        """Read the signed-in member's notifications."""
+        return await self._network.get_notifications(max_scrolls)
+
+    async def get_profile_views(self, max_scrolls: int | None = None) -> dict[str, Any]:
+        """Read who viewed the signed-in member's profile."""
+        return await self._network.get_profile_views(max_scrolls)
 
     async def get_inbox(self, limit: int = 20) -> dict[str, Any]:
         """List recent conversations from the messaging inbox."""

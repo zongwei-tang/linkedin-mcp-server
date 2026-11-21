@@ -18,6 +18,7 @@ from linkedin_mcp_server.config.schema import DEFAULT_TOOL_TIMEOUT_SECONDS
 from linkedin_mcp_server.dependencies import get_ready_extractor, tool_errors
 from linkedin_mcp_server.error_handler import CodedToolError, ErrorCode
 from linkedin_mcp_server.linkedin.contracts import FilterValidationError
+from linkedin_mcp_server.linkedin.identifiers import normalize_post_reference
 from linkedin_mcp_server.linkedin.search_urls import build_content_search_url
 
 logger = logging.getLogger(__name__)
@@ -112,4 +113,49 @@ def register_post_tools(
 
         await ctx.report_progress(progress=100, total=100, message="Complete")
 
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Post Details",
+        annotations={"readOnlyHint": True, "openWorldHint": True},
+        tags={"post"},
+    )
+    @tool_errors
+    async def get_post_details(
+        post: str,
+        ctx: Context,
+        max_scrolls: Annotated[int, Field(ge=1, le=30)] | None = None,
+    ) -> dict[str, Any]:
+        """
+        Read one LinkedIn post in full, with the comments its page shows.
+
+        Use it on a post another tool pointed at: every kind "feed_post"
+        reference from get_feed, search_posts, get_company_posts and the
+        posts section of a profile can be passed back as is.
+
+        Args:
+            post: The post, as a URN ("urn:li:activity:<id>", ugcPost and share
+                URNs too) or a permalink ("/feed/update/<urn>/",
+                "/posts/<slug>", or either one as a full URL).
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations used to load comments (1-30,
+                default 10). Replies hidden behind a "load more" control are
+                not opened.
+
+        Returns:
+            Dict with url, sections (post -> raw text) and optional references
+            (the author, commenters and anyone mentioned) and section_errors.
+            The LLM should parse the raw text for the body, the author's
+            headline, the date, reaction and comment counts and each comment.
+        """
+        # Refused before the browser, so a value that names no post costs no
+        # page load.
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="get_post_details")
+        logger.info("Reading post: %s", post)
+
+        await ctx.report_progress(progress=0, total=100, message="Reading the post")
+        result = await extractor.read_post(post, max_scrolls=max_scrolls)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
         return result

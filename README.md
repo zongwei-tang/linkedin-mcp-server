@@ -106,6 +106,11 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_easy_apply_form` | Read an Easy Apply form's fields, options and prefilled values. Never submits. |
 | `get_feed` | Read recent posts from your home feed, with links to the original posts. |
 | `search_posts` | Search posts by keyword, optionally filtered by recency or content type. |
+| `get_post_details` | Read one post in full with its comments, from a URN or a permalink. |
+| `get_invitations` | List your pending connection invitations, received or sent. |
+| `get_connections` | List your first-degree connections, most recently added first. |
+| `get_notifications` | Read your notifications, newest first. Opening them marks them seen. |
+| `get_profile_views` | Read who viewed your profile; how many are named depends on your plan. |
 | `get_session_status` | Check your saved login and browser state without opening a browser. |
 | `close_session` | Close the shared browser session without deleting your saved login. |
 | `open_login` | Docker: show the LinkedIn sign-in inside the chat, in clients that show MCP Apps. |

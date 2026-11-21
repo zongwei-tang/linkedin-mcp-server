@@ -68,6 +68,11 @@ TOOL_DELEGATES = {
     "search_posts": "search_posts",
     "send_message": "send_message",
     "reply_to_conversation": "reply_to_conversation",
+    "get_post_details": "read_post",
+    "get_invitations": "get_invitations",
+    "get_connections": "get_connections",
+    "get_notifications": "get_notifications",
+    "get_profile_views": "get_profile_views",
 }
 
 
@@ -104,6 +109,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_feed",
         "_jobs",
         "_message_sender",
+        "_network",
         "_person",
         "_posts",
     }

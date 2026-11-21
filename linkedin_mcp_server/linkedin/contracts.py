@@ -267,3 +267,23 @@ class FilterValidationError(ValueError):
     letting the MCP tool wrapper catch this case precisely and surface the
     actionable message past ``mask_error_details``.
     """
+
+
+def single_section_result(
+    url: str, section_name: str, extracted: ExtractedSection
+) -> dict[str, Any]:
+    """The tool result for a read of one page into one section.
+
+    Text that is only LinkedIn's rate-limit sentinel becomes a section error
+    rather than section content, as every other single-page reader does.
+    """
+    result: dict[str, Any] = {"url": url, "sections": {}}
+    if extracted.text and extracted.text != RATE_LIMITED_SECTION_TEXT:
+        result["sections"][section_name] = extracted.text
+        if extracted.references:
+            result["references"] = {section_name: extracted.references}
+    elif extracted.text == RATE_LIMITED_SECTION_TEXT:
+        result["section_errors"] = {section_name: rate_limited_section_error()}
+    elif extracted.error:
+        result["section_errors"] = {section_name: extracted.error}
+    return result

@@ -40,6 +40,10 @@
         "coroutine": true,
         "signature": "(self, company_name: 'str', keywords: 'str | None' = None) -> 'dict[str, Any]'"
       },
+      "get_connections": {
+        "coroutine": true,
+        "signature": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
       "get_conversation": {
         "coroutine": true,
         "signature": "(self, linkedin_username: 'str | None' = None, thread_id: 'str | None' = None, index: 'int' = 0) -> 'dict[str, Any]'"
@@ -52,6 +56,10 @@
         "coroutine": true,
         "signature": "(self, limit: 'int' = 20) -> 'dict[str, Any]'"
       },
+      "get_invitations": {
+        "coroutine": true,
+        "signature": "(self, direction: 'InvitationDirection' = 'received', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
       "get_job_apply_url": {
         "coroutine": true,
         "signature": "(self, job_id: 'str') -> 'dict[str, Any]'"
@@ -60,9 +68,17 @@
         "coroutine": true,
         "signature": "(self, sections: 'set[str] | None' = None, callbacks: 'ProgressCallback | None' = None, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
       },
+      "get_notifications": {
+        "coroutine": true,
+        "signature": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
       "get_page_text": {
         "coroutine": true,
         "signature": "(self) -> 'str'"
+      },
+      "get_profile_views": {
+        "coroutine": true,
+        "signature": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
       },
       "get_saved_jobs": {
         "coroutine": true,
@@ -83,6 +99,10 @@
       "read_person": {
         "coroutine": true,
         "signature": "(self, username: 'str', requested: 'set[str]', callbacks: 'ProgressCallback | None' = None, max_scrolls: 'int | None' = None, *, main_profile_already_loaded: 'bool' = False, allow_self_alias: 'bool' = False) -> 'dict[str, Any]'"
+      },
+      "read_post": {
+        "coroutine": true,
+        "signature": "(self, post: 'str', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
       },
       "reply_to_conversation": {
         "coroutine": true,
@@ -120,16 +140,21 @@
       "extract_feed",
       "extract_page",
       "get_company_employees",
+      "get_connections",
       "get_conversation",
       "get_easy_apply_form",
       "get_inbox",
+      "get_invitations",
       "get_job_apply_url",
       "get_my_profile",
+      "get_notifications",
+      "get_profile_views",
       "get_saved_jobs",
       "get_sidebar_profiles",
       "read_company",
       "read_job",
       "read_person",
+      "read_post",
       "reply_to_conversation",
       "search_companies",
       "search_conversations",
@@ -314,6 +339,32 @@
           "type": "object"
         }
       },
+      "get_connections": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more connections (1-50,\ndefault 10). Each one loads roughly one more batch."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_conversation": {
         "input": {
           "additionalProperties": false,
@@ -413,6 +464,41 @@
           "type": "object"
         }
       },
+      "get_invitations": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "direction": {
+              "default": "received",
+              "description": "\"received\" (default) for invitations waiting on you,\n\"sent\" for the ones you sent that are still pending.",
+              "enum": [
+                "received",
+                "sent"
+              ],
+              "type": "string"
+            },
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more entries (1-50,\ndefault 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_job_apply_url": {
         "input": {
           "additionalProperties": false,
@@ -489,6 +575,32 @@
           "type": "object"
         }
       },
+      "get_notifications": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load older notifications (1-50,\ndefault 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_person_profile": {
         "input": {
           "additionalProperties": false,
@@ -527,6 +639,65 @@
           "required": [
             "linkedin_username"
           ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_post_details": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 30,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations used to load comments (1-30,\ndefault 10). Replies hidden behind a \"load more\" control are\nnot opened."
+            },
+            "post": {
+              "description": "The post, as a URN (\"urn:li:activity:<id>\", ugcPost and share\nURNs too) or a permalink (\"/feed/update/<urn>/\",\n\"/posts/<slug>\", or either one as a full URL).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_profile_views": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more viewers (1-50,\ndefault 10)."
+            }
+          },
           "type": "object"
         },
         "output": {

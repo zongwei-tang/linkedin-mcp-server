@@ -55,6 +55,11 @@ PUBLIC_SIGNATURES = {
     "search_posts": "(self, keywords: 'str', date_posted: 'str | None' = None, max_pages: 'int' = 3, content_type: 'str | None' = None) -> 'dict[str, Any]'",
     "send_message": "(self, linkedin_username: 'str', message: 'str', *, confirm_send: 'bool', profile_urn: 'str | None' = None) -> 'dict[str, Any]'",
     "reply_to_conversation": "(self, thread_id: 'str', message: 'str', *, confirm_send: 'bool') -> 'dict[str, Any]'",
+    "read_post": "(self, post: 'str', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
+    "get_invitations": "(self, direction: 'InvitationDirection' = 'received', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
+    "get_connections": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
+    "get_notifications": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
+    "get_profile_views": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -83,6 +88,11 @@ DELEGATES = {
     "search_posts": ("_posts", "search_posts"),
     "send_message": ("_message_sender", "send_message"),
     "reply_to_conversation": ("_message_sender", "reply_to_conversation"),
+    "read_post": ("_posts", "read_post"),
+    "get_invitations": ("_network", "get_invitations"),
+    "get_connections": ("_network", "get_connections"),
+    "get_notifications": ("_network", "get_notifications"),
+    "get_profile_views": ("_network", "get_profile_views"),
 }
 
 DELEGATE_CALLS = {
@@ -111,6 +121,11 @@ DELEGATE_CALLS = {
     "search_posts": "self._posts.search_posts(keywords, date_posted=date_posted, max_pages=max_pages, content_type=content_type)",
     "send_message": "self._message_sender.send_message(linkedin_username, message, confirm_send=confirm_send, profile_urn=profile_urn)",
     "reply_to_conversation": "self._message_sender.reply_to_conversation(thread_id, message, confirm_send=confirm_send)",
+    "read_post": "self._posts.read_post(post, max_scrolls)",
+    "get_invitations": "self._network.get_invitations(direction, max_scrolls)",
+    "get_connections": "self._network.get_connections(max_scrolls)",
+    "get_notifications": "self._network.get_notifications(max_scrolls)",
+    "get_profile_views": "self._network.get_profile_views(max_scrolls)",
 }
 
 FACADE_STATE = {
@@ -122,6 +137,7 @@ FACADE_STATE = {
     "_feed",
     "_jobs",
     "_message_sender",
+    "_network",
     "_person",
     "_posts",
 }

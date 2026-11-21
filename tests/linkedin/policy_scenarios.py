@@ -941,6 +941,19 @@ async def _single_capture_facade_scenario(method: str) -> dict[str, Any]:
             elif method == "search_posts":
                 arguments = {"keywords": "mathematics", "max_pages": 2}
                 result = await extractor.search_posts(**arguments)
+            elif method == "read_post":
+                arguments = {"post": "urn:li:activity:7212345678901234567"}
+                result = await extractor.read_post(**arguments)
+            elif method == "get_invitations":
+                arguments = {"direction": "sent", "max_scrolls": 2}
+                result = await extractor.get_invitations(**arguments)
+            elif method in {
+                "get_connections",
+                "get_notifications",
+                "get_profile_views",
+            }:
+                arguments = {"max_scrolls": 2}
+                result = await getattr(extractor, method)(**arguments)
             else:
                 raise AssertionError(method)
     page.assert_clean()
@@ -1283,6 +1296,11 @@ TOOL_FACADE_METHODS = {
     "search_posts",
     "send_message",
     "reply_to_conversation",
+    "read_post",
+    "get_invitations",
+    "get_connections",
+    "get_notifications",
+    "get_profile_views",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1365,6 +1383,15 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
             "search_companies"
         ),
         "search-posts.json": await _single_capture_facade_scenario("search_posts"),
+        "read-post.json": await _single_capture_facade_scenario("read_post"),
+        "invitations.json": await _single_capture_facade_scenario("get_invitations"),
+        "connections.json": await _single_capture_facade_scenario("get_connections"),
+        "notifications.json": await _single_capture_facade_scenario(
+            "get_notifications"
+        ),
+        "profile-views.json": await _single_capture_facade_scenario(
+            "get_profile_views"
+        ),
         "inbox.json": await _conversation_scenario("get_inbox"),
         "conversation.json": await _conversation_scenario("get_conversation"),
         "search-conversations.json": await _conversation_scenario(

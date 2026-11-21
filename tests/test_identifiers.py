@@ -22,10 +22,13 @@ from linkedin_mcp_server.linkedin.identifiers import (
     normalize_job_id,
     normalize_opaque_id,
     normalize_person_identifier,
+    normalize_post_reference,
     normalize_profile_urn,
     normalize_thread_id,
     person_profile_url,
+    post_page_url,
 )
+from linkedin_mcp_server.linkedin.feed_payload import permalink_paths_from_payload
 from linkedin_mcp_server.linkedin.link_metadata import classify_link
 
 PROFILE_ID = "ACoAADdZSNYBiaacxEw6je-wVIKjGkKp-it0gD8"
@@ -781,3 +784,78 @@ class TestIdentifierAllowlist:
     )
     def test_a_real_one_passes(self, value: str):
         assert normalize_person_identifier(value) == value
+
+
+_ACTIVITY_URN = "urn:li:activity:7212345678901234567"
+_POST_SLUG = "ada-lovelace_engines-activity-7212345678901234567-AbCd"
+
+
+class TestNormalizePostReference:
+    def test_accepts_every_permalink_this_server_prints(self):
+        """A feed_post reference handed straight back has to name its post."""
+        payload = (
+            f'{{"url":"https://www.linkedin.com/posts/{_POST_SLUG}",'
+            f'"entityUrn":"{_ACTIVITY_URN}"}}'
+        )
+        printed = permalink_paths_from_payload(payload)
+        dom = classify_link(
+            "https://www.linkedin.com/feed/update/urn%3Ali%3Aactivity%3A"
+            "7212345678901234567/?trk=x"
+        )
+        assert dom is not None
+        printed.append(dom[1])
+
+        assert [normalize_post_reference(path) for path in printed] == [
+            f"/posts/{_POST_SLUG}/",
+            f"/feed/update/{_ACTIVITY_URN}/",
+            f"/feed/update/{_ACTIVITY_URN}/",
+        ]
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            _ACTIVITY_URN,
+            f"  {_ACTIVITY_URN} ",
+            f"https://www.linkedin.com/feed/update/{_ACTIVITY_URN}/",
+            f"linkedin.com/feed/update/{_ACTIVITY_URN}?utm_source=share",
+        ],
+    )
+    def test_reduces_a_urn_or_its_url_to_the_update_path(self, value: str):
+        assert normalize_post_reference(value) == f"/feed/update/{_ACTIVITY_URN}/"
+
+    def test_keeps_the_entity_type_of_the_urn(self):
+        urn = "urn:li:ugcPost:7212345678901234567"
+        assert normalize_post_reference(urn) == f"/feed/update/{urn}/"
+
+    def test_reads_a_slug_url(self):
+        assert (
+            normalize_post_reference(
+                f"https://de.linkedin.com/posts/{_POST_SLUG}?utm_medium=ios"
+            )
+            == f"/posts/{_POST_SLUG}/"
+        )
+
+    @pytest.mark.parametrize(
+        "value",
+        [
+            "",
+            "7212345678901234567",
+            "urn:li:comment:(activity:7212345678901234567,7212345678901234568)",
+            "urn:li:fsd_profile:ACoAAB",
+            f"https://evil.example/feed/update/{_ACTIVITY_URN}/",
+            f"https://www.linkedin.com/feed/update/{_ACTIVITY_URN}/extra/",
+            "https://www.linkedin.com/feed/update/../../in/alice/",
+            "https://www.linkedin.com/posts/../in/alice",
+            "https://www.linkedin.com/posts/a%252e%252e",
+            "https://www.linkedin.com/posts/",
+            "https://www.linkedin.com/feed/",
+        ],
+    )
+    def test_refuses_what_names_no_post(self, value: str):
+        with pytest.raises(InvalidReferenceError):
+            normalize_post_reference(value)
+
+    def test_builds_the_page_url_on_linkedin(self):
+        assert post_page_url(f"/posts/{_POST_SLUG}/") == (
+            f"https://www.linkedin.com/posts/{_POST_SLUG}/"
+        )

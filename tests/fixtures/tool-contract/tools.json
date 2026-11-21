@@ -281,6 +281,46 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List your first-degree connections, most recently added first.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more connections (1-50,\ndefault 10). Each one loads roughly one more batch."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_connections",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Connections"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "messaging"
         ]
       }
@@ -437,6 +477,55 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List your pending connection invitations.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "direction": {
+          "default": "received",
+          "description": "\"received\" (default) for invitations waiting on you,\n\"sent\" for the ones you sent that are still pending.",
+          "enum": [
+            "received",
+            "sent"
+          ],
+          "type": "string"
+        },
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more entries (1-50,\ndefault 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_invitations",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Invitations"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "job"
         ]
       }
@@ -555,6 +644,46 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read your LinkedIn notifications, newest first.\n\nOpening the notifications page marks them seen, exactly as it does\nfor you in a browser.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load older notifications (1-50,\ndefault 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_notifications",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Notifications"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "person"
         ]
       }
@@ -609,6 +738,93 @@
       "type": "object"
     },
     "title": "Get Person Profile"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "post"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read one LinkedIn post in full, with the comments its page shows.\n\nUse it on a post another tool pointed at: every kind \"feed_post\"\nreference from get_feed, search_posts, get_company_posts and the\nposts section of a profile can be passed back as is.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 30,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations used to load comments (1-30,\ndefault 10). Replies hidden behind a \"load more\" control are\nnot opened."
+        },
+        "post": {
+          "description": "The post, as a URN (\"urn:li:activity:<id>\", ugcPost and share\nURNs too) or a permalink (\"/feed/update/<urn>/\",\n\"/posts/<slug>\", or either one as a full URL).",
+          "type": "string"
+        }
+      },
+      "required": [
+        "post"
+      ],
+      "type": "object"
+    },
+    "name": "get_post_details",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Post Details"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read who viewed your profile recently.\n\nHow many viewers LinkedIn names depends on your plan; the others are\ndescribed without a profile.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more viewers (1-50,\ndefault 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_profile_views",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Profile Views"
   },
   {
     "_meta": {
