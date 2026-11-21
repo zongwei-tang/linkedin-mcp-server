@@ -32,7 +32,10 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from linkedin_mcp_server.core.destination import linkedin_element
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin.identifiers import (
     normalize_person_identifier,
     person_profile_url,
@@ -110,9 +113,14 @@ CONFIRM_UNFOLLOW_JS = r"""(opts) => {
     for (const old of document.querySelectorAll('[' + mark + ']')) {
         old.removeAttribute(mark);
     }
-    const added = [...document.querySelectorAll('button:not([' + before + '])')];
+    // Suggestions in <aside> keep rendering too, and are never the dialog.
+    const added = [...document.querySelectorAll('button:not([' + before + '])')]
+        .filter((button) => !button.closest('aside'));
     const plain = added.filter((button) => !button.querySelector('svg, img'));
-    const closers = added.filter((button) => button.querySelector('svg, img'));
+    // The close button as measured: around an xmark icon, by id or test hook.
+    const closers = added.filter((button) => [...button.querySelectorAll(
+        'svg[id], [data-test-icon]'
+    )].some((icon) => (icon.id || icon.getAttribute('data-test-icon')).startsWith('xmark')));
     const dialogs = new Map();
     for (const button of plain) {
         let node = button.parentElement;
@@ -170,14 +178,16 @@ class PersonActions:
         if not followed:
             await self._confirm_unfollow(url)
         if not await self._wait_for(followed):
-            raise LinkedInOperationError(
+            # Whatever the click left open goes, so nothing stays half-asked.
+            await page.keyboard.press("Escape")
+            raise ActionOutcomeError(
                 f"The follow button of {url} was clicked, but the top card did "
                 "not change. Read the profile again before retrying."
             )
         await self._session.delay(NAV_DELAY)
         after = await self._open_and_read(url)
         if after["followed"] != followed:
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
                 "reload, so LinkedIn may not have kept it. Calling this again is "
                 "safe: it reads the state before clicking."
@@ -211,6 +221,12 @@ class PersonActions:
                 f"The follow button of {url} could not be found in its top card. "
                 "A first-degree connection keeps Follow under the More menu, "
                 "which this does not open. Nothing was clicked."
+            )
+        if found["candidates"] != 1:
+            raise LinkedInOperationError(
+                f"{url} shows {found['candidates']} follow buttons beside a More "
+                "button, so its top card's could not be told apart. Nothing was "
+                "clicked."
             )
         return found
 

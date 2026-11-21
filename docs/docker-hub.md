@@ -6,9 +6,12 @@ A Model Context Protocol (MCP) server that connects AI assistants to LinkedIn. A
 
 ## Features
 
-- **Profile Access**: Get detailed LinkedIn profile information including experience, education, skills, projects, certifications, volunteering, and more
+- **Profile Access**: Get detailed LinkedIn profile information including experience, education, skills, projects, certifications, volunteering, courses, publications, patents, test scores, organizations, recommendations received and given, comments, reactions, and more
 - **Own Profile**: Fetch the authenticated user's own profile to give agents self-context
 - **Profile Connections**: Send connection requests or accept incoming ones, with optional notes
+- **Invitations**: List pending connection invitations, received or sent, and ignore one by the sender's profile
+- **Network**: List your connections, followers and the people and pages you follow, and read your notifications and who viewed your profile
+- **Follow People and Pages**: Follow or unfollow a person or a company page; a repeat call reports the state it found and clicks nothing
 - **Sidebar Profiles**: Extract profile URLs from the sidebar recommendation sections on a profile page ("More profiles for you", "Explore premium profiles", "People you may know")
 - **Messaging**: List the inbox, read a conversation by username or thread ID, search messages by keyword, archive a conversation by thread ID, and compose/send a new message or reply inside an existing thread by thread ID, InMail included, both with explicit confirmation (profile-based send may open a separate DM, so replies go through the thread)
 - **Company Profiles**: Extract comprehensive company data, including the LinkedIn company URN id (used by LinkedIn's people-search `currentCompany` URL facet)
@@ -18,12 +21,17 @@ A Model Context Protocol (MCP) server that connects AI assistants to LinkedIn. A
 - **Easy Apply Forms**: Read the questions of a job's Easy Apply form, with each field's type, options and prefilled value, without typing or submitting
 - **Job Search**: Search for jobs with keywords and location filters
 - **Saved Jobs**: List job postings saved by the authenticated user
+- **Save Jobs**: Save a job posting or remove it from your saved jobs
 - **Dismiss Jobs**: Dismiss a job from job search so later searches no longer show it
 - **People Search**: Search for people by keywords, location, connection degree, current company, and mutual connections
 - **Person Posts**: Get recent activity/posts from a person's profile
 - **Company Posts**: Get recent posts from a company's LinkedIn feed
 - **Home Feed**: Get recent posts from the authenticated user's LinkedIn home feed
 - **Post Search**: Search posts/content globally by keyword (the "Posts" tab) with optional recency and content-type filters, such as uploaded documents
+- **Post Details**: Read one post in full with its comments, from a URN or a permalink
+- **Post Reactions**: Like a post, react with any of LinkedIn's six reactions, or remove your reaction
+- **Groups, Events and Schools**: List your groups, read a group, an event, or a school's page and its alumni, and search groups, events and schools
+- **Saved Posts, Articles and Newsletters**: List the posts you saved and read an article or a newsletter in full
 - **Compact References**: Return typed per-section links alongside readable text without shipping full-page markdown
 - **Session Status**: Diagnose saved-session files and the serving process's browser state without opening a browser or contacting LinkedIn
 

@@ -13,7 +13,10 @@ from __future__ import annotations
 from typing import Any
 
 from linkedin_mcp_server.core.destination import linkedin_element
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin.identifiers import normalize_person_identifier
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.network import INVITATION_URLS
@@ -98,7 +101,7 @@ class InvitationActions:
         ) as button:
             await button.click(timeout=5000)
         if not await self._wait_until_gone(key):
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"Ignore was clicked on {username}'s invitation, but its row "
                 "stayed in the list."
             )
@@ -107,7 +110,7 @@ class InvitationActions:
         await self._session.check_rate_limit()
         after = await self._presence_once_rendered(key)
         if after["present"]:
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{username}'s invitation left the list after Ignore, but was "
                 "back after a reload, so LinkedIn may not have kept it."
             )
@@ -179,7 +182,7 @@ class InvitationActions:
             await self._session.delay(_POLL)
             state = await self._session.page.evaluate(INVITATION_PRESENT_JS, key)
         if not state["present"] and state["text"] < 100:
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 "The invitations list did not render after the reload, so the "
                 "ignore could not be confirmed. Check get_invitations before "
                 "calling again."

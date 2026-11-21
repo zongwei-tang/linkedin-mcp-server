@@ -41,7 +41,10 @@ from dataclasses import dataclass
 from typing import Any, Literal
 
 from linkedin_mcp_server.core.destination import linkedin_element
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin.identifiers import (
     normalize_post_reference,
     post_page_url,
@@ -195,15 +198,30 @@ class PostActions:
         safe. After a click the page is loaded again and must show the new
         state, because a click the page took is not yet a change LinkedIn kept.
 
+        Liking is the Like reaction exactly: a post showing another reaction
+        (Celebrate, Love, ...) is switched to Like, as react_to_post("like")
+        does, rather than reported as already liked. Unliking takes back any
+        reaction, which the Like button does when pressed.
+
         Args:
             post: A post URN or either permalink form, as get_post_details
                 takes it.
-            liked: True to like the post, False to remove the like.
+            liked: True to like the post, False to remove the like or any
+                other reaction.
 
         Returns:
             {url, post, liked, status} where status is "liked", "unliked",
             "already_liked" or "already_unliked".
         """
+        if liked:
+            reacted = await self.set_post_reaction(post, "like")
+            status_of = {"reacted": "liked", "already_reacted": "already_liked"}
+            return {
+                "url": reacted["url"],
+                "post": reacted["post"],
+                "liked": True,
+                "status": status_of[reacted["status"]],
+            }
         path = normalize_post_reference(post)
         url = post_page_url(path)
         before = await self._open_and_read(url)
@@ -216,14 +234,14 @@ class PostActions:
         ) as button:
             await button.click(timeout=5000)
         if not await self._wait_for(liked):
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"The Like button of {url} was clicked, but the post did not "
                 "change. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
         after = await self._open_and_read(url)
         if after.pressed != liked:
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
                 "reload, so LinkedIn may not have kept it. Calling this again "
                 "is safe: it reads the state before clicking."
@@ -286,14 +304,14 @@ class PostActions:
             await self._choose_from_menu(url, reaction)
         if not await self._wait_until(lambda control: _shows(control, reaction)):
             current = await self._read()
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{reaction!r} was chosen on {url}, but the post shows "
                 f"{_described(current)}. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
         after = await self._open_and_read(url)
         if not _shows(after, reaction):
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{url} showed {reaction!r} after the click, but "
                 f"{_described(after)} after a reload, so LinkedIn may not have "
                 "kept it."

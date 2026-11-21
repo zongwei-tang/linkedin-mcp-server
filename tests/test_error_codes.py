@@ -8,6 +8,7 @@ from fastmcp import Client
 import linkedin_mcp_server.server as server_module
 from linkedin_mcp_server.core.exceptions import (
     AccountRestrictedError,
+    ActionOutcomeError,
     AuthenticationError,
     ElementNotFoundError,
     InvalidReferenceError,
@@ -80,6 +81,7 @@ _BRANCHES = [
     (NetworkError("x"), C.NETWORK),
     (PageReadError("x"), C.PAGE_UNREADABLE),
     (InvalidReferenceError("x"), C.INVALID_ARGUMENT),
+    (ActionOutcomeError("x"), C.OUTCOME_UNKNOWN),
     (LinkedInOperationError("x"), C.INTERNAL),
     (LinkedInMCPError("x"), C.INTERNAL),
 ]

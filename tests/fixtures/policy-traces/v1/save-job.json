@@ -80,7 +80,7 @@
       "call": "set_job_saved",
       "kind": "evaluate",
       "operation": "job_save_button",
-      "program_digest": "9e925079f6db"
+      "program_digest": "31a942fa7348"
     },
     {
       "call": "set_job_saved",
@@ -128,7 +128,7 @@
       "call": "set_job_saved",
       "kind": "evaluate",
       "operation": "job_save_button",
-      "program_digest": "9e925079f6db"
+      "program_digest": "31a942fa7348"
     }
   ],
   "result": {

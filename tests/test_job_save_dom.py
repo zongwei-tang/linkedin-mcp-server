@@ -6,7 +6,7 @@ headless chromium, with navigation stubbed and the saved-jobs list played by
 a fake that follows the page. The posting behaves as measured on 2026-11-20:
 the apply link (the safety redirect, or the posting's `/apply` path) shares a
 row with exactly one other button, Save, whose only change when clicked is its
-words. Labels are German on purpose.
+words. Both carry an aria-label. Labels are German on purpose.
 
 Skipped automatically when chromium is not installed; run locally after
 ``uv run patchright install chromium --no-shell``.
@@ -19,7 +19,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from patchright.async_api import async_playwright
 
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin import job_actions
 from linkedin_mcp_server.linkedin.job_actions import JobActions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
@@ -43,24 +46,38 @@ save.addEventListener('click', () => {
     const saved = save.dataset.saved !== 'true';
     save.dataset.saved = String(saved);
     save.textContent = saved ? 'Gespeichert' : 'Speichern';
+    if (save.hasAttribute('aria-label')) {
+        save.setAttribute('aria-label', saved ? 'Job nicht mehr speichern' : 'Job speichern');
+    }
 });
 """
 
 
 def posting(
-    *, saved: bool = False, apply: str = "/safety/go/?url=x", extra: str = ""
+    *,
+    saved: bool = False,
+    apply: str = "/safety/go/?url=x",
+    extra: str = "",
+    labelled: bool = True,
+    description: str = "",
 ) -> str:
     words = "Gespeichert" if saved else "Speichern"
+    label = (
+        f' aria-label="{"Job nicht mehr speichern" if saved else "Job speichern"}"'
+        if labelled
+        else ""
+    )
     return (
         "<main><div><div>"
         '<div><a href="https://www.linkedin.com/company/acme/">Acme</a>'
         '<button aria-expanded="false" aria-label="Weitere Optionen"></button></div>'
         "<div><div><div>"
         f'<div><a href="https://www.linkedin.com{apply}" aria-label="Bewerben">Bewerben</a></div>'
-        f'<div><button data-who="save" data-saved="{str(saved).lower()}">{words}</button></div>'
+        f'<div><button data-who="save" data-saved="{str(saved).lower()}"{label}>{words}</button></div>'
         f"{extra}"
         "</div></div></div>"
         "</div></div>"
+        f"{description}"
         '<section><button aria-label="Acme folgen">Folgen</button></section>'
         f"</main><script>{SCRIPT}</script>"
     )
@@ -115,16 +132,34 @@ def _short_waits(monkeypatch):
 
 
 async def act(
-    page, html: str, saved: bool, *, deep: bool = False, ignore: bool = False
+    page,
+    html: str,
+    saved: bool,
+    *,
+    deep: bool = False,
+    ignore: bool = False,
+    gone_on_load: int | None = None,
 ):
+    """Run one save or unsave; ``gone_on_load`` takes the Save button off the
+    page at that load of the posting, counting from one."""
     await page.goto(URL)
     await page.set_content(html)
     if ignore:
         await page.evaluate("() => document.body.setAttribute('data-ignore', '')")
     session = PageSession(page)
     actions = JobActions(session, PageNavigator(session), SavedList(page, deep=deep))
+    loads = 0
+
+    async def load(_url):
+        nonlocal loads
+        loads += 1
+        if loads == gone_on_load:
+            await page.evaluate(
+                "() => document.querySelector('[data-who=\"save\"]').remove()"
+            )
+
     with (
-        patch.object(actions._navigator, "_navigate_to_page", new_callable=AsyncMock),
+        patch.object(actions._navigator, "_navigate_to_page", side_effect=load),
         patch.object(PageSession, "check_rate_limit", new_callable=AsyncMock),
         patch.object(PageSession, "dismiss_modal", new_callable=AsyncMock),
     ):
@@ -199,3 +234,41 @@ async def test_a_posting_without_an_apply_link_is_not_clicked(dom_page):
 async def test_a_click_that_changes_nothing_is_an_error(dom_page):
     with pytest.raises(LinkedInOperationError, match="did not change"):
         await act(dom_page, posting(), True, ignore=True)
+
+
+async def test_an_unlabelled_button_beside_the_apply_link_is_not_clicked(dom_page):
+    with pytest.raises(LinkedInOperationError, match="Nothing was clicked"):
+        await act(dom_page, posting(labelled=False), True)
+    assert await clicks(dom_page) == 0
+
+
+async def test_a_description_link_is_not_taken_for_the_apply_link(dom_page):
+    # An applied or closed posting shows no apply link of its own, while its
+    # description can still hold a link through the same safety redirect,
+    # here beside the company's Follow button.
+    description = (
+        "<section><div><p>Mehr unter "
+        '<a href="https://www.linkedin.com/safety/go/?url=y">acme.example</a></p>'
+        '<button aria-label="Acme folgen" '
+        "onclick=\"document.body.dataset.wrong = 'true'\">Folgen</button>"
+        "</div></section>"
+    )
+    html = posting(apply="/company/acme/", description=description)
+
+    with pytest.raises(LinkedInOperationError, match="Nothing was clicked"):
+        await act(dom_page, html, True)
+    assert await clicks(dom_page) == 0
+    assert await dom_page.evaluate("() => document.body.dataset.wrong") is None
+
+
+async def test_a_failed_click_back_says_the_posting_was_left_flipped(dom_page):
+    # Unlisted, so unsaving clicks once to tell the state apart, which saves
+    # it; the button is gone when the posting is opened to click it back.
+    with pytest.raises(ActionOutcomeError) as caught:
+        await act(dom_page, posting(saved=False), False, gone_on_load=2)
+
+    message = str(caught.value)
+    assert "is now saved, the opposite of what was asked" in message
+    assert "Call unsave_job again" in message
+    assert "Nothing was clicked" not in message
+    assert await clicks(dom_page) == 1

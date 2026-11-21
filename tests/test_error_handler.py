@@ -501,3 +501,27 @@ class TestAnAlreadyShapedToolErrorPassesThrough:
 
         # That the pass-through is for ToolError only, and an unknown exception
         # still reaches the catch-all, is `test_reraises_unknown_exception` above.
+
+
+def test_an_unconfirmed_write_surfaces_its_message_without_an_issue_template(
+    monkeypatch,
+):
+    # The click went through, so the message is what tells the caller to check
+    # before retrying. A template appended to it would bury that, and the
+    # catch-all, which ActionOutcomeError subclasses, appends one.
+    from linkedin_mcp_server.core.exceptions import ActionOutcomeError
+
+    marker = "ISSUE-TEMPLATE-MARKER"
+    monkeypatch.setattr(
+        "linkedin_mcp_server.error_handler.build_issue_diagnostics",
+        lambda *args, **kwargs: marker,
+    )
+    monkeypatch.setattr(
+        "linkedin_mcp_server.error_handler.format_tool_error_with_diagnostics",
+        lambda message, diagnostics: f"{message}\n{diagnostics}",
+    )
+    message = "The Follow button was clicked, but did not change."
+
+    with pytest.raises(CodedToolError) as raised:
+        raise_tool_error(ActionOutcomeError(message), "follow_person")
+    assert str(raised.value) == message

@@ -20,7 +20,10 @@ from unittest.mock import AsyncMock, patch
 import pytest
 from patchright.async_api import async_playwright
 
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin import post_actions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.post_actions import PostActions
@@ -157,7 +160,8 @@ async def test_a_like_the_reload_shows_is_reported_liked(dom_page):
 
 
 async def test_a_like_the_reload_does_not_show_is_an_error(dom_page):
-    with pytest.raises(LinkedInOperationError, match="not after a reload"):
+    # The click went through, so the account may have changed: outcome unknown.
+    with pytest.raises(ActionOutcomeError, match="after a reload"):
         await act(dom_page, post_page(False), True, reload_html=post_page(False))
 
 
@@ -200,7 +204,7 @@ async def test_a_click_the_page_ignores_is_an_error(dom_page):
         patch.object(actions._navigator, "_navigate_to_page", new_callable=AsyncMock),
         patch.object(PageSession, "check_rate_limit", new_callable=AsyncMock),
         patch.object(PageSession, "dismiss_modal", new_callable=AsyncMock),
-        pytest.raises(LinkedInOperationError, match="did not change"),
+        pytest.raises(ActionOutcomeError, match="was chosen"),
     ):
         await actions.set_post_liked(POST, True)
     assert await pressed(dom_page) == ["post"]

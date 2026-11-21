@@ -71,6 +71,15 @@ card.addEventListener('click', () => {
     const followed = !!card.querySelector('#check-outline-small');
     if (!followed) { if (!document.body.hasAttribute('data-ignore')) show(true); return; }
     if (document.body.hasAttribute('data-no-ask')) { show(false); return; }
+    // A suggestion card in <aside>, rendered as the click lands: an icon
+    // button and two plain ones, like the confirmation's shape.
+    if (document.body.hasAttribute('data-aside-card')) {
+        document.querySelector('aside').insertAdjacentHTML('beforeend',
+            '<div><button data-who="aside-close"><svg id="close-small"></svg></button>'
+            + '<p>Grace</p><button data-who="aside-1">Nachricht</button>'
+            + '<button data-who="aside-2">Vernetzen</button></div>');
+    }
+    if (document.body.hasAttribute('data-late')) { setTimeout(ask, 600); return; }
     // As live: the rest of the profile keeps rendering plain buttons.
     if (document.body.hasAttribute('data-busy-page')) {
         const section = document.createElement('section');
@@ -82,9 +91,10 @@ card.addEventListener('click', () => {
     }
     ask();
 });
-for (const other of document.querySelectorAll('[data-who="subscribe"], aside button')) {
-    other.addEventListener('click', () => log(other.dataset.who || 'aside'));
-}
+document.body.addEventListener('click', (event) => {
+    const button = event.target.closest('aside button, [data-who="subscribe"]');
+    if (button) log(button.dataset.who || 'aside');
+});
 """ % (CHECK, PLUS)
 
 
@@ -236,3 +246,29 @@ async def test_buttons_rendered_elsewhere_while_it_asks_are_ignored(dom_page):
 
     assert result["status"] == "unfollowed"
     assert await log(dom_page) == ["top", "unfollow"]
+
+
+async def test_a_late_confirmation_is_waited_for_and_an_aside_card_never_clicked(
+    dom_page,
+):
+    # Review finding: a suggestion card shaped like the confirmation appears at
+    # once, and the confirmation itself only after a poll.
+    result = await act(
+        dom_page, profile(True), False, body_attrs=["data-aside-card", "data-late"]
+    )
+
+    assert result["status"] == "unfollowed"
+    assert await log(dom_page) == ["top", "unfollow"]
+
+
+async def test_two_top_card_follow_buttons_are_not_guessed_between(dom_page):
+    html = profile(False).replace(
+        "</section><section>",
+        '<div><div><button data-who="top2"><svg id="plus-outline-small"></svg>'
+        'Folgen</button></div><button aria-expanded="false">Mehr</button></div>'
+        "</section><section>",
+        1,
+    )
+    with pytest.raises(LinkedInOperationError, match="Nothing was clicked"):
+        await act(dom_page, html, True)
+    assert await log(dom_page) == []

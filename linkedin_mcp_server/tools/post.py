@@ -180,6 +180,8 @@ def register_post_tools(
 
         The post's state is read first: a post you already like is left
         alone and reported already_liked, so a repeated call clicks nothing.
+        A post showing another reaction of yours (Celebrate, Love, ...) is
+        switched to Like.
         The like is confirmed by loading the post again. Comments are never
         touched. Undo with unlike_post.
 

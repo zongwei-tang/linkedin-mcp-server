@@ -125,7 +125,7 @@
       "call": "set_person_followed",
       "kind": "evaluate",
       "operation": "unfollow_confirm",
-      "program_digest": "8697469d3102"
+      "program_digest": "eb3df6200f77"
     },
     {
       "call": "set_person_followed",

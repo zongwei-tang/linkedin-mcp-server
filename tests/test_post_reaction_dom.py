@@ -267,3 +267,36 @@ async def test_two_groups_of_six_choose_nothing(dom_page):
     with pytest.raises(LinkedInOperationError, match="Nothing was chosen"):
         await act(dom_page, post_page(None), "love", body_attrs={"data-two-menus": ""})
     assert await log(dom_page) == ["caret"]
+
+
+async def _like(page, html: str):
+    await page.goto(POST_URL)
+    await page.set_content(html)
+    session = PageSession(page)
+    actions = PostActions(session, PageNavigator(session))
+    with (
+        patch.object(actions._navigator, "_navigate_to_page", new_callable=AsyncMock),
+        patch.object(PageSession, "check_rate_limit", new_callable=AsyncMock),
+        patch.object(PageSession, "dismiss_modal", new_callable=AsyncMock),
+    ):
+        return await actions.set_post_liked(POST, True)
+
+
+async def test_liking_a_post_with_another_reaction_switches_it_to_like(dom_page):
+    # Review finding: like_post called this "already_liked" and left Celebrate.
+    result = await _like(dom_page, post_page("PRAISE"))
+
+    assert result == {
+        "url": POST_URL,
+        "post": f"/feed/update/{POST}/",
+        "liked": True,
+        "status": "liked",
+    }
+    assert await log(dom_page) == ["caret", "LIKE"]
+
+
+async def test_liking_a_liked_post_clicks_nothing(dom_page):
+    result = await _like(dom_page, post_page("LIKE"))
+
+    assert result["status"] == "already_liked"
+    assert await log(dom_page) == []

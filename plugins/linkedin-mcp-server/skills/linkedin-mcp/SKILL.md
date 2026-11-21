@@ -32,6 +32,8 @@ work, health checks, or background maintenance.
   page the user named.
 - `ignore_invitation` removes a pending invitation for good. Use it only for
   the sender the user named.
+- `save_job` and `unsave_job` change the user's saved jobs, which only the user
+  sees. Use them only for postings the user named.
 - `dismiss_job` hides a job from every later search and cannot be undone. Use
   it only for jobs the user asked to dismiss.
 - Do not retry a failed write action unless the result proves it was not sent.
@@ -54,7 +56,7 @@ instances, clear profiles, or replace the user's browser session.
   `get_sidebar_profiles`.
 - Companies: `get_company_profile`, `get_company_posts`, `search_companies`,
   and `get_company_employees`.
-- Jobs: `search_jobs`, `get_saved_jobs`, `save_job`, `unsave_job`, `get_job_details`,
+- Jobs: `search_jobs`, `get_saved_jobs`, `get_job_details`,
   `get_job_apply_url` and `get_easy_apply_form`. `get_easy_apply_form` opens
   the Easy Apply form, so use it only when the user is preparing an
   application.
@@ -70,7 +72,9 @@ instances, clear profiles, or replace the user's browser session.
 - Writes: `send_message`, `reply_to_conversation` (answer an existing thread,
   InMail included), `connect_with_person`, `archive_conversation`,
   `like_post`, `react_to_post`, `unlike_post`, `follow_person`,
-  `unfollow_person`, `follow_company`, `unfollow_company`, `ignore_invitation` and `dismiss_job`, subject to the explicit authorization rules above.
+  `unfollow_person`, `follow_company`, `unfollow_company`,
+  `ignore_invitation`, `save_job`, `unsave_job` and `dismiss_job`, subject to
+  the explicit authorization rules above.
 - Session: `get_session_status` says whether a login is saved without opening
   a browser or a login window; it does not prove LinkedIn still accepts it.
 - Cleanup: use `close_session` only when the user asks to end the managed

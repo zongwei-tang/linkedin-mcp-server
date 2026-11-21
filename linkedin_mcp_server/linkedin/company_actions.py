@@ -25,7 +25,10 @@ from __future__ import annotations
 from typing import Any, Literal
 
 from linkedin_mcp_server.core.destination import linkedin_element
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin.identifiers import (
     company_page_url,
     normalize_company_identifier,
@@ -109,14 +112,14 @@ class CompanyActions:
         if not followed:
             await self._confirm_unfollow(url)
         if not await self._wait_for(followed):
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"The follow button of {url} was clicked, but the page did not "
                 "change. Read it again before retrying."
             )
         await self._session.delay(NAV_DELAY)
         after = await self._open_and_read(url)
         if after["followed"] != followed:
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
                 "reload, so LinkedIn may not have kept it. Calling this again is "
                 "safe: it reads the state before clicking."

@@ -122,7 +122,7 @@
     },
     {
       "name": "unlike_post",
-      "description": "Remove the signed-in member's like from a LinkedIn post"
+      "description": "Remove the signed-in member's like or other reaction from a LinkedIn post; a post with none is left alone"
     },
     {
       "name": "get_saved_posts",

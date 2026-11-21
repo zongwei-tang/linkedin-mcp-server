@@ -7,6 +7,12 @@ and unsaving it again:
   is the safety redirect (`/safety/go`) or the posting's own `/apply` path,
   and the closest ancestor above it that holds any other button holds exactly
   this one.
+- Both the apply link and the Save button carry an aria-label; the
+  description's "… more" button carries none. Requiring the attribute on both
+  keeps a link written into the description, which LinkedIn sends through the
+  same safety redirect and which is not expected to carry one, from being
+  taken for the apply link on a posting that shows none of its own (an
+  applied or closed one), and the button beside it from being clicked.
 - Saved and unsaved differ only in the button's words ("Save"/"Saved" and
   their aria-labels). It carries no icon and no pressed state, and its
   componentkey is new on every load. The saved-jobs list is the one
@@ -27,7 +33,10 @@ from collections.abc import Awaitable, Callable
 from typing import TYPE_CHECKING, Any, Literal
 
 from linkedin_mcp_server.core.destination import linkedin_element
-from linkedin_mcp_server.core.exceptions import LinkedInOperationError
+from linkedin_mcp_server.core.exceptions import (
+    ActionOutcomeError,
+    LinkedInOperationError,
+)
 from linkedin_mcp_server.linkedin.identifiers import job_view_url, normalize_job_id
 from linkedin_mcp_server.linkedin.job_policy import SAFETY_REDIRECT_PATH
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
@@ -94,7 +103,7 @@ SAVE_BUTTON_JS = r"""(opts) => {
         old.removeAttribute(mark);
     }
     const main = document.querySelector('main');
-    const result = {found: false, buttons: 0, text: null};
+    const result = {found: false, buttons: 0, labelled: false, text: null};
     if (!main) return result;
     const pathOf = (anchor) => {
         try {
@@ -103,7 +112,8 @@ SAVE_BUTTON_JS = r"""(opts) => {
             return '';
         }
     };
-    const apply = [...main.querySelectorAll('a[href]')].find(
+    // Presence only: the label's words are the page's language.
+    const apply = [...main.querySelectorAll('a[href][aria-label]')].find(
         (anchor) => [applyPath, redirectPath].includes(pathOf(anchor))
     );
     if (!apply) return result;
@@ -114,7 +124,8 @@ SAVE_BUTTON_JS = r"""(opts) => {
         );
         if (!buttons.length) continue;
         result.buttons = buttons.length;
-        if (buttons.length === 1) {
+        result.labelled = buttons.length === 1 && buttons[0].hasAttribute('aria-label');
+        if (result.labelled) {
             result.found = true;
             result.text = (buttons[0].innerText || '').trim();
             buttons[0].setAttribute(mark, '');
@@ -152,25 +163,49 @@ class JobActions:
             return _result(url, job_id, saved, "already_saved")
 
         await self._toggle(url, job_id)
-        now = job_id in await self._saved_job_ids()
+        try:
+            now = job_id in await self._saved_job_ids()
+        except ActionOutcomeError:
+            raise
+        except LinkedInOperationError as exc:
+            raise ActionOutcomeError(
+                f"Job {job_id}'s Save button was clicked, but the saved list "
+                f"could not be read after it ({exc}). Check get_saved_jobs "
+                "before retrying."
+            ) from exc
         if now == saved:
             status: SaveStatus = "saved" if saved else "unsaved"
             return _result(url, job_id, saved, status)
         if listed:
             # Listed before and still listed: the click did not take.
-            raise LinkedInOperationError(
+            raise ActionOutcomeError(
                 f"Job {job_id} was in the saved list, and still is after its "
                 "Save button was clicked. Check get_saved_jobs before retrying."
             )
         # It was saved past the pages read, and the click unsaved it, or it was
         # unsaved and the click saved it: either way it is now the opposite of
-        # what it was, so a second click puts it back as found.
-        await self._toggle(url, job_id)
-        again = job_id in await self._saved_job_ids()
+        # what it was, so a second click puts it back as found. If that click
+        # fails, the posting is left opposite to what was asked, and the error
+        # has to say so rather than look like nothing happened.
+        flipped = "unsaved" if saved else "saved"
+        try:
+            await self._toggle(url, job_id)
+            again = job_id in await self._saved_job_ids()
+        except Exception as exc:
+            # The reason is the second attempt's; its "Nothing was clicked"
+            # would read as if the first click never happened.
+            reason = str(exc).removesuffix(" Nothing was clicked.").rstrip(".")
+            raise ActionOutcomeError(
+                f"Job {job_id} is now {flipped}, the opposite of what was "
+                f"asked: telling its state apart took a click that {flipped} "
+                f"it, and the click to put it back failed: {reason}. Call "
+                f"{'save_job' if saved else 'unsave_job'} again, or check "
+                "get_saved_jobs."
+            ) from exc
         if again == saved:
             status = "already_saved" if saved else "already_unsaved"
             return _result(url, job_id, saved, status)
-        raise LinkedInOperationError(
+        raise ActionOutcomeError(
             f"Job {job_id}'s Save button was clicked twice, but the saved list "
             f"{'still does not hold it' if saved else 'still holds it'}. Check "
             "get_saved_jobs before retrying."
@@ -203,8 +238,9 @@ class JobActions:
         if not found["found"]:
             raise LinkedInOperationError(
                 f"The Save button of job {job_id} could not be found: the apply "
-                f"link's row held {found['buttons']} buttons where one was "
-                "expected, or the posting has no apply link. Nothing was clicked."
+                f"link's row held {found['buttons']} buttons where one with an "
+                "aria-label was expected, or the posting shows no apply link "
+                "with one. Nothing was clicked."
             )
         before = found["text"]
         async with linkedin_element(
@@ -217,7 +253,7 @@ class JobActions:
             now = await self._read(job_id)
             if now["found"] and now["text"] != before:
                 return
-        raise LinkedInOperationError(
+        raise ActionOutcomeError(
             f"The Save button of job {job_id} was clicked, but did not change. "
             "Check get_saved_jobs before retrying."
         )

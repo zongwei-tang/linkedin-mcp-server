@@ -1493,7 +1493,7 @@
       "openWorldHint": true,
       "readOnlyHint": false
     },
-    "description": "Like one LinkedIn post as the signed-in member.\n\nThe post's state is read first: a post you already like is left\nalone and reported already_liked, so a repeated call clicks nothing.\nThe like is confirmed by loading the post again. Comments are never\ntouched. Undo with unlike_post.",
+    "description": "Like one LinkedIn post as the signed-in member.\n\nThe post's state is read first: a post you already like is left\nalone and reported already_liked, so a repeated call clicks nothing.\nA post showing another reaction of yours (Celebrate, Love, ...) is\nswitched to Like.\nThe like is confirmed by loading the post again. Comments are never\ntouched. Undo with unlike_post.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {

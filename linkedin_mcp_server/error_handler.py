@@ -22,6 +22,7 @@ from linkedin_mcp_server.core.proxy_errors import (
 )
 from linkedin_mcp_server.core.exceptions import (
     AccountRestrictedError,
+    ActionOutcomeError,
     InvalidReferenceError,
     AuthenticationError,
     ElementNotFoundError,
@@ -501,6 +502,12 @@ def _shape_tool_error(exception: Exception, context: str = "") -> NoReturn:
     elif isinstance(exception, InvalidReferenceError):
         logger.info("Invalid reference%s: %s", ctx, exception)
         raise CodedToolError(str(exception), ErrorCode.INVALID_ARGUMENT) from exception
+
+    # Ahead of the catch-all too: the click went through, so the code has to
+    # say the account may have changed, and an issue template would bury that.
+    elif isinstance(exception, ActionOutcomeError):
+        logger.warning("Write outcome unconfirmed%s: %s", ctx, exception)
+        raise CodedToolError(str(exception), ErrorCode.OUTCOME_UNKNOWN) from exception
 
     elif isinstance(exception, (LinkedInOperationError, LinkedInMCPError)):
         # Catch-all for base exception types and any future subclasses

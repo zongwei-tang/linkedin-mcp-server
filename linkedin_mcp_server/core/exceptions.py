@@ -18,6 +18,16 @@ class InvalidReferenceError(LinkedInOperationError):
     pass
 
 
+class ActionOutcomeError(LinkedInOperationError):
+    """A write's click went through, and what LinkedIn kept is not confirmed.
+
+    The account may already have changed, so the caller has to read the state
+    before acting again, and the message says what was last seen. Separate from
+    the other operation errors because it is not a page this server could not
+    read: issue diagnostics would bury that the account may be different now.
+    """
+
+
 class AuthenticationError(LinkedInOperationError):
     """Raised when authentication fails."""
 
