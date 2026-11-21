@@ -1115,3 +1115,30 @@ def test_group_and_event_links_are_references_their_tools_take():
     # The list pages themselves name no group or event.
     assert classify_link("https://www.linkedin.com/groups/") is None
     assert classify_link("https://www.linkedin.com/events/") is None
+
+
+def test_a_card_wide_group_or_event_anchor_is_kept_without_a_label():
+    """A group search wraps each card in one anchor, so its label is the whole
+    card and longer than any label kept. The id is what the tools take."""
+    from linkedin_mcp_server.linkedin.link_metadata import build_references
+
+    card = (
+        "Artificial Intelligence, Machine Learning, Data Science & Robotics "
+        "Public Group 2,999,762 members Navigating the World of AI, ML and Data"
+    )
+    refs = build_references(
+        [
+            {"href": "https://www.linkedin.com/groups/3990648/", "text": card},
+            {
+                "href": "https://www.linkedin.com/events/7488972365415194624/",
+                "text": card,
+            },
+        ],
+        "search_results",
+    )
+
+    assert [(r["kind"], r["url"]) for r in refs] == [
+        ("group", "/groups/3990648/"),
+        ("event", "/events/7488972365415194624/"),
+    ]
+    assert all("text" not in r for r in refs)

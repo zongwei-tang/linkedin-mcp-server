@@ -264,13 +264,19 @@ def normalize_reference(
         text = choose_reference_text(raw, kind)
     # A job is kept without a label because its id is the useful part, and a
     # card-wide anchor has none: the "More jobs" cards wrap title, company,
-    # location and insights in one link, which no label survives.
+    # location and insights in one link, which no label survives. A group
+    # search wraps each result card the same way (measured 2026-11-21: name,
+    # privacy, member count and description in one /groups/<id>/ anchor), and
+    # so can an event's; their ids are what get_group_details and
+    # get_event_details take.
     if text is None and kind not in {
         "feed_post",
         "external",
         "conversation",
         "company_urn",
         "job",
+        "group",
+        "event",
     }:
         return None
 
