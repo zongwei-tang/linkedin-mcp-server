@@ -350,3 +350,203 @@ def register_page_tools(
         return await _read(
             ctx, "search_schools", "search_schools", keywords, max_scrolls
         )
+
+    @mcp.tool(
+        timeout=tool_timeout, title="Get My Events", annotations=_READ, tags={"network"}
+    )
+    @tool_errors
+    async def get_my_events(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        List the LinkedIn events you are attending or organizing.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (events -> raw text) and optional
+            references (the events and their organizers) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(ctx, "get_my_events", "my_events", None, max_scrolls)
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get My Newsletters",
+        annotations=_READ,
+        tags={"network"},
+    )
+    @tool_errors
+    async def get_my_newsletters(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        List the LinkedIn newsletters you subscribe to.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (newsletters -> raw text) and optional
+            references (the newsletters and their authors) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(
+            ctx, "get_my_newsletters", "my_newsletters", None, max_scrolls
+        )
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Followed Pages",
+        annotations=_READ,
+        tags={"company"},
+    )
+    @tool_errors
+    async def get_followed_pages(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        List the company, school and showcase pages you follow on LinkedIn.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (followed_pages -> raw text) and optional
+            references (the pages) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(
+            ctx, "get_followed_pages", "followed_pages", None, max_scrolls
+        )
+
+    @mcp.tool(
+        timeout=tool_timeout, title="Get Catch Up", annotations=_READ, tags={"network"}
+    )
+    @tool_errors
+    async def get_catch_up(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        Read your network's news: job changes, work anniversaries, birthdays
+        and other updates from your connections.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (catch_up -> raw text) and optional
+            references (the people each update is about) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(ctx, "get_catch_up", "catch_up", None, max_scrolls)
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Suggested People",
+        annotations=_READ,
+        tags={"network"},
+    )
+    @tool_errors
+    async def get_suggested_people(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        List the people LinkedIn suggests you may know, from your My Network page.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (people_you_may_know -> raw text) and optional
+            references (the suggested profiles) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(
+            ctx, "get_suggested_people", "people_you_may_know", None, max_scrolls
+        )
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get My Dashboard",
+        annotations=_READ,
+        tags={"person"},
+    )
+    @tool_errors
+    async def get_my_dashboard(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        Read your private dashboard: post impressions, followers, profile views
+        and search appearances, as LinkedIn summarizes them.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (dashboard -> raw text) and optional
+            references and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(ctx, "get_my_dashboard", "dashboard", None, max_scrolls)
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Search Appearances",
+        annotations=_READ,
+        tags={"person"},
+    )
+    @tool_errors
+    async def get_search_appearances(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        Read how often you appeared in LinkedIn search, and where the
+        searchers work and what they do.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (search_appearances -> raw text) and optional
+            references and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(
+            ctx, "get_search_appearances", "search_appearances", None, max_scrolls
+        )
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Content Analytics",
+        annotations=_READ,
+        tags={"post"},
+    )
+    @tool_errors
+    async def get_content_analytics(
+        ctx: Context, max_scrolls: MaxScrolls = None
+    ) -> dict[str, Any]:
+        """
+        Read the impressions and engagement of your posts over the recent
+        period LinkedIn shows.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations to load more (1-50, default 10).
+
+        Returns:
+            Dict with url, sections (content_analytics -> raw text) and optional
+            references (your top posts) and section_errors. A page LinkedIn answers with another
+            part of the site comes back as a page_redirected section error.
+        """
+        return await _read(
+            ctx, "get_content_analytics", "content_analytics", None, max_scrolls
+        )

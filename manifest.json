@@ -141,6 +141,38 @@
       "description": "List the people and pages you follow"
     },
     {
+      "name": "get_followed_pages",
+      "description": "List the company, school and showcase pages you follow"
+    },
+    {
+      "name": "get_my_events",
+      "description": "List the events you are attending or organizing"
+    },
+    {
+      "name": "get_my_newsletters",
+      "description": "List the newsletters you subscribe to"
+    },
+    {
+      "name": "get_catch_up",
+      "description": "Read your network's job changes, work anniversaries and birthdays"
+    },
+    {
+      "name": "get_suggested_people",
+      "description": "List the people LinkedIn suggests you may know"
+    },
+    {
+      "name": "get_my_dashboard",
+      "description": "Read your dashboard: post impressions, followers and profile views"
+    },
+    {
+      "name": "get_search_appearances",
+      "description": "Read how often you appeared in search, and who searched"
+    },
+    {
+      "name": "get_content_analytics",
+      "description": "Read the impressions and engagement of your posts"
+    },
+    {
       "name": "get_group_details",
       "description": "Read a group's description and recent posts by its group ID"
     },

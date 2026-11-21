@@ -38,7 +38,7 @@ a page-owning collaborator.
 | `message_sender` | `MessageSender` | `page-owning` |
 | `navigation` | `PageNavigator`, `WaitUntil` | `page-owning` |
 | `network` | `CONNECTIONS_URL`, `INVITATION_URLS`, `InvitationDirection`, `NOTIFICATIONS_URL`, `NetworkReader`, `PROFILE_VIEWS_URL` | `browser-free` |
-| `pages` | `PAGE_KINDS`, `PageKind`, `PageReader`, `PageTarget`, `page_target()` | `browser-free` |
+| `pages` | `PAGE_KINDS`, `PageKind`, `PageReader`, `PageTarget`, `page_target()`, `redirected_section_error()` | `page-owning` |
 | `person` | `PersonReader` | `page-owning` |
 | `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS` | `page-owning` |
 | `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
@@ -73,7 +73,7 @@ a page-owning collaborator.
 - `message_sender` -> `contracts`, `identifiers`, `navigation`, `session`
 - `navigation` -> `session`
 - `network` -> `capture`, `connection_actions`, `contracts`
-- `pages` -> `capture`, `contracts`, `identifiers`
+- `pages` -> `capture`, `contracts`, `identifiers`, `session`
 - `person` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `search_urls`, `session`, `text`
 - `person_actions` -> `identifiers`, `navigation`, `session`
 - `post_actions` -> `identifiers`, `navigation`, `session`

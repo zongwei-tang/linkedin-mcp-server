@@ -350,6 +350,32 @@
           "type": "object"
         }
       },
+      "get_catch_up": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_company_employees": {
         "input": {
           "additionalProperties": false,
@@ -471,6 +497,32 @@
           "type": "object"
         }
       },
+      "get_content_analytics": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_conversation": {
         "input": {
           "additionalProperties": false,
@@ -575,6 +627,32 @@
               "maximum": 50,
               "minimum": 1,
               "type": "integer"
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_followed_pages": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
             }
           },
           "type": "object"
@@ -761,7 +839,85 @@
           "type": "object"
         }
       },
+      "get_my_dashboard": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_my_events": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_my_groups": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_my_newsletters": {
         "input": {
           "additionalProperties": false,
           "properties": {
@@ -1110,6 +1266,32 @@
           "type": "object"
         }
       },
+      "get_search_appearances": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_session_status": {
         "input": {
           "additionalProperties": false,
@@ -1133,6 +1315,32 @@
           "required": [
             "linkedin_username"
           ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_suggested_people": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 50,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations to load more (1-50, default 10)."
+            }
+          },
           "type": "object"
         },
         "output": {

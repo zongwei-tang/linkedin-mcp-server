@@ -263,6 +263,46 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read your network's news: job changes, work anniversaries, birthdays\nand other updates from your connections.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_catch_up",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Catch Up"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "company"
         ]
       }
@@ -440,6 +480,46 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "post"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read the impressions and engagement of your posts over the recent\nperiod LinkedIn shows.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_content_analytics",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Content Analytics"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "messaging"
         ]
       }
@@ -605,6 +685,46 @@
       "type": "object"
     },
     "title": "Get Feed"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "company"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List the company, school and showcase pages you follow on LinkedIn.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_followed_pages",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Followed Pages"
   },
   {
     "_meta": {
@@ -885,6 +1005,86 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "person"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read your private dashboard: post impressions, followers, profile views\nand search appearances, as LinkedIn summarizes them.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_my_dashboard",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get My Dashboard"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List the LinkedIn events you are attending or organizing.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_my_events",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get My Events"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "network"
         ]
       }
@@ -920,6 +1120,46 @@
       "type": "object"
     },
     "title": "Get My Groups"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List the LinkedIn newsletters you subscribe to.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_my_newsletters",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get My Newsletters"
   },
   {
     "_meta": {
@@ -1388,6 +1628,46 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "person"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "Read how often you appeared in LinkedIn search, and where the\nsearchers work and what they do.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_search_appearances",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Search Appearances"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "session"
         ]
       }
@@ -1441,6 +1721,46 @@
       "type": "object"
     },
     "title": "Get Sidebar Profiles"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "openWorldHint": true,
+      "readOnlyHint": true
+    },
+    "description": "List the people LinkedIn suggests you may know, from your My Network page.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 50,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations to load more (1-50, default 10)."
+        }
+      },
+      "type": "object"
+    },
+    "name": "get_suggested_people",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Get Suggested People"
   },
   {
     "_meta": {

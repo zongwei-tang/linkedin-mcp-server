@@ -125,6 +125,14 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_my_groups` | List the groups you belong to, with links to read each one. |
 | `get_followers` | List the people who follow you. |
 | `get_following` | List the people and pages you follow. |
+| `get_followed_pages` | List the company, school and showcase pages you follow. |
+| `get_my_events` | List the events you are attending or organizing. |
+| `get_my_newsletters` | List the newsletters you subscribe to. |
+| `get_catch_up` | Read your network's job changes, work anniversaries and birthdays. |
+| `get_suggested_people` | List the people LinkedIn suggests you may know. |
+| `get_my_dashboard` | Read your dashboard: post impressions, followers and profile views. |
+| `get_search_appearances` | Read how often you appeared in search, and who searched. |
+| `get_content_analytics` | Read the impressions and engagement of your posts. |
 | `get_group_details` | Read a group's description and recent posts by its group ID. |
 | `get_event_details` | Read an event's time, place, organizer and details. |
 | `get_school_profile` | Read a school's or university's page. |

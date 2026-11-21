@@ -5,16 +5,18 @@ that take a reference (a group, an event, a school, an article, a newsletter)
 build their address from the segment the page's own URL carries, refused before
 the browser starts when it is not one; the search kinds take keywords.
 
-These addresses are LinkedIn's public routes, not measured markup: a kind that
-lands somewhere else comes back with whatever that page says, which is why the
-first live read of each one is checked by hand.
+These addresses are LinkedIn's public routes, not measured markup. A read that
+LinkedIn sends to another part of the site (the feed, a sign-in wall, a page
+the account cannot see) returns a ``page_redirected`` section error instead of
+that other page's text, judged by the first segment of the address it landed
+on. The first live read of each kind is still checked by hand.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from typing import Any, Literal
-from urllib.parse import quote, quote_plus
+from urllib.parse import quote, quote_plus, urlparse
 
 from linkedin_mcp_server.core.exceptions import InvalidReferenceError
 from linkedin_mcp_server.linkedin.capture import (
@@ -22,14 +24,26 @@ from linkedin_mcp_server.linkedin.capture import (
     CapturePlan,
     SectionCapture,
 )
-from linkedin_mcp_server.linkedin.contracts import single_section_result
+from linkedin_mcp_server.linkedin.contracts import (
+    RATE_LIMITED_SECTION_TEXT,
+    single_section_result,
+)
 from linkedin_mcp_server.linkedin.identifiers import normalize_route_reference
+from linkedin_mcp_server.linkedin.session import PageSession
 
 PageKind = Literal[
     "saved_posts",
     "my_groups",
     "followers",
     "following",
+    "my_events",
+    "my_newsletters",
+    "followed_pages",
+    "catch_up",
+    "people_you_may_know",
+    "dashboard",
+    "search_appearances",
+    "content_analytics",
     "group",
     "event",
     "school",
@@ -59,6 +73,14 @@ _OWN_PAGES: dict[str, tuple[str, str]] = {
     "my_groups": ("/groups/", "groups"),
     "followers": ("/mynetwork/network-manager/people-follow/followers/", "followers"),
     "following": ("/mynetwork/network-manager/people-follow/following/", "following"),
+    "my_events": ("/mynetwork/network-manager/events/", "events"),
+    "my_newsletters": ("/mynetwork/network-manager/newsletters/", "newsletters"),
+    "followed_pages": ("/mynetwork/network-manager/company/", "followed_pages"),
+    "catch_up": ("/mynetwork/catch-up/all/", "catch_up"),
+    "people_you_may_know": ("/mynetwork/grow/", "people_you_may_know"),
+    "dashboard": ("/dashboard/", "dashboard"),
+    "search_appearances": ("/analytics/search-appearances/", "search_appearances"),
+    "content_analytics": ("/analytics/creator/content/", "content_analytics"),
 }
 
 # Pages named by the segment after their route: (route, field, numeric, suffix,
@@ -139,11 +161,29 @@ def page_target(kind: str, reference: str | None = None) -> PageTarget:
     )
 
 
+def _area(url: str) -> str:
+    """The first path segment of *url*: the part of the site it belongs to."""
+    return urlparse(url).path.strip("/").split("/", 1)[0]
+
+
+def redirected_section_error(target: str, landed: str) -> dict[str, str]:
+    """The section error for a read LinkedIn answered with another page."""
+    return {
+        "error_type": "page_redirected",
+        "error_message": (
+            f"LinkedIn showed {urlparse(landed).path or landed} instead of "
+            f"{urlparse(target).path}, so that page's text is not returned. The "
+            "account may not have this page, or LinkedIn moved it."
+        ),
+    }
+
+
 class PageReader:
     """Read one page of a known kind into one section."""
 
-    def __init__(self, capture: SectionCapture):
+    def __init__(self, capture: SectionCapture, session: PageSession):
         self._capture = capture
+        self._session = session
 
     async def read_page(
         self,
@@ -163,4 +203,18 @@ class PageReader:
             section_name=target.section,
             plan=CapturePlan(target.mode, max_scrolls),
         )
+        # Only text needs the check: a failed read already says why it failed.
+        landed = self._session.page.url
+        if (
+            extracted.text
+            and extracted.text != RATE_LIMITED_SECTION_TEXT
+            and _area(landed) != _area(target.url)
+        ):
+            return {
+                "url": target.url,
+                "sections": {},
+                "section_errors": {
+                    target.section: redirected_section_error(target.url, landed)
+                },
+            }
         return single_section_result(target.url, target.section, extracted)

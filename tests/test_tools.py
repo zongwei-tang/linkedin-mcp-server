@@ -432,6 +432,14 @@ _A_VALID_CALL = [
     ("page", "get_my_groups", {}),
     ("page", "get_followers", {}),
     ("page", "get_following", {}),
+    ("page", "get_my_events", {}),
+    ("page", "get_my_newsletters", {}),
+    ("page", "get_followed_pages", {}),
+    ("page", "get_catch_up", {}),
+    ("page", "get_suggested_people", {}),
+    ("page", "get_my_dashboard", {}),
+    ("page", "get_search_appearances", {}),
+    ("page", "get_content_analytics", {}),
     ("page", "get_group_details", {"group_id": "1234567"}),
     ("page", "get_event_details", {"event": "7262891234567890123"}),
     ("page", "get_school_profile", {"school": "uc-berkeley"}),
@@ -3058,6 +3066,14 @@ class TestPageTools:
             ("get_my_groups", {}, "my_groups", None),
             ("get_followers", {}, "followers", None),
             ("get_following", {}, "following", None),
+            ("get_my_events", {}, "my_events", None),
+            ("get_my_newsletters", {}, "my_newsletters", None),
+            ("get_followed_pages", {}, "followed_pages", None),
+            ("get_catch_up", {}, "catch_up", None),
+            ("get_suggested_people", {}, "people_you_may_know", None),
+            ("get_my_dashboard", {}, "dashboard", None),
+            ("get_search_appearances", {}, "search_appearances", None),
+            ("get_content_analytics", {}, "content_analytics", None),
             ("get_group_details", {"group_id": "1234567"}, "group", "1234567"),
             (
                 "get_event_details",
@@ -3103,7 +3119,7 @@ class TestPageTools:
         mcp = FastMCP("test")
         register_page_tools(mcp)
         tools = await mcp.list_tools()
-        assert len(tools) == 13
+        assert len(tools) == 21
         assert all(
             t.annotations and t.annotations.read_only_hint is True for t in tools
         )

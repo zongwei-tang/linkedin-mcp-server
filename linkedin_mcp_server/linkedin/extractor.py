@@ -74,7 +74,7 @@ class LinkedInExtractor:
         self._jobs = JobReader(navigator, capture, job_pages)
         self._posts = PostSearch(capture)
         self._network = NetworkReader(capture)
-        self._pages = PageReader(capture)
+        self._pages = PageReader(capture, session)
         self._post_actions = PostActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)

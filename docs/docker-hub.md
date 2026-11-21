@@ -11,6 +11,8 @@ A Model Context Protocol (MCP) server that connects AI assistants to LinkedIn. A
 - **Profile Connections**: Send connection requests or accept incoming ones, with optional notes
 - **Invitations**: List pending connection invitations, received or sent, and ignore one by the sender's profile
 - **Network**: List your connections, followers and the people and pages you follow, and read your notifications and who viewed your profile
+- **Network Pages**: List the pages, events and newsletters you follow, the people LinkedIn suggests you may know, and your network's job changes and anniversaries
+- **Analytics**: Read your private dashboard, search appearances and post analytics
 - **Follow People and Pages**: Follow or unfollow a person or a company page; a repeat call reports the state it found and clicks nothing
 - **Sidebar Profiles**: Extract profile URLs from the sidebar recommendation sections on a profile page ("More profiles for you", "Explore premium profiles", "People you may know")
 - **Messaging**: List the inbox, read a conversation by username or thread ID, search messages by keyword, archive a conversation by thread ID, and compose/send a new message or reply inside an existing thread by thread ID, InMail included, both with explicit confirmation (profile-based send may open a separate DM, so replies go through the thread)

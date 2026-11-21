@@ -63,9 +63,13 @@ instances, clear profiles, or replace the user's browser session.
 - Content: `get_feed`, `search_posts` and `get_post_details`, which reads one
   post and its comments from any `feed_post` reference the others return.
 - Network: `get_invitations`, `get_connections`, `get_notifications`,
-  `get_profile_views`, `get_followers`, `get_following`, `get_my_groups`,
+  `get_profile_views`, `get_followers`, `get_following`,
+  `get_followed_pages`, `get_suggested_people`, `get_catch_up`,
+  `get_my_groups`, `get_my_events`, `get_my_newsletters`,
   `get_group_details`, `get_event_details`, `search_groups` and
   `search_events`.
+- Analytics, private to the user: `get_my_dashboard`,
+  `get_search_appearances` and `get_content_analytics`.
 - Schools and reading: `get_school_profile`, `get_school_alumni`,
   `search_schools`, `get_saved_posts`, `get_article` and `get_newsletter`.
 - Messages: `get_inbox`, `get_conversation`, and `search_conversations`.
