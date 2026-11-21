@@ -63,7 +63,7 @@ a page-owning collaborator.
 - `link_metadata` -> `identifiers`
 - `message_sender` -> `contracts`, `identifiers`, `navigation`, `session`
 - `navigation` -> `session`
-- `network` -> `capture`, `contracts`
+- `network` -> `capture`, `connection_actions`, `contracts`
 - `person` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `search_urls`, `session`, `text`
 - `posts` -> `capture`, `contracts`, `identifiers`, `link_metadata`, `search_urls`
 - `profile_page` -> `session`

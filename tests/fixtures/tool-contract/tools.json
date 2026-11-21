@@ -652,7 +652,7 @@
       "openWorldHint": true,
       "readOnlyHint": true
     },
-    "description": "Read your LinkedIn notifications, newest first.\n\nOpening the notifications page marks them seen, exactly as it does\nfor you in a browser.",
+    "description": "Read your LinkedIn notifications, newest first.",
     "inputSchema": {
       "additionalProperties": false,
       "properties": {

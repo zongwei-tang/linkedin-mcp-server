@@ -9,6 +9,7 @@ from linkedin_mcp_server.linkedin.capture import (
     CapturePlan,
     SectionCapture,
 )
+from linkedin_mcp_server.linkedin.connection_actions import SENT_INVITATIONS_URL
 from linkedin_mcp_server.linkedin.contracts import single_section_result
 
 InvitationDirection = Literal["received", "sent"]
@@ -16,9 +17,11 @@ InvitationDirection = Literal["received", "sent"]
 # One page per list. Each is the signed-in member's own, so none takes an
 # identifier and none can be pointed at somebody else's network.
 _LINKEDIN = "https://www.linkedin.com"
+# The sent list is the page connect_with_person already reads to find an
+# outstanding invitation; the received list is its sibling tab.
 INVITATION_URLS: dict[str, str] = {
-    "received": f"{_LINKEDIN}/mynetwork/invitation-manager/received/",
-    "sent": f"{_LINKEDIN}/mynetwork/invitation-manager/sent/",
+    "received": SENT_INVITATIONS_URL.replace("/sent/", "/received/"),
+    "sent": SENT_INVITATIONS_URL,
 }
 CONNECTIONS_URL = f"{_LINKEDIN}/mynetwork/invite-connect/connections/"
 NOTIFICATIONS_URL = f"{_LINKEDIN}/notifications/"
@@ -75,9 +78,6 @@ class NetworkReader:
 
     async def get_notifications(self, max_scrolls: int | None = None) -> dict[str, Any]:
         """Read the signed-in member's notifications page.
-
-        Opening the page is what LinkedIn counts as seeing them, so the unread
-        badge clears as it would for a person.
 
         Returns:
             {url, sections: {notifications: text}} plus optional

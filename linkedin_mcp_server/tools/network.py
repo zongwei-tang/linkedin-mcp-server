@@ -108,9 +108,6 @@ def register_network_tools(
         """
         Read your LinkedIn notifications, newest first.
 
-        Opening the notifications page marks them seen, exactly as it does
-        for you in a browser.
-
         Args:
             ctx: FastMCP context for progress reporting
             max_scrolls: Scroll iterations to load older notifications (1-50,
