@@ -379,6 +379,32 @@ rebrowser-bot-detector, the JA4 and HTTP/2 fingerprints, the startup-flash
 timing, and the cookie-across-restart check. The image rows in the 153 table
 stay 153 measurements.
 
+### Linux without a display, against LinkedIn's Cloudflare
+
+Measured 2026-11-21 on a Linux x86_64 VPS (Contabo, AS40021, reaching LinkedIn
+over IPv6) through `BrowserManager` against a loopback origin, Chrome for
+Testing 156.0.8078.4. With `headless=True` and no `DISPLAY` the windowless mode
+is unavailable (it is macOS-only), so Chromium runs in its real headless mode:
+
+| | Headless, no display | Headed on Xvfb |
+|---|---|---|
+| User agent, page and worker and HTTP | `…HeadlessChrome/156.0.0.0…` | `…Chrome/156.0.0.0…` |
+| WebGL renderer | SwiftShader | none |
+| `navigator.webdriver` | `false` | `false` |
+| `sec-ch-ua` brands | `Not:A-Brand/8`, `Chromium/156` | the same |
+
+In the headless mode, LinkedIn's public routes (`/uas/login` on the first
+request of the session, `/pulse/<article>` half an hour later) were answered
+in place with Cloudflare's "Performing security verification" page, then its
+Turnstile checkbox, and no `cf_clearance` was ever issued. `/feed/` and a
+newsletter page loaded signed in on the same address in between. Every
+navigation after the check failed with `ERR_TOO_MANY_REDIRECTS`, and the next
+process met an empty 429 on `/feed/`. The same `/pulse/` route had read
+normally on the Mac in the windowless mode. A run headed on Xvfb from the
+datacenter address was not possible the same day, so how much the address
+alone weighs is not measured. Source: the live check of that day, its page
+traces and screenshots.
+
 ## Things that look like fixes and are not
 
 - **`--user-agent` as a browser switch.** Reaches every target including
