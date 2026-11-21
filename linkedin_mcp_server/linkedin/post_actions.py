@@ -27,6 +27,12 @@ the post's button holds an image whose class carries LinkedIn's own reaction
 type, `data-test-reactions-icon-type-PRAISE` for Celebrate, which is a code
 rather than a word and is what confirms the reaction. Clicking that button
 takes any reaction back.
+
+The caret and the menu's buttons are hidden until hovered, so a real click
+waits forever for them to become visible (measured live: "element is not
+visible"). They are clicked in the page instead, after the element's own
+document is checked to be LinkedIn's, which is how the reaction was chosen
+when it was measured.
 """
 
 from __future__ import annotations
@@ -117,6 +123,9 @@ POST_LIKE_JS = r"""(mark) => {
     likes[0].setAttribute(mark, '');
     return result;
 }"""
+
+# A click dispatched in the page, for controls that only show on hover.
+IN_PAGE_CLICK_JS = "(element) => element.click()"
 
 # Marks every button on the page, so the reactions menu's buttons are the ones
 # the caret click adds.
@@ -272,16 +281,19 @@ class PostActions:
             )
         return _reaction_result(url, path, reaction, "reacted")
 
-    async def _click(self, selector: str) -> None:
+    async def _click(self, selector: str, *, in_page: bool = False) -> None:
         async with linkedin_element(
             self._session.page.locator(selector), timeout=5000
         ) as element:
-            await element.click(timeout=5000)
+            if in_page:
+                await element.evaluate(IN_PAGE_CLICK_JS)
+            else:
+                await element.click(timeout=5000)
 
     async def _choose_from_menu(self, url: str, reaction: Reaction) -> None:
         page = self._session.page
         await page.evaluate(REACTION_MENU_PREPARE_JS, _BEFORE_MARK)
-        await self._click(f"button[{_CARET_MARK}]")
+        await self._click(f"button[{_CARET_MARK}]", in_page=True)
         options = {
             "before": _BEFORE_MARK,
             "mark": _CHOICE_MARK,
@@ -299,7 +311,7 @@ class PostActions:
                 "buttons, where the six reactions were expected. Nothing was "
                 "chosen."
             )
-        await self._click(f"button[{_CHOICE_MARK}]")
+        await self._click(f"button[{_CHOICE_MARK}]", in_page=True)
 
     async def _wait_until(self, done) -> bool:
         deadline = self._session.monotonic() + _LIKE_TIMEOUT

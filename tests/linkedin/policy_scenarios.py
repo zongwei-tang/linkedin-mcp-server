@@ -440,6 +440,9 @@ async def _react_to_post_scenario() -> dict[str, Any]:
     )
     page.script("evaluate:reaction_menu_prepare", True)
     page.script("evaluate:reaction_choice", {"added": 6})
+    # Both are hidden until hovered, so both are clicked in the page.
+    page.script("post_reaction_caret.evaluate:in_page_click", None)
+    page.script("post_reaction_choice.evaluate:in_page_click", None)
     extractor = _extractor(page)
     arguments = {"post": "urn:li:activity:7212345678901234567", "reaction": "celebrate"}
     async with boundaries(recorder, clock):

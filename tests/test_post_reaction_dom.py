@@ -66,6 +66,10 @@ document.querySelector('[data-finite-scroll-hotkey="l"]').addEventListener('clic
         return;
     }
     const menu = document.createElement('div');
+    // As live: the menu is not visible until a hover animates it in.
+    if (document.body.hasAttribute('data-hidden-menu')) {
+        menu.style.visibility = 'hidden';
+    }
     LABELS.forEach((label, index) => {
         const button = document.createElement('button');
         button.setAttribute('aria-label', 'Reagieren: ' + label);
@@ -222,3 +226,17 @@ async def test_an_unknown_reaction_never_opens_the_post(dom_page):
     with pytest.raises(ValueError, match="reaction must be one of"):
         await act(dom_page, post_page(None), "angry")
     assert await log(dom_page) == []
+
+
+async def test_a_menu_hidden_until_hovered_is_still_chosen_from(dom_page):
+    # The live failure: a real click waits for the menu to become visible and
+    # never sees it. The caret is hidden the same way.
+    html = post_page(None).replace(
+        'data-finite-scroll-hotkey="l"></button></span></div></div>',
+        'data-finite-scroll-hotkey="l" style="visibility: hidden"></button></span></div></div>',
+        1,
+    )
+    result = await act(dom_page, html, "celebrate", body_attrs={"data-hidden-menu": ""})
+
+    assert result["status"] == "reacted"
+    assert await log(dom_page) == ["caret", "PRAISE"]

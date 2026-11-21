@@ -37,7 +37,7 @@ a page-owning collaborator.
 | `navigation` | `PageNavigator`, `WaitUntil` | `page-owning` |
 | `network` | `CONNECTIONS_URL`, `INVITATION_URLS`, `InvitationDirection`, `NOTIFICATIONS_URL`, `NetworkReader`, `PROFILE_VIEWS_URL` | `browser-free` |
 | `person` | `PersonReader` | `page-owning` |
-| `post_actions` | `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
+| `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
 | `posts` | `PostSearch` | `browser-free` |
 | `profile_page` | `MessageTarget`, `MessageTargetResolution`, `ProfilePageReader`, `ReadMessageTarget` | `browser-free` |
 | `search_urls` | `CONTENT_DATE_POSTED_MAP`, `CONTENT_TYPE_MAP`, `EXPERIENCE_LEVEL_MAP`, `JOB_DATE_POSTED_MAP`, `JOB_TYPE_MAP`, `NETWORK_TOKENS`, `SORT_BY_MAP`, `WORK_TYPE_MAP`, `build_company_search_url()`, `build_content_search_url()`, `build_job_search_url()`, `build_people_search_url()` | `browser-free` |

@@ -102,8 +102,9 @@
     {
       "call": "set_post_reaction",
       "handle": "post_reaction_caret",
-      "kind": "handle.click",
-      "timeout_ms": 5000
+      "kind": "handle.evaluate",
+      "operation": "in_page_click",
+      "program_digest": "ad50f6d69363"
     },
     {
       "call": "set_post_reaction",
@@ -144,8 +145,9 @@
     {
       "call": "set_post_reaction",
       "handle": "post_reaction_choice",
-      "kind": "handle.click",
-      "timeout_ms": 5000
+      "kind": "handle.evaluate",
+      "operation": "in_page_click",
+      "program_digest": "ad50f6d69363"
     },
     {
       "call": "set_post_reaction",
