@@ -1,0 +1,199 @@
+{
+  "call": {
+    "arguments": {
+      "liked": true,
+      "post": "urn:li:activity:7212345678901234567"
+    },
+    "method": "set_post_liked"
+  },
+  "events": [
+    {
+      "call": "set_post_liked",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_post_liked",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "requested_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_post_liked",
+      "description": "goto https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_post_liked",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_post_liked",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_post_liked",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-like",
+      "call": "set_post_liked",
+      "kind": "evaluate",
+      "operation": "post_like",
+      "program_digest": "d44ee1c5eeeb"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "locator.create",
+      "locator": "post_like_button",
+      "parent": null,
+      "selector": "button[data-mcp-like]"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "locator.element_handle",
+      "locator": "post_like_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_liked",
+      "handle": "post_like_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_post_liked",
+      "handle": "post_like_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_liked",
+      "handle": "post_like_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.25
+    },
+    {
+      "arg": "data-mcp-like",
+      "call": "set_post_liked",
+      "kind": "evaluate",
+      "operation": "post_like",
+      "program_digest": "d44ee1c5eeeb"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_post_liked",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_post_liked",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "requested_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_post_liked",
+      "description": "goto https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_post_liked",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_post_liked",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_post_liked",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_post_liked",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-like",
+      "call": "set_post_liked",
+      "kind": "evaluate",
+      "operation": "post_like",
+      "program_digest": "d44ee1c5eeeb"
+    }
+  ],
+  "result": {
+    "liked": true,
+    "post": "/feed/update/urn:li:activity:7212345678901234567/",
+    "status": "liked",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+  },
+  "scenario": "set_post_liked__liked",
+  "schema_version": 1
+}

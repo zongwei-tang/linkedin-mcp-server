@@ -933,6 +933,42 @@
       "fastmcp": {
         "tags": [
           "actions",
+          "post"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Like one LinkedIn post as the signed-in member.\n\nThe post's state is read first: a post you already like is left\nalone and reported already_liked, so a repeated call clicks nothing.\nThe like is confirmed by loading the post again. Comments are never\ntouched. Undo with unlike_post.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "post": {
+          "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\").",
+          "type": "string"
+        }
+      },
+      "required": [
+        "post"
+      ],
+      "type": "object"
+    },
+    "name": "like_post",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Like Post"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
           "messaging"
         ]
       }
@@ -1369,5 +1405,41 @@
       "type": "object"
     },
     "title": "Send Message"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "post"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Remove the signed-in member's like from one LinkedIn post.\n\nA post you have not reacted to is left alone and reported\nalready_unliked, so a repeated call clicks nothing. The change is\nconfirmed by loading the post again. Comments are never touched.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "post": {
+          "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\").",
+          "type": "string"
+        }
+      },
+      "required": [
+        "post"
+      ],
+      "type": "object"
+    },
+    "name": "unlike_post",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Unlike Post"
   }
 ]

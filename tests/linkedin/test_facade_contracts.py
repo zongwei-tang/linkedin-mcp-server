@@ -73,6 +73,8 @@ TOOL_DELEGATES = {
     "get_connections": "get_connections",
     "get_notifications": "get_notifications",
     "get_profile_views": "get_profile_views",
+    "like_post": "set_post_liked",
+    "unlike_post": "set_post_liked",
 }
 
 
@@ -111,6 +113,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_message_sender",
         "_network",
         "_person",
+        "_post_actions",
         "_posts",
     }
     assert set(vars(extractor)) == expected_state

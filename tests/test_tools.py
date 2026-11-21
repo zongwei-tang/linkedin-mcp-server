@@ -51,6 +51,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.search_posts = AsyncMock(return_value=result)
     mock.get_company_employees = AsyncMock(return_value=result)
     mock.read_post = AsyncMock(return_value=result)
+    mock.set_post_liked = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -203,6 +204,8 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
             {"post": "7212345678901234567"},
             "post is not a LinkedIn post",
         ),
+        ("post", "like_post", {"post": "/feed/"}, "post is not a LinkedIn post"),
+        ("post", "unlike_post", {"post": "/in/ada/"}, "post is not a LinkedIn post"),
         (
             "messaging",
             "reply_to_conversation",
@@ -337,6 +340,8 @@ _A_VALID_CALL = [
     ("feed", "get_feed", {}),
     ("post", "search_posts", {"keywords": "python"}),
     ("post", "get_post_details", {"post": "urn:li:activity:7212345678901234567"}),
+    ("post", "like_post", {"post": "urn:li:activity:7212345678901234567"}),
+    ("post", "unlike_post", {"post": "urn:li:activity:7212345678901234567"}),
     ("network", "get_invitations", {}),
     ("network", "get_connections", {}),
     ("network", "get_notifications", {}),
@@ -2912,6 +2917,46 @@ class TestFeedTools:
 
         with pytest.raises(ValidationError, match="num_posts"):
             await mcp.call_tool("get_feed", {"num_posts": 51})
+
+
+class TestLikeTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "liked"), [("like_post", True), ("unlike_post", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, liked):
+        expected = {
+            "url": "u",
+            "post": "/feed/update/urn:li:activity:1/",
+            "liked": liked,
+            "status": "x",
+        }
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            tool_name, {"post": "urn:li:activity:7212345678901234567"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_post_liked.assert_awaited_once_with(
+            "urn:li:activity:7212345678901234567", liked
+        )
+
+    @pytest.mark.parametrize("tool_name", ["like_post", "unlike_post"])
+    async def test_they_are_idempotent_writes(self, tool_name):
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        tool = await mcp.get_tool(tool_name)
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is False
+        assert tool.annotations.destructive_hint is False
+        assert tool.annotations.idempotent_hint is True
 
 
 class TestPostDetailsAndNetworkTools:

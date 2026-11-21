@@ -109,6 +109,14 @@
       "description": "Read one LinkedIn post in full, with the comments its page shows"
     },
     {
+      "name": "like_post",
+      "description": "Like a LinkedIn post as the signed-in member; a post already liked is left alone"
+    },
+    {
+      "name": "unlike_post",
+      "description": "Remove the signed-in member's like from a LinkedIn post"
+    },
+    {
       "name": "get_invitations",
       "description": "List your pending connection invitations, received or sent"
     },

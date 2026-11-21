@@ -394,6 +394,32 @@ async def _job_search_scenario(route: str = "/jobs/search/") -> dict[str, Any]:
     )
 
 
+async def _like_post_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_post_liked__liked",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    post = "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+    page.goto_landings.extend([post, post])
+    page.declare_locator("button[data-mcp-like]", "post_like_button")
+    page.script(
+        "evaluate:post_like",
+        {"carets": 1, "likes": 1, "pressed": False},
+        {"carets": 1, "likes": 1, "pressed": True},
+        # The reload has to show the like too, and only that confirms it.
+        {"carets": 1, "likes": 1, "pressed": True},
+    )
+    extractor = _extractor(page)
+    arguments = {"post": "urn:li:activity:7212345678901234567", "liked": True}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_post_liked"):
+            result = await extractor.set_post_liked(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_post_liked", "arguments": arguments}, result)
+
+
 async def _dismiss_job_scenario() -> dict[str, Any]:
     recorder = TraceRecorder("dismiss_job__dismissed", _COMMON_ALLOWED | {"title"})
     clock = FakeClock(recorder)
@@ -1301,6 +1327,7 @@ TOOL_FACADE_METHODS = {
     "get_connections",
     "get_notifications",
     "get_profile_views",
+    "set_post_liked",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1332,6 +1359,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "job-search-metadata-upgrade.json": await _job_search_upgrade_scenario(),
         "saved-jobs.json": await _saved_jobs_scenario(),
         "dismiss-job.json": await _dismiss_job_scenario(),
+        "like-post.json": await _like_post_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

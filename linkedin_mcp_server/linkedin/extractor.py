@@ -25,6 +25,7 @@ from linkedin_mcp_server.linkedin.message_sender import MessageSender
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.network import InvitationDirection, NetworkReader
 from linkedin_mcp_server.linkedin.person import PersonReader
+from linkedin_mcp_server.linkedin.post_actions import PostActions
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
 from linkedin_mcp_server.linkedin.session import PageSession
@@ -68,6 +69,7 @@ class LinkedInExtractor:
         self._jobs = JobReader(navigator, capture, job_pages)
         self._posts = PostSearch(capture)
         self._network = NetworkReader(capture)
+        self._post_actions = PostActions(session, navigator)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -246,6 +248,10 @@ class LinkedInExtractor:
     ) -> dict[str, Any]:
         """Read one post and the comments its page renders."""
         return await self._posts.read_post(post, max_scrolls)
+
+    async def set_post_liked(self, post: str, liked: bool) -> dict[str, Any]:
+        """Like or unlike one post, leaving it as asked."""
+        return await self._post_actions.set_post_liked(post, liked)
 
     async def get_invitations(
         self,

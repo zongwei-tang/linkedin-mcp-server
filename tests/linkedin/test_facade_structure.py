@@ -60,6 +60,7 @@ PUBLIC_SIGNATURES = {
     "get_connections": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
     "get_notifications": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
     "get_profile_views": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
+    "set_post_liked": "(self, post: 'str', liked: 'bool') -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -93,6 +94,7 @@ DELEGATES = {
     "get_connections": ("_network", "get_connections"),
     "get_notifications": ("_network", "get_notifications"),
     "get_profile_views": ("_network", "get_profile_views"),
+    "set_post_liked": ("_post_actions", "set_post_liked"),
 }
 
 DELEGATE_CALLS = {
@@ -126,6 +128,7 @@ DELEGATE_CALLS = {
     "get_connections": "self._network.get_connections(max_scrolls)",
     "get_notifications": "self._network.get_notifications(max_scrolls)",
     "get_profile_views": "self._network.get_profile_views(max_scrolls)",
+    "set_post_liked": "self._post_actions.set_post_liked(post, liked)",
 }
 
 FACADE_STATE = {
@@ -139,6 +142,7 @@ FACADE_STATE = {
     "_message_sender",
     "_network",
     "_person",
+    "_post_actions",
     "_posts",
 }
 

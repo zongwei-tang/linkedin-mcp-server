@@ -159,3 +159,77 @@ def register_post_tools(
         result = await extractor.read_post(post, max_scrolls=max_scrolls)
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result
+
+    _WRITE = {
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Like Post",
+        annotations=_WRITE,
+        tags={"post", "actions"},
+    )
+    @tool_errors
+    async def like_post(post: str, ctx: Context) -> dict[str, Any]:
+        """
+        Like one LinkedIn post as the signed-in member.
+
+        The post's state is read first: a post you already like is left
+        alone and reported already_liked, so a repeated call clicks nothing.
+        The like is confirmed by loading the post again. Comments are never
+        touched. Undo with unlike_post.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, post (its path), liked (true) and status: "liked"
+            or "already_liked".
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="like_post")
+        logger.info("Liking post: %s", post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.set_post_liked(post, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unlike Post",
+        annotations=_WRITE,
+        tags={"post", "actions"},
+    )
+    @tool_errors
+    async def unlike_post(post: str, ctx: Context) -> dict[str, Any]:
+        """
+        Remove the signed-in member's like from one LinkedIn post.
+
+        A post you have not reacted to is left alone and reported
+        already_unliked, so a repeated call clicks nothing. The change is
+        confirmed by loading the post again. Comments are never touched.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, post (its path), liked (false) and status:
+            "unliked" or "already_unliked".
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="unlike_post")
+        logger.info("Unliking post: %s", post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.set_post_liked(post, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result

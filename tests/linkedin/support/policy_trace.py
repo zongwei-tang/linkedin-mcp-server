@@ -700,6 +700,7 @@ def semantic_program_id(program: str) -> str:
         ("archiveItems[0].setAttribute(mark", "thread_menu_items"),
         ("addedTotal: added.length", "thread_menu_survey"),
         ("result.dismiss = dismiss.length", "job_search_card"),
+        ("likes[0].setAttribute(mark", "post_like"),
         ("return {ids: ids, scoped", "job_ids"),
         ("promoted.push(id)", "job_promoted_ids"),
         ("signals.bounded && (signals.easy_apply", "job_apply_ready"),
