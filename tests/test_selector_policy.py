@@ -241,7 +241,7 @@ def test_a_class_in_a_shared_selector_constant_fails(
         """_JOB_CARD_SELECTOR = 'a[href*="/jobs/view/"], [componentkey^="job-card-component-ref-"]'""",
         '_JOB_CARD_SELECTOR = "div.job-card-container__link"',
     )
-    assert "core/utils.py:26: bem-class: .job-card-container__link" in _report(
+    assert "core/utils.py:27: bem-class: .job-card-container__link" in _report(
         tree, capsys
     )
 

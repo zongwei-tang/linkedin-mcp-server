@@ -13,6 +13,7 @@ from .destination import is_another_site, is_linkedin_landing, raise_if_off_link
 from .exceptions import (
     AccountRestrictedError,
     AuthenticationError,
+    BotChallengeError,
     ElementNotFoundError,
     LinkedInOperationError,
     NetworkError,
@@ -32,6 +33,7 @@ from .proxy_errors import (
     redact_proxy_credentials,
     redacted_copy,
 )
+from .bot_challenge import raise_if_bot_challenge
 from .utils import detect_rate_limit, handle_modal_close, scroll_to_bottom
 
 if TYPE_CHECKING:
@@ -56,6 +58,7 @@ def __getattr__(name: str) -> object:
 __all__ = [
     "AccountRestrictedError",
     "AuthenticationError",
+    "BotChallengeError",
     "BrowserManager",
     "await_deferring_cancels",
     "detect_auth_barrier",
@@ -68,6 +71,7 @@ __all__ = [
     "ProfileNotFoundError",
     "ProxyConnectionError",
     "RateLimitError",
+    "raise_if_bot_challenge",
     "as_proxy_error",
     "goto_reporting_proxy_errors",
     "is_proxy_error",

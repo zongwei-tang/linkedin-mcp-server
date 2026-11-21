@@ -63,6 +63,29 @@ class RateLimitError(LinkedInOperationError):
         self.suggested_wait_time = suggested_wait_time
 
 
+class BotChallengeError(RateLimitError):
+    """LinkedIn's bot protection answered with a security check, not the page.
+
+    Cloudflare stands in front of www.linkedin.com and serves its check in
+    place, on the page's own URL, so nothing about the address gives it away.
+    A rate limit and not an ``AuthenticationError``: the session is fine, and
+    the re-login that class triggers would retire it for nothing. A
+    ``RateLimitError`` so every handler that already lets throttling through
+    untouched does the same for it, and a capture never retries into it.
+    """
+
+    def __init__(self, message: str | None = None, suggested_wait_time: int = 3600):
+        super().__init__(
+            message
+            or (
+                "LinkedIn's bot protection (Cloudflare) showed a security check "
+                "instead of the page, so nothing was read or clicked. The "
+                "session was kept."
+            ),
+            suggested_wait_time=suggested_wait_time,
+        )
+
+
 class ElementNotFoundError(LinkedInOperationError):
     """Raised when an expected element is not found."""
 

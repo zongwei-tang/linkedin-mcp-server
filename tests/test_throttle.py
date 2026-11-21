@@ -17,6 +17,7 @@ from fastmcp.exceptions import ToolError
 
 from linkedin_mcp_server.core.throttle import (
     browser_call_record,
+    challenge_seen,
     refused_document,
     reset_throttle_record,
     throttle_evidence,
@@ -454,3 +455,43 @@ class TestARefusedPageLoad:
         record(page_load(429, "https://www.linkedin.com/feed/"))
 
         assert refused_document("/feed/") is None
+
+
+class TestACloudflareCheck:
+    """Cloudflare's check is a 403 with ``cf-mitigated: challenge``."""
+
+    @pytest.mark.usefixtures("in_a_browser_call")
+    def test_a_check_is_named_as_one_and_not_as_a_throttled_403(self):
+        record(
+            response(
+                403,
+                "https://www.linkedin.com/pulse/engines-ada/",
+                headers={"cf-mitigated": "challenge"},
+            )
+        )
+
+        assert challenge_seen()
+        assert throttled_count() == 0
+        evidence = throttle_evidence()
+        assert evidence is not None
+        assert "Cloudflare" in evidence and "/pulse/engines-ada/" in evidence
+        assert "HTTP 403" not in evidence
+
+    @pytest.mark.usefixtures("in_a_browser_call")
+    def test_a_plain_403_is_no_check(self):
+        record(response(403, "https://www.linkedin.com/pulse/engines-ada/"))
+
+        assert not challenge_seen()
+        assert throttle_evidence() is None
+
+    def test_outside_a_browser_call_no_check_is_seen(self):
+        reset_throttle_record()
+        record(
+            response(
+                403,
+                "https://www.linkedin.com/feed/",
+                headers={"cf-mitigated": "challenge"},
+            )
+        )
+
+        assert not challenge_seen()

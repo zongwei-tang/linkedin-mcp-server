@@ -18,6 +18,7 @@ from linkedin_mcp_server.common_utils import harden_linkedin_tree, secure_mkdir
 from linkedin_mcp_server.core import (
     AuthenticationError,
     BrowserManager,
+    BotChallengeError,
     OffLinkedInLandingError,
     RateLimitError,
     await_deferring_cancels,
@@ -38,7 +39,8 @@ from linkedin_mcp_server.core import (
 
 from linkedin_mcp_server.browser_launch import build_launch_options, describe_launch
 from linkedin_mcp_server.common_utils import utcnow_iso
-from linkedin_mcp_server.core.throttle import refused_document
+from linkedin_mcp_server.core.bot_challenge import page_is_challenge
+from linkedin_mcp_server.core.throttle import challenge_seen, refused_document
 from linkedin_mcp_server.config import get_config
 from linkedin_mcp_server.debug_trace import record_page_trace
 from linkedin_mcp_server.debug_utils import stabilize_navigation
@@ -254,6 +256,12 @@ async def _feed_auth_succeeds(
         # Again, because the waits above give a redirect time to land, and a
         # verdict either way is only about LinkedIn while the page still is.
         await _refuse_a_landing_off_linkedin(browser, "feed-off-linkedin-settled")
+        if barrier is None and await page_is_challenge(browser.page):
+            # Cloudflare's check on the feed's own URL is neither a signed-in
+            # feed nor a dead session: True would call it signed in, False
+            # would retire a session that is fine.
+            await record_page_trace(browser.page, "feed-bot-challenge")
+            raise BotChallengeError()
         if barrier is not None:
             await record_page_trace(
                 browser.page,
@@ -263,8 +271,9 @@ async def _feed_auth_succeeds(
             await _log_feed_failure_context(browser, barrier)
             return False
         return True
-    except OffLinkedInLandingError:
-        # Also the recursive retries' refusal, which runs inside this try.
+    except (OffLinkedInLandingError, BotChallengeError):
+        # Also the recursive retries' refusals, which run inside this try. A
+        # check is not a navigation failure to recover from with a click.
         raise
     except Exception as exc:
         # Before anything else: a proxy fault is not a dead session. Returning
@@ -307,6 +316,10 @@ async def _feed_auth_succeeds(
         # and both destinations here outlive the call -- the trace is written to
         # disk and the log is what users paste into issue reports.
         await _log_feed_failure_context(browser, detail)
+        if barrier is None and (
+            challenge_seen() or await page_is_challenge(browser.page)
+        ):
+            raise BotChallengeError() from None
         refused = refused_document("/feed/") if barrier is None else None
         if refused is not None:
             # LinkedIn refused the feed itself with a throttling status (an

@@ -36,6 +36,7 @@ from typing import Any
 from urllib.parse import urlsplit
 from weakref import WeakKeyDictionary, WeakSet
 
+from .bot_challenge import response_is_challenge
 from .destination import is_linkedin_landing
 
 logger = logging.getLogger(__name__)
@@ -58,6 +59,9 @@ _count: int = 0
 # This call's page loads LinkedIn refused, by path. A refused document is the
 # one throttling a caller may act on: the page it asked for never came.
 _refused_documents: dict[str, ThrottleHit] = {}
+# Cloudflare's security checks this call met: how many, and the last URL.
+_challenges: int = 0
+_last_challenge: str | None = None
 _watched: WeakSet[Any] = WeakSet()
 
 # Which call each request was sent during. The record is cleared as a call
@@ -105,10 +109,12 @@ def browser_call_record() -> Generator[None]:
 
 def reset_throttle_record() -> None:
     """Forget the previous call's evidence."""
-    global _call, _count, _latest
+    global _call, _count, _latest, _challenges, _last_challenge
     _call += 1
     _count = 0
     _latest = None
+    _challenges = 0
+    _last_challenge = None
     _statuses.clear()
     _refused_documents.clear()
 
@@ -124,8 +130,18 @@ def throttle_evidence() -> str | None:
     None outside a browser call, whose record belongs to another call.
     """
     last = _latest
-    if last is None or not _owns_the_browser.get():
+    if not _owns_the_browser.get():
         return None
+    challenged = (
+        f"LinkedIn's bot protection (Cloudflare) answered {_challenges} "
+        f"{'request' if _challenges == 1 else 'requests'} with a security "
+        f"check during this call, most recently {_path(_last_challenge or '')}. "
+        "Wait before retrying."
+        if _challenges
+        else None
+    )
+    if last is None:
+        return challenged
 
     statuses = " and ".join(f"HTTP {status}" for status in sorted(_statuses))
     asked = (
@@ -138,7 +154,15 @@ def throttle_evidence() -> str | None:
         f"{'request' if _count == 1 else 'requests'} during this call, most "
         f"recently {_path(last.url)}. LinkedIn was throttling this session, "
         f"so wait before retrying.{asked}"
-    )
+    ) + (f" {challenged}" if challenged else "")
+
+
+def challenge_seen() -> bool:
+    """Whether Cloudflare answered any request of this call with its check.
+
+    False outside a browser call, whose record belongs to another call.
+    """
+    return _owns_the_browser.get() and _challenges > 0
 
 
 def refused_document(path: str) -> ThrottleHit | None:
@@ -205,16 +229,23 @@ def _sent_before_this_call(response: Any) -> bool:
 
 def _record(response: Any) -> None:
     """Note one response. Registered on the page; never raises into Playwright."""
-    global _count, _latest
+    global _count, _latest, _challenges, _last_challenge
 
     try:
         status = int(response.status)
-        if status not in THROTTLED_STATUSES:
+        challenged = response_is_challenge(response)
+        if status not in THROTTLED_STATUSES and not challenged:
             return
         url = str(response.url)
         # Another host's 429 is no word from LinkedIn: a proxy or captive
         # portal answering for it would be misreported as LinkedIn's wait.
         if not is_linkedin_landing(url) or _sent_before_this_call(response):
+            return
+        if challenged and status not in THROTTLED_STATUSES:
+            # A check, not a status LinkedIn refused with: told apart in the
+            # evidence, and never counted as an HTTP 403 throttle.
+            _challenges += 1
+            _last_challenge = url
             return
         hit = ThrottleHit(status=status, url=url, retry_after=_retry_after(response))
     except Exception:

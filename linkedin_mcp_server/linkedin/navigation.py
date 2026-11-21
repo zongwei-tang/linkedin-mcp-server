@@ -18,7 +18,12 @@ from linkedin_mcp_server.core.destination import (
     is_linkedin_landing,
     raise_if_off_linkedin,
 )
-from linkedin_mcp_server.core.exceptions import AuthenticationError
+from linkedin_mcp_server.core.bot_challenge import raise_if_bot_challenge
+from linkedin_mcp_server.core.exceptions import (
+    AuthenticationError,
+    BotChallengeError,
+    NetworkError,
+)
 from linkedin_mcp_server.core.proxy_errors import (
     NAVIGATION_BUDGET_MS,
     goto_reporting_proxy_errors,
@@ -26,6 +31,7 @@ from linkedin_mcp_server.core.proxy_errors import (
     redact_proxy_credentials,
     redacted_copy,
 )
+from linkedin_mcp_server.core.throttle import challenge_seen
 from linkedin_mcp_server.debug_trace import record_page_trace
 from linkedin_mcp_server.debug_utils import stabilize_navigation
 from linkedin_mcp_server.linkedin.session import PageSession
@@ -33,6 +39,15 @@ from linkedin_mcp_server.linkedin.session import PageSession
 logger = logging.getLogger(__name__)
 
 WaitUntil = Literal["commit", "domcontentloaded", "load", "networkidle"]
+
+
+async def _is_bot_challenge(page: Any, response: Any) -> bool:
+    """Whether the navigation ended on Cloudflare's check instead of the page."""
+    try:
+        await raise_if_bot_challenge(page, response)
+    except BotChallengeError:
+        return True
+    return False
 
 
 class PageNavigator:
@@ -204,7 +219,7 @@ class PageNavigator:
                 # deadline bounds the wait for the request as well, which
                 # the wrapper otherwise runs ahead of the timeout.
                 if type(page).__module__.startswith("patchright."):
-                    await goto_reporting_proxy_errors(
+                    response = await goto_reporting_proxy_errors(
                         page,
                         url,
                         wait_until=wait_until,
@@ -212,7 +227,7 @@ class PageNavigator:
                         overall_timeout=overall_ms,
                     )
                 else:
-                    await page.goto(
+                    response = await page.goto(
                         url,
                         wait_until=wait_until,
                         timeout=timeout_ms,
@@ -277,6 +292,20 @@ class PageNavigator:
                 )
                 await self._log_navigation_failure(url, wait_until, exc, hops)
                 await self._raise_if_auth_barrier(url, navigation_error=exc)
+                if "err_too_many_redirects" in str(exc).lower():
+                    # Measured 2026-11-21: once Cloudflare's check held a
+                    # browser, every later navigation looped until Chromium
+                    # gave up, and retrying at once drew a 429. A classified
+                    # error says so instead of a masked internal one.
+                    if challenge_seen():
+                        raise BotChallengeError() from None
+                    raise NetworkError(
+                        f"LinkedIn kept redirecting {url} until the browser "
+                        "gave up (ERR_TOO_MANY_REDIRECTS), so nothing was read "
+                        "or clicked. It follows a security check or a damaged "
+                        "session; wait before retrying rather than retrying "
+                        "at once."
+                    ) from None
                 # Re-raised as a redacted copy rather than the original: with a
                 # proxy configured, a driver error can quote the proxy URL, and
                 # everything downstream from here logs the exception -- the
@@ -296,6 +325,16 @@ class PageNavigator:
                     extra={"target_url": url, "hops": hops},
                 )
                 raise_if_off_linkedin(page.url)
+
+            # Cloudflare answers in place, on the page's own URL, so neither
+            # the landing check above nor the barrier check below sees it.
+            if await _is_bot_challenge(page, response):
+                await record_page_trace(
+                    page,
+                    "extractor-bot-challenge",
+                    extra={"target_url": url, "hops": hops},
+                )
+                raise BotChallengeError()
 
             barrier = await detect_auth_barrier_quick(page)
             if not barrier:

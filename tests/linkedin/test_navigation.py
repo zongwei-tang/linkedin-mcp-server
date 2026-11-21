@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, patch
 
 from patchright.async_api import Error as PatchrightError
@@ -11,6 +12,8 @@ import pytest
 from linkedin_mcp_server.core.exceptions import (
     AccountRestrictedError,
     AuthenticationError,
+    BotChallengeError,
+    NetworkError,
     OffLinkedInLandingError,
     ProxyConnectionError,
 )
@@ -966,3 +969,74 @@ class TestALandingOffLinkedInStopsTheRead:
         assert result.text == ""
         assert result.error is not None
         assert "ERR_NAME_NOT_RESOLVED" in result.error["error_message"]
+
+
+class TestCloudflareCheck:
+    """Cloudflare answers in place, on the page's own URL (measured 2026-11-21)."""
+
+    async def test_a_challenge_response_is_a_bot_check_not_a_page(self, mock_page):
+        navigator = PageNavigator(PageSession(mock_page))
+        challenge = SimpleNamespace(status=403, headers={"cf-mitigated": "challenge"})
+        mock_page.goto = AsyncMock(return_value=challenge)
+
+        with (
+            patch(
+                "linkedin_mcp_server.linkedin.navigation.detect_auth_barrier_quick",
+                new_callable=AsyncMock,
+                return_value=None,
+            ),
+            pytest.raises(BotChallengeError),
+        ):
+            await navigator._goto_with_auth_checks(
+                "https://www.linkedin.com/pulse/engines-ada/"
+            )
+
+    async def test_a_served_page_passes(self, mock_page):
+        navigator = PageNavigator(PageSession(mock_page))
+        mock_page.goto = AsyncMock(
+            return_value=SimpleNamespace(status=200, headers={"server": "x"})
+        )
+
+        with patch(
+            "linkedin_mcp_server.linkedin.navigation.detect_auth_barrier_quick",
+            new_callable=AsyncMock,
+            return_value=None,
+        ):
+            await navigator._goto_with_auth_checks(
+                "https://www.linkedin.com/pulse/engines-ada/"
+            )
+
+    @pytest.mark.parametrize(
+        ("challenged", "expected"),
+        [(False, NetworkError), (True, BotChallengeError)],
+        ids=["no-check-seen", "after-a-check"],
+    )
+    async def test_a_redirect_loop_is_classified_not_internal(
+        self, mock_page, challenged, expected
+    ):
+        navigator = PageNavigator(PageSession(mock_page))
+        mock_page.goto = AsyncMock(
+            side_effect=PatchrightError("net::ERR_TOO_MANY_REDIRECTS at https://x")
+        )
+
+        with (
+            patch(
+                "linkedin_mcp_server.linkedin.navigation.resolve_remember_me_prompt",
+                new_callable=AsyncMock,
+                return_value=False,
+            ),
+            patch(
+                "linkedin_mcp_server.linkedin.navigation.detect_auth_barrier_quick",
+                new_callable=AsyncMock,
+                return_value=None,
+            ),
+            patch(
+                "linkedin_mcp_server.linkedin.navigation.challenge_seen",
+                return_value=challenged,
+            ),
+            pytest.raises(expected) as caught,
+        ):
+            await navigator._goto_with_auth_checks(
+                "https://www.linkedin.com/in/williamhgates/"
+            )
+        assert type(caught.value) is expected

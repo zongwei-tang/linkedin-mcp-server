@@ -4,6 +4,7 @@ import pytest
 from fastmcp.exceptions import ToolError
 
 from linkedin_mcp_server.core.exceptions import (
+    BotChallengeError,
     NetworkError,
     ProfileNotFoundError,
     InvalidReferenceError,
@@ -11,7 +12,11 @@ from linkedin_mcp_server.core.exceptions import (
     RateLimitError,
     PageReadError,
 )
-from linkedin_mcp_server.error_handler import CodedToolError, raise_tool_error
+from linkedin_mcp_server.error_handler import (
+    CodedToolError,
+    ErrorCode,
+    raise_tool_error,
+)
 from linkedin_mcp_server.exceptions import (
     AuthenticationInProgressError,
     AuthMissingOnOwnerError,
@@ -46,6 +51,17 @@ def test_raises_tool_error_for_rate_limit_default_wait():
     error = RateLimitError("Rate limited")
     with pytest.raises(ToolError, match="Wait 300 seconds"):
         raise_tool_error(error)
+
+
+def test_a_bot_check_is_a_rate_limit_that_names_it():
+    # Not auth_required: that code retires a session that is fine.
+    with pytest.raises(CodedToolError) as caught:
+        raise_tool_error(BotChallengeError())
+
+    assert caught.value.code == ErrorCode.RATE_LIMITED
+    assert caught.value.retry_after == 3600
+    assert "Cloudflare" in str(caught.value)
+    assert "session was kept" in str(caught.value)
 
 
 def test_raises_tool_error_for_profile_not_found():

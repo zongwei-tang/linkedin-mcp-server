@@ -13,6 +13,7 @@ from patchright.async_api import (
 )
 
 from .auth import raise_if_auth_route
+from .bot_challenge import raise_if_bot_challenge
 from .destination import linkedin_element
 from .exceptions import OffLinkedInLandingError, RateLimitError
 
@@ -278,7 +279,8 @@ async def detect_rate_limit(page: Page) -> None:
 
     Checks (in order):
     1. URL is a login, authwall or checkpoint route (security challenge)
-    2. Body text contains rate-limit phrases on error-shaped pages (throttling)
+    2. Cloudflare's security check, served in place of the page
+    3. Body text contains rate-limit phrases on error-shaped pages (throttling)
 
     The body-text heuristic only runs on pages without a ``<main>`` element
     and with short body text (<2000 chars), since real rate-limit pages are
@@ -289,9 +291,12 @@ async def detect_rate_limit(page: Page) -> None:
         AuthenticationError: On a security challenge, which waiting does not
             clear, so it gets the same re-login as one met on navigation.
         AccountRestrictedError: On LinkedIn's account-restriction route.
+        BotChallengeError: On Cloudflare's security check, which is a rate
+            limit and not a dead session.
         RateLimitError: If a throttling page is detected
     """
     raise_if_auth_route(page.url)
+    await raise_if_bot_challenge(page)
 
     # Check for rate limit messages — only on error-shaped pages.
     # Real rate-limit pages have no <main> element and short body text.

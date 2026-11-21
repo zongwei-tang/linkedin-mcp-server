@@ -33,6 +33,7 @@ from linkedin_mcp_server.core.exceptions import (
     ProfileNotFoundError,
     ProxyConnectionError,
     RateLimitError,
+    BotChallengeError,
 )
 
 from linkedin_mcp_server.exceptions import (
@@ -439,6 +440,17 @@ def _shape_tool_error(exception: Exception, context: str = "") -> NoReturn:
             context=context,
             code=ErrorCode.AUTH_REQUIRED,
         )
+
+    elif isinstance(exception, BotChallengeError):
+        wait_time = exception.suggested_wait_time
+        logger.warning("Bot check%s: %s (wait=%ds)", ctx, exception, wait_time)
+        raise CodedToolError(
+            f"{exception} Wait {wait_time} seconds before trying again; a "
+            "browser that runs headless or a datacenter network makes the "
+            "check likelier.",
+            ErrorCode.RATE_LIMITED,
+            retry_after=wait_time,
+        ) from exception
 
     elif isinstance(exception, RateLimitError):
         wait_time = getattr(exception, "suggested_wait_time", 300)

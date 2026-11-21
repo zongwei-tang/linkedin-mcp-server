@@ -11,6 +11,7 @@ from linkedin_mcp_server.config.schema import AppConfig
 from linkedin_mcp_server.core.exceptions import (
     AccountRestrictedError,
     OffLinkedInLandingError,
+    BotChallengeError,
     ProxyConnectionError,
     RateLimitError,
 )
@@ -334,6 +335,54 @@ async def test_a_feed_linkedin_refused_with_429_is_a_rate_limit_not_a_dead_sessi
         await _feed_auth_succeeds(browser)
 
     assert caught.value.suggested_wait_time == 42
+
+
+@pytest.mark.asyncio
+async def test_cloudflares_check_on_the_feed_is_neither_signed_in_nor_expired():
+    # True would call the check a signed-in feed; False would retire the session.
+    browser = _make_mock_browser()
+
+    with (
+        patch(
+            "linkedin_mcp_server.drivers.browser.resolve_remember_me_prompt",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.detect_auth_barrier_quick",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.page_is_challenge",
+            new_callable=AsyncMock,
+            return_value=True,
+        ),
+        pytest.raises(BotChallengeError),
+    ):
+        await _feed_auth_succeeds(browser)
+
+
+@pytest.mark.asyncio
+async def test_a_feed_load_that_failed_after_a_check_keeps_the_session():
+    browser = _make_mock_browser()
+    browser.page.goto = AsyncMock(side_effect=Exception("net::ERR_TOO_MANY_REDIRECTS"))
+
+    with (
+        patch(
+            "linkedin_mcp_server.drivers.browser.resolve_remember_me_prompt",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.detect_auth_barrier_quick",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch("linkedin_mcp_server.drivers.browser.challenge_seen", return_value=True),
+        pytest.raises(BotChallengeError),
+    ):
+        await _feed_auth_succeeds(browser)
 
 
 @pytest.mark.asyncio
