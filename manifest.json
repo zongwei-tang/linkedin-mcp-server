@@ -101,6 +101,14 @@
       "description": "List job postings saved by the authenticated LinkedIn user"
     },
     {
+      "name": "save_job",
+      "description": "Save a LinkedIn job posting to your saved jobs"
+    },
+    {
+      "name": "unsave_job",
+      "description": "Remove a LinkedIn job posting from your saved jobs"
+    },
+    {
       "name": "dismiss_job",
       "description": "Dismiss a job from job search so later searches no longer show it"
     },

@@ -705,6 +705,7 @@ def semantic_program_id(program: str) -> str:
         ("button.setAttribute(before", "mark_all_buttons"),
         ("result.followed = STATES[icon]", "person_follow"),
         ("const FOLLOW_ICONS = ['check-small', 'add-small']", "company_follow"),
+        ("const {applyPath, redirectPath, mark} = opts", "job_save_button"),
         ("plain[1].setAttribute(mark", "unfollow_confirm"),
         ("reactions[index].setAttribute(mark", "reaction_choice"),
         ("buttons[0].setAttribute(mark", "invitation_row"),

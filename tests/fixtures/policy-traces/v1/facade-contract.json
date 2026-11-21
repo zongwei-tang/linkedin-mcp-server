@@ -140,6 +140,10 @@
         "coroutine": true,
         "signature": "(self, company: 'str', followed: 'bool') -> 'dict[str, Any]'"
       },
+      "set_job_saved": {
+        "coroutine": true,
+        "signature": "(self, job_id: 'str', saved: 'bool') -> 'dict[str, Any]'"
+      },
       "set_person_followed": {
         "coroutine": true,
         "signature": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'"
@@ -184,6 +188,7 @@
       "search_posts",
       "send_message",
       "set_company_followed",
+      "set_job_saved",
       "set_person_followed",
       "set_post_liked",
       "set_post_reaction"
@@ -927,6 +932,25 @@
           "type": "object"
         }
       },
+      "save_job": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "search_companies": {
         "input": {
           "additionalProperties": false,
@@ -1285,6 +1309,25 @@
           },
           "required": [
             "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "unsave_job": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id"
           ],
           "type": "object"
         },

@@ -1169,6 +1169,42 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "actions",
+          "job"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Save one job posting to your saved jobs. Private: nobody is told.\n\nThe state is read from your saved-jobs list, not from the posting's\nbutton: a posting already listed is left alone and reported\nalready_saved. One saved so long ago that it is past the pages read\nis found by the click itself, which is then put back. Undo with\nunsave_job; list saved jobs with get_saved_jobs.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "type": "object"
+    },
+    "name": "save_job",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Save Job"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "company",
           "search"
         ]
@@ -1670,5 +1706,41 @@
       "type": "object"
     },
     "title": "Unlike Post"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "job"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Remove one job posting from your saved jobs.\n\nA posting not in your saved list is left as found and reported\nalready_unsaved; telling that apart from one saved long ago can take a\nclick that is then put back. Undo with save_job.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "job_id": {
+          "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "type": "object"
+    },
+    "name": "unsave_job",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Unsave Job"
   }
 ]

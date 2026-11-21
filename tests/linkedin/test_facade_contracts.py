@@ -81,6 +81,8 @@ TOOL_DELEGATES = {
     "unfollow_person": "set_person_followed",
     "follow_company": "set_company_followed",
     "unfollow_company": "set_company_followed",
+    "save_job": "set_job_saved",
+    "unsave_job": "set_job_saved",
 }
 
 
@@ -117,6 +119,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_conversations",
         "_feed",
         "_invitation_actions",
+        "_job_actions",
         "_jobs",
         "_message_sender",
         "_network",

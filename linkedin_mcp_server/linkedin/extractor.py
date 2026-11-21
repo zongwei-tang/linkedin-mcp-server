@@ -20,6 +20,7 @@ from linkedin_mcp_server.linkedin.contracts import (
 from linkedin_mcp_server.linkedin.conversations import ConversationReader
 from linkedin_mcp_server.linkedin.feed import FeedReader
 from linkedin_mcp_server.linkedin.invitation_actions import InvitationActions
+from linkedin_mcp_server.linkedin.job_actions import JobActions, saved_job_ids_from
 from linkedin_mcp_server.linkedin.job_pages import JobPageReader
 from linkedin_mcp_server.linkedin.job_policy import JobsTrackerStage
 from linkedin_mcp_server.linkedin.jobs import JobReader
@@ -76,6 +77,9 @@ class LinkedInExtractor:
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)
         self._company_actions = CompanyActions(session, navigator)
+        self._job_actions = JobActions(
+            session, navigator, saved_job_ids_from(self._jobs)
+        )
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -282,6 +286,10 @@ class LinkedInExtractor:
     ) -> dict[str, Any]:
         """Follow or unfollow one company page, leaving it as asked."""
         return await self._company_actions.set_company_followed(company, followed)
+
+    async def set_job_saved(self, job_id: str, saved: bool) -> dict[str, Any]:
+        """Save or unsave one job posting, leaving it as asked."""
+        return await self._job_actions.set_job_saved(job_id, saved)
 
     async def ignore_invitation(self, username: str) -> dict[str, Any]:
         """Ignore the pending invitation one person sent."""

@@ -336,3 +336,74 @@ def register_job_tools(
         await ctx.report_progress(progress=100, total=100, message="Complete")
 
         return result
+
+    _SAVE_WRITE = {
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Save Job",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def save_job(job_id: str, ctx: Context) -> dict[str, Any]:
+        """
+        Save one job posting to your saved jobs. Private: nobody is told.
+
+        The state is read from your saved-jobs list, not from the posting's
+        button: a posting already listed is left alone and reported
+        already_saved. One saved so long ago that it is past the pages read
+        is found by the click itself, which is then put back. Undo with
+        unsave_job; list saved jobs with get_saved_jobs.
+
+        Args:
+            job_id: LinkedIn job ID (e.g. "4252026496"), or a posting URL.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, job_id, saved (true) and status: "saved" or
+            "already_saved".
+        """
+        job_id = normalize_job_id(job_id)
+        extractor = await get_ready_extractor(ctx, tool_name="save_job")
+        logger.info("Saving job %s", job_id)
+        await ctx.report_progress(progress=0, total=100, message="Reading saved jobs")
+        result = await extractor.set_job_saved(job_id, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unsave Job",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def unsave_job(job_id: str, ctx: Context) -> dict[str, Any]:
+        """
+        Remove one job posting from your saved jobs.
+
+        A posting not in your saved list is left as found and reported
+        already_unsaved; telling that apart from one saved long ago can take a
+        click that is then put back. Undo with save_job.
+
+        Args:
+            job_id: LinkedIn job ID (e.g. "4252026496"), or a posting URL.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, job_id, saved (false) and status: "unsaved" or
+            "already_unsaved".
+        """
+        job_id = normalize_job_id(job_id)
+        extractor = await get_ready_extractor(ctx, tool_name="unsave_job")
+        logger.info("Unsaving job %s", job_id)
+        await ctx.report_progress(progress=0, total=100, message="Reading saved jobs")
+        result = await extractor.set_job_saved(job_id, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result

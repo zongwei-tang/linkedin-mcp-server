@@ -30,6 +30,7 @@ a page-owning collaborator.
 | `fields` | `COMPANY_SECTIONS`, `PERSON_SECTIONS`, `parse_company_sections()`, `parse_person_sections()` | `browser-free` |
 | `identifiers` | `company_page_url()`, `job_id_from_path()`, `job_id_from_search_query()`, `job_view_url()`, `messaging_thread_url()`, `normalize_company_identifier()`, `normalize_job_id()`, `normalize_opaque_id()`, `normalize_person_identifier()`, `normalize_post_reference()`, `normalize_profile_urn()`, `normalize_thread_id()`, `person_profile_url()`, `post_page_url()`, `reply_thread_id()` | `browser-free` |
 | `invitation_actions` | `INVITATION_PRESENT_JS`, `INVITATION_ROW_JS`, `InvitationActions`, `ROW_KEY_PREFIX` | `page-owning` |
+| `job_actions` | `JobActions`, `SAVED_PAGES_READ`, `SAVE_BUTTON_JS`, `SaveStatus`, `SavedJobIds`, `saved_job_ids_from()` | `page-owning` |
 | `job_pages` | `APPLY_READY_JS`, `APPLY_SIGNALS_JS`, `EASY_APPLY_CLOSED_JS`, `EASY_APPLY_DISCARD_SELECTOR`, `EASY_APPLY_NEXT_SELECTOR`, `EASY_APPLY_OPEN_JS`, `EASY_APPLY_STEP_JS`, `EasyApplyDraftLeftError`, `EasyApplyFormRead`, `JOB_IDS_JS`, `JobApplyRead`, `JobPageCapture`, `JobPageReader`, `ORGANIC_BEFORE_NOTICE_JS`, `PROMOTED_JOB_IDS_JS`, `SEARCH_CARD_JS`, `SearchCardOutcome` | `page-owning` |
 | `job_policy` | `ApplyType`, `EASY_APPLY_DRAFT_LEFT`, `JOB_SEARCH_PATHS`, `JobsTrackerStage`, `RESULTS_PER_LINKEDIN_PAGE`, `SAFETY_REDIRECT_PATH`, `SAVED_JOBS_PAGE_SIZE`, `SAVED_JOBS_PATHS`, `SAVED_JOBS_URL`, `SCROLL_BUDGET_TOTAL`, `SCROLL_DEADLINE_MAX`, `SEARCH_TIMEOUT_FRACTION`, `WORLDWIDE_GEO_ID`, `apply_link_missing_section_error()`, `dropped_filters_section_error()`, `dropped_offset_section_error()`, `easy_apply_draft_section_error()`, `employer_apply_url()`, `label_similar_jobs()`, `lost_keywords_section_error()`, `missing_description_section_error()`, `no_matching_jobs_section_error()`, `parse_posting_title()`, `posting_state()`, `reaches_the_public_internet()`, `reconcile_search_references()`, `route()`, `same_job_search()` | `browser-free` |
 | `jobs` | `JobReader` | `browser-free` |
@@ -57,12 +58,13 @@ a page-owning collaborator.
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
 - `identifiers` -> _(none)_
 - `invitation_actions` -> `identifiers`, `navigation`, `network`, `session`
+- `job_actions` -> `identifiers`, `job_policy`, `jobs`, `navigation`, `session`
 - `job_pages` -> `capture`, `content`, `contracts`, `identifiers`, `job_policy`, `link_metadata`, `navigation`, `session`, `text`
 - `job_policy` -> `identifiers`, `link_metadata`, `text`
 - `jobs` -> `capture`, `contracts`, `identifiers`, `job_pages`, `job_policy`, `link_metadata`, `navigation`, `search_urls`, `session`, `text`
@@ -113,6 +115,7 @@ a page-owning collaborator.
 - `search_posts`
 - `send_message`
 - `set_company_followed`
+- `set_job_saved`
 - `set_person_followed`
 - `set_post_liked`
 - `set_post_reaction`
@@ -127,6 +130,7 @@ a page-owning collaborator.
 - `_conversations`
 - `_feed`
 - `_invitation_actions`
+- `_job_actions`
 - `_jobs`
 - `_message_sender`
 - `_network`

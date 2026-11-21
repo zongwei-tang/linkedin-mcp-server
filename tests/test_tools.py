@@ -56,6 +56,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.set_post_reaction = AsyncMock(return_value=result)
     mock.set_person_followed = AsyncMock(return_value=result)
     mock.set_company_followed = AsyncMock(return_value=result)
+    mock.set_job_saved = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -178,6 +179,8 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
             {"job_id": "/feed/"},
             "job_id is not a LinkedIn id",
         ),
+        ("job", "save_job", {"job_id": "/feed/"}, "job_id is not a LinkedIn id"),
+        ("job", "unsave_job", {"job_id": "/feed/"}, "job_id is not a LinkedIn id"),
         (
             "post",
             "search_posts",
@@ -357,6 +360,8 @@ _A_VALID_CALL = [
     ("job", "get_saved_jobs", {}),
     ("job", "dismiss_job", {"job_id": "4252026496"}),
     ("job", "get_easy_apply_form", {"job_id": "4252026496"}),
+    ("job", "save_job", {"job_id": "4252026496"}),
+    ("job", "unsave_job", {"job_id": "4252026496"}),
     ("messaging", "get_inbox", {}),
     ("messaging", "get_conversation", {"linkedin_username": "alice"}),
     ("messaging", "search_conversations", {"keywords": "hello"}),
@@ -2992,6 +2997,27 @@ class TestIgnoreInvitationTool:
         assert tool.annotations.read_only_hint is False
         assert tool.annotations.destructive_hint is True
         assert tool.annotations.idempotent_hint is False
+
+
+class TestSaveJobTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "saved"), [("save_job", True), ("unsave_job", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, saved):
+        expected = {"url": "u", "job_id": "4252026496", "saved": saved, "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.job import register_job_tools
+
+        mcp = FastMCP("test")
+        register_job_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            tool_name, {"job_id": "https://www.linkedin.com/jobs/view/4252026496/"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_job_saved.assert_awaited_once_with("4252026496", saved)
 
 
 class TestCompanyFollowTools:

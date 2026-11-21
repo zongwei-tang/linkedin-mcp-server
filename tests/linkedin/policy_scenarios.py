@@ -522,6 +522,40 @@ async def _unfollow_company_scenario() -> dict[str, Any]:
     )
 
 
+async def _save_job_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_job_saved__saved",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    posting = "https://www.linkedin.com/jobs/view/123/"
+    page.goto_landings.append(posting)
+    page.declare_locator("button[data-mcp-save]", "job_save_button")
+    page.script(
+        "evaluate:job_save_button",
+        {"found": True, "buttons": 1, "text": "before"},
+        # Only that the words changed is read, never what they say.
+        {"found": True, "buttons": 1, "text": "after"},
+    )
+    extractor = _extractor(page)
+    # The saved list is the tracker workflow's own and is traced on its own;
+    # here it answers: not listed before the click, listed after it.
+    listed = [
+        {"url": "u", "sections": {"saved_jobs": "list"}},
+        {"url": "u", "sections": {"saved_jobs": "list"}, "job_ids": ["123"]},
+    ]
+    arguments = {"job_id": "123", "saved": True}
+    async with boundaries(recorder, clock):
+        with (
+            recorder.context("set_job_saved"),
+            patch.object(jobs_module.JobReader, "get_saved_jobs", side_effect=listed),
+        ):
+            result = await extractor.set_job_saved(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_job_saved", "arguments": arguments}, result)
+
+
 async def _ignore_invitation_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "ignore_invitation__ignored",
@@ -1465,6 +1499,7 @@ TOOL_FACADE_METHODS = {
     "set_post_reaction",
     "set_person_followed",
     "set_company_followed",
+    "set_job_saved",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1501,6 +1536,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "react-to-post.json": await _react_to_post_scenario(),
         "unfollow-person.json": await _unfollow_person_scenario(),
         "unfollow-company.json": await _unfollow_company_scenario(),
+        "save-job.json": await _save_job_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

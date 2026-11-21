@@ -65,6 +65,7 @@ PUBLIC_SIGNATURES = {
     "set_post_reaction": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'",
     "set_person_followed": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'",
     "set_company_followed": "(self, company: 'str', followed: 'bool') -> 'dict[str, Any]'",
+    "set_job_saved": "(self, job_id: 'str', saved: 'bool') -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -103,6 +104,7 @@ DELEGATES = {
     "set_post_reaction": ("_post_actions", "set_post_reaction"),
     "set_person_followed": ("_person_actions", "set_person_followed"),
     "set_company_followed": ("_company_actions", "set_company_followed"),
+    "set_job_saved": ("_job_actions", "set_job_saved"),
 }
 
 DELEGATE_CALLS = {
@@ -141,6 +143,7 @@ DELEGATE_CALLS = {
     "set_post_reaction": "self._post_actions.set_post_reaction(post, reaction)",
     "set_person_followed": "self._person_actions.set_person_followed(username, followed)",
     "set_company_followed": "self._company_actions.set_company_followed(company, followed)",
+    "set_job_saved": "self._job_actions.set_job_saved(job_id, saved)",
 }
 
 FACADE_STATE = {
@@ -152,6 +155,7 @@ FACADE_STATE = {
     "_conversations",
     "_feed",
     "_invitation_actions",
+    "_job_actions",
     "_jobs",
     "_message_sender",
     "_network",

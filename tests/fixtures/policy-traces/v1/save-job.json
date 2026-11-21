@@ -1,0 +1,142 @@
+{
+  "call": {
+    "arguments": {
+      "job_id": "123",
+      "saved": true
+    },
+    "method": "set_job_saved"
+  },
+  "events": [
+    {
+      "call": "set_job_saved",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_job_saved",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_job_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/view/123/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs/view/123/",
+      "requested_url": "https://www.linkedin.com/jobs/view/123/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_job_saved",
+      "description": "goto https://www.linkedin.com/jobs/view/123/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_job_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/view/123/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_job_saved",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_job_saved",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": {
+        "applyPath": "/jobs/view/123/apply",
+        "mark": "data-mcp-save",
+        "redirectPath": "/safety/go"
+      },
+      "call": "set_job_saved",
+      "kind": "evaluate",
+      "operation": "job_save_button",
+      "program_digest": "9e925079f6db"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "locator.create",
+      "locator": "job_save_button",
+      "parent": null,
+      "selector": "button[data-mcp-save]"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "locator.element_handle",
+      "locator": "job_save_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_job_saved",
+      "handle": "job_save_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_job_saved",
+      "handle": "job_save_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_job_saved",
+      "handle": "job_save_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_job_saved",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.25
+    },
+    {
+      "arg": {
+        "applyPath": "/jobs/view/123/apply",
+        "mark": "data-mcp-save",
+        "redirectPath": "/safety/go"
+      },
+      "call": "set_job_saved",
+      "kind": "evaluate",
+      "operation": "job_save_button",
+      "program_digest": "9e925079f6db"
+    }
+  ],
+  "result": {
+    "job_id": "123",
+    "saved": true,
+    "status": "saved",
+    "url": "https://www.linkedin.com/jobs/view/123/"
+  },
+  "scenario": "set_job_saved__saved",
+  "schema_version": 1
+}
