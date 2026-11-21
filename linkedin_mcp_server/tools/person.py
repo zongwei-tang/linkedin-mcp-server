@@ -82,7 +82,7 @@ def register_person_tools(
             ctx: FastMCP context for progress reporting
             sections: Comma-separated list of extra sections to read.
                 The main profile page is always included.
-                Available sections: experience, education, interests, honors, volunteering, languages, certifications, skills, projects, contact_info, posts
+                Available sections: experience, education, interests, honors, volunteering, languages, certifications, skills, projects, courses, publications, patents, test_scores, organizations, recommendations (received), recommendations_given, contact_info, posts, comments (comments the person wrote), reactions (posts the person reacted to)
                 Examples: "experience,education", "contact_info", "skills,projects", "honors,languages", "posts"
                 Default (None) reads only the main profile page.
             max_scrolls: Maximum pagination attempts per section to load more content.
@@ -364,7 +364,7 @@ def register_person_tools(
             ctx: FastMCP context for progress reporting
             sections: Comma-separated list of extra sections to read.
                 The main profile page is always included.
-                Available sections: experience, education, interests, honors, volunteering, languages, certifications, skills, projects, contact_info, posts
+                Available sections: experience, education, interests, honors, volunteering, languages, certifications, skills, projects, courses, publications, patents, test_scores, organizations, recommendations (received), recommendations_given, contact_info, posts, comments (comments the person wrote), reactions (posts the person reacted to)
                 Examples: "experience,education", "contact_info", "skills,projects"
                 Default (None) reads only the main profile page.
             max_scrolls: Maximum pagination attempts per section (same as get_person_profile).

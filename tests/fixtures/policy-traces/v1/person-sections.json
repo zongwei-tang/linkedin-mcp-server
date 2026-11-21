@@ -12,8 +12,17 @@
         "certifications",
         "skills",
         "projects",
+        "courses",
+        "publications",
+        "patents",
+        "test_scores",
+        "organizations",
+        "recommendations",
+        "recommendations_given",
         "contact_info",
-        "posts"
+        "posts",
+        "comments",
+        "reactions"
       ],
       "username": "ada-lovelace"
     },
@@ -127,8 +136,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read main_profile (1/12)",
-      "percent": 8
+      "message": "Read main_profile (1/21)",
+      "percent": 5
     },
     {
       "call": "read_person",
@@ -250,8 +259,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read experience (2/12)",
-      "percent": 16
+      "message": "Read experience (2/21)",
+      "percent": 9
     },
     {
       "call": "read_person",
@@ -373,8 +382,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read education (3/12)",
-      "percent": 24
+      "message": "Read education (3/21)",
+      "percent": 14
     },
     {
       "call": "read_person",
@@ -496,8 +505,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read interests (4/12)",
-      "percent": 32
+      "message": "Read interests (4/21)",
+      "percent": 18
     },
     {
       "call": "read_person",
@@ -619,8 +628,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read honors (5/12)",
-      "percent": 40
+      "message": "Read honors (5/21)",
+      "percent": 23
     },
     {
       "call": "read_person",
@@ -742,8 +751,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read volunteering (6/12)",
-      "percent": 48
+      "message": "Read volunteering (6/21)",
+      "percent": 27
     },
     {
       "call": "read_person",
@@ -865,8 +874,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read languages (7/12)",
-      "percent": 55
+      "message": "Read languages (7/21)",
+      "percent": 32
     },
     {
       "call": "read_person",
@@ -988,8 +997,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read certifications (8/12)",
-      "percent": 63
+      "message": "Read certifications (8/21)",
+      "percent": 36
     },
     {
       "call": "read_person",
@@ -1111,8 +1120,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read skills (9/12)",
-      "percent": 71
+      "message": "Read skills (9/21)",
+      "percent": 41
     },
     {
       "call": "read_person",
@@ -1234,8 +1243,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read projects (10/12)",
-      "percent": 79
+      "message": "Read projects (10/21)",
+      "percent": 45
     },
     {
       "call": "read_person",
@@ -1246,6 +1255,867 @@
     {
       "call": "read_person",
       "callback_id": "callback-11",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/courses/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/courses/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/courses/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/courses/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/courses/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-11",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read courses (11/21)",
+      "percent": 50
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-12",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/publications/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/publications/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/publications/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/publications/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/publications/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-12",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read publications (12/21)",
+      "percent": 54
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-13",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/patents/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/patents/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/patents/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/patents/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/patents/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-13",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read patents (13/21)",
+      "percent": 59
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-14",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/test-scores/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/test-scores/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/test-scores/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/test-scores/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/test-scores/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-14",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read test_scores (14/21)",
+      "percent": 63
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-15",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/organizations/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/organizations/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/organizations/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/organizations/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/organizations/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-15",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read organizations (15/21)",
+      "percent": 68
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-16",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=0",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=0",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=0",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=0",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=0",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-16",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read recommendations (16/21)",
+      "percent": 72
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-17",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=1",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=1",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=1",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=1",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/details/recommendations/?detailScreenTabIndex=1",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-17",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "profile_details_ready",
+      "program_digest": "652e003606ba",
+      "timeout_ms": 10000
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.create",
+      "locator": "show_more",
+      "parent": null,
+      "selector": "main button"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.derive",
+      "locator": "show_more.filtered",
+      "operation": "filter:^Show (more|all)\\b/re.IGNORECASE|re.UNICODE",
+      "parent": "show_more"
+    },
+    {
+      "call": "read_person",
+      "kind": "locator.count",
+      "locator": "show_more.filtered"
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 5,
+      "pause_time": 0.5
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read recommendations_given (17/21)",
+      "percent": 77
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-18",
       "event": "framenavigated",
       "kind": "listener.add"
     },
@@ -1288,7 +2158,7 @@
     },
     {
       "call": "read_person",
-      "callback_id": "callback-11",
+      "callback_id": "callback-18",
       "event": "framenavigated",
       "kind": "listener.remove"
     },
@@ -1319,8 +2189,8 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read contact_info (11/12)",
-      "percent": 87
+      "message": "Read contact_info (18/21)",
+      "percent": 81
     },
     {
       "call": "read_person",
@@ -1330,7 +2200,7 @@
     },
     {
       "call": "read_person",
-      "callback_id": "callback-12",
+      "callback_id": "callback-19",
       "event": "framenavigated",
       "kind": "listener.add"
     },
@@ -1373,7 +2243,7 @@
     },
     {
       "call": "read_person",
-      "callback_id": "callback-12",
+      "callback_id": "callback-19",
       "event": "framenavigated",
       "kind": "listener.remove"
     },
@@ -1423,7 +2293,215 @@
     {
       "call": "read_person",
       "kind": "callback.progress",
-      "message": "Read posts (12/12)",
+      "message": "Read posts (19/21)",
+      "percent": 86
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-20",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/comments/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/comments/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/comments/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/recent-activity/comments/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/comments/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-20",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "main_text_200",
+      "program_digest": "24943facf9de",
+      "timeout_ms": 10000
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 10,
+      "pause_time": 1.0
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read comments (20/21)",
+      "percent": 90
+    },
+    {
+      "call": "read_person",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-21",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/reactions/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/reactions/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/reactions/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_person",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/recent-activity/reactions/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/reactions/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_person",
+      "callback_id": "callback-21",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_person",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_person",
+      "kind": "wait_for_selector",
+      "operation": "main",
+      "selector": "main",
+      "state": "visible",
+      "timeout_ms": null
+    },
+    {
+      "call": "read_person",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": null,
+      "call": "read_person",
+      "kind": "wait_for_function",
+      "operation": "main_text_200",
+      "program_digest": "24943facf9de",
+      "timeout_ms": 10000
+    },
+    {
+      "actual_scrolls": 2,
+      "call": "read_person",
+      "kind": "boundary.scroll_body",
+      "max_scrolls": 10,
+      "pause_time": 1.0
+    },
+    {
+      "arg": {
+        "selectors": [
+          "main"
+        ]
+      },
+      "call": "read_person",
+      "kind": "evaluate",
+      "operation": "root_content",
+      "program_digest": "e6b2be4ebddd"
+    },
+    {
+      "call": "read_person",
+      "kind": "callback.progress",
+      "message": "Read reactions (21/21)",
       "percent": 95
     },
     {
@@ -1522,21 +2600,39 @@
       "certifications",
       "skills",
       "projects",
+      "courses",
+      "publications",
+      "patents",
+      "test_scores",
+      "organizations",
+      "recommendations",
+      "recommendations_given",
       "contact_info",
-      "posts"
+      "posts",
+      "comments",
+      "reactions"
     ],
     "sections": {
       "certifications": "certifications content",
+      "comments": "comments content",
       "contact_info": "contact_info content",
+      "courses": "courses content",
       "education": "education content",
       "experience": "experience content",
       "honors": "honors content",
       "interests": "interests content",
       "languages": "languages content",
       "main_profile": "main_profile content",
+      "organizations": "organizations content",
+      "patents": "patents content",
       "posts": "posts content",
       "projects": "projects content",
+      "publications": "publications content",
+      "reactions": "reactions content",
+      "recommendations": "recommendations content",
+      "recommendations_given": "recommendations_given content",
       "skills": "skills content",
+      "test_scores": "test_scores content",
       "volunteering": "volunteering content"
     },
     "url": "https://www.linkedin.com/in/ada-lovelace/"

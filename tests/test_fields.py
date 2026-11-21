@@ -31,8 +31,23 @@ class TestPersonSections:
             "certifications": ("/details/certifications/", False),
             "skills": ("/details/skills/", False),
             "projects": ("/details/projects/", False),
+            "courses": ("/details/courses/", False),
+            "publications": ("/details/publications/", False),
+            "patents": ("/details/patents/", False),
+            "test_scores": ("/details/test-scores/", False),
+            "organizations": ("/details/organizations/", False),
+            "recommendations": (
+                "/details/recommendations/?detailScreenTabIndex=0",
+                False,
+            ),
+            "recommendations_given": (
+                "/details/recommendations/?detailScreenTabIndex=1",
+                False,
+            ),
             "contact_info": ("/overlay/contact-info/", True),
             "posts": ("/recent-activity/all/", False),
+            "comments": ("/recent-activity/comments/", False),
+            "reactions": ("/recent-activity/reactions/", False),
         }
         assert PERSON_SECTIONS == expected
         assert list(PERSON_SECTIONS.items()) == list(expected.items())
@@ -52,8 +67,17 @@ class TestPersonSections:
             "certifications",
             "skills",
             "projects",
+            "courses",
+            "publications",
+            "patents",
+            "test_scores",
+            "organizations",
+            "recommendations",
+            "recommendations_given",
             "contact_info",
             "posts",
+            "comments",
+            "reactions",
         }
         assert set(PERSON_SECTIONS) == expected
 
@@ -146,7 +170,9 @@ class TestParsePersonSections:
 
     def test_all_sections(self):
         requested, unknown = parse_person_sections(
-            "experience,education,interests,honors,volunteering,languages,certifications,skills,projects,contact_info,posts"
+            "experience,education,interests,honors,volunteering,languages,certifications,"
+            "skills,projects,courses,publications,patents,test_scores,organizations,"
+            "recommendations,recommendations_given,contact_info,posts,comments,reactions"
         )
         assert requested == set(PERSON_SECTIONS)
         assert unknown == []

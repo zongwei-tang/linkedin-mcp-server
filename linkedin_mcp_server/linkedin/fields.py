@@ -20,8 +20,22 @@ PERSON_SECTIONS: dict[str, tuple[str, bool]] = {
     "certifications": ("/details/certifications/", False),
     "skills": ("/details/skills/", False),
     "projects": ("/details/projects/", False),
+    "courses": ("/details/courses/", False),
+    "publications": ("/details/publications/", False),
+    "patents": ("/details/patents/", False),
+    "test_scores": ("/details/test-scores/", False),
+    "organizations": ("/details/organizations/", False),
+    # One page with two tabs, so one navigation each: the tab index is the
+    # only address LinkedIn gives either list.
+    "recommendations": ("/details/recommendations/?detailScreenTabIndex=0", False),
+    "recommendations_given": (
+        "/details/recommendations/?detailScreenTabIndex=1",
+        False,
+    ),
     "contact_info": ("/overlay/contact-info/", True),
     "posts": ("/recent-activity/all/", False),
+    "comments": ("/recent-activity/comments/", False),
+    "reactions": ("/recent-activity/reactions/", False),
 }
 
 COMPANY_SECTIONS: dict[str, tuple[str, bool]] = {
@@ -48,8 +62,17 @@ _PERSON_SECTION_MODES = {
     "certifications": CaptureMode.DETAILS,
     "skills": CaptureMode.DETAILS,
     "projects": CaptureMode.DETAILS,
+    "courses": CaptureMode.DETAILS,
+    "publications": CaptureMode.DETAILS,
+    "patents": CaptureMode.DETAILS,
+    "test_scores": CaptureMode.DETAILS,
+    "organizations": CaptureMode.DETAILS,
+    "recommendations": CaptureMode.DETAILS,
+    "recommendations_given": CaptureMode.DETAILS,
     "contact_info": CaptureMode.OVERLAY,
     "posts": CaptureMode.ACTIVITY,
+    "comments": CaptureMode.ACTIVITY,
+    "reactions": CaptureMode.ACTIVITY,
 }
 _COMPANY_SECTION_MODES = {"posts": CaptureMode.ACTIVITY}
 
