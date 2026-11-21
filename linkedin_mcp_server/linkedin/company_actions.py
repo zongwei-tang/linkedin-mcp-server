@@ -14,6 +14,10 @@ server's own browser, English locale:
   `data-test-dialog-secondary-btn`. Escape cancels.
 
 `aria-pressed`, icon names and test hooks are not words, so no label is read.
+
+Verified live 2026-11-21 through the MCP tools on one followed page: follow
+(already_followed, no click), unfollow through the alertdialog, unfollow again
+(already_unfollowed, no click), follow back, each confirmed by a reload.
 """
 
 from __future__ import annotations
