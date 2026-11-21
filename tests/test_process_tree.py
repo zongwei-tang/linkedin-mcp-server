@@ -2810,6 +2810,36 @@ def test_crash_guardian_requires_a_quiet_interval_after_an_empty_scan(
     assert killed == [456]
 
 
+def test_crash_guardian_backs_off_and_gives_up_when_it_cannot_scan(
+    monkeypatch: pytest.MonkeyPatch,
+):
+    """A ``ps`` that cannot run is not retried a hundred times a second forever.
+
+    Every orphaned guardian did exactly that inside a sandbox that refuses
+    ``ps``, and 43 of them held a Mac's CPU. The waits grow to a cap, and the
+    guardian exits once it has been blind for the limit.
+    """
+    now = [0.0]
+    waits: list[float] = []
+
+    def sleep(seconds: float) -> None:
+        waits.append(seconds)
+        now[0] += seconds
+        if len(waits) > 1000:
+            raise AssertionError("the guardian never gave up")
+
+    monkeypatch.setattr(process_guardian, "_marked_groups", lambda _markers: None)
+    monkeypatch.setattr(process_guardian.time, "monotonic", lambda: now[0])
+    monkeypatch.setattr(process_guardian.time, "sleep", sleep)
+
+    process_guardian._drain({"marker"})
+
+    assert waits[:5] == [0.5, 1.0, 2.0, 4.0, 5.0]
+    assert max(waits) == process_guardian._BLIND_POLL_CAP_SECONDS
+    assert now[0] >= process_guardian._BLIND_LIMIT_SECONDS
+    assert len(waits) < 200
+
+
 def test_crash_guardian_scan_waits_for_a_ps_slowed_by_load(
     monkeypatch: pytest.MonkeyPatch,
 ):

@@ -12,13 +12,26 @@ import time
 _BROWSER_PROCESS_MARKER = "LINKEDIN_MCP_BROWSER_PROCESS_MARKER"
 _POLL_SECONDS = 0.01
 _QUIET_SECONDS = 1.0
+#: The first wait after a scan that could not run, doubled after each further
+#: one up to the cap. A scan that fails fails at once (a missing or forbidden
+#: ``ps``, a timeout), so retrying it every _POLL_SECONDS is a fork and an exec
+#: a hundred times a second, forever, in every orphaned guardian: measured
+#: 2026-11-21 as 43 of them holding a Mac's CPU at 53-61% system time inside a
+#: sandbox that refuses to run ``ps`` at all.
+_BLIND_POLL_SECONDS = 0.5
+_BLIND_POLL_CAP_SECONDS = 5.0
+#: How long scans may keep failing before the guardian gives up and exits. It
+#: can neither see nor kill anything while blind, so holding on longer only
+#: keeps the lease and the load, and the load is what keeps a loaded host's
+#: ``ps`` failing.
+_BLIND_LIMIT_SECONDS = 600.0
 #: How long one ``ps`` may take outside Linux. It prints every process's
 #: environment, which is slow on a Mac even without load; see the process scan
 #: entries in docs/daemon-measurements.md. A scan cut off by this bound proves
 #: nothing and is asked again, so a bound that a loaded host's ``ps`` keeps
 #: exceeding holds the profile and leaves the browser running for as long as
-#: the load lasts. The drain has no deadline of its own, so the bound only has
-#: to stop a ``ps`` that never returns.
+#: the load lasts, up to _BLIND_LIMIT_SECONDS. The bound only has to stop a
+#: ``ps`` that never returns.
 _SNAPSHOT_SECONDS = 5.0
 
 
@@ -99,12 +112,22 @@ def _marked_groups(markers: set[str]) -> set[int] | None:
 def _drain(markers: set[str]) -> None:
     own_group = os.getpgrp()
     quiet_since: float | None = None
+    blind_since: float | None = None
+    blind_wait = _BLIND_POLL_SECONDS
     while True:
         groups = _marked_groups(markers)
         if groups is None:
             quiet_since = None
-            time.sleep(_POLL_SECONDS)
+            now = time.monotonic()
+            if blind_since is None:
+                blind_since = now
+            elif now - blind_since >= _BLIND_LIMIT_SECONDS:
+                return
+            time.sleep(blind_wait)
+            blind_wait = min(blind_wait * 2, _BLIND_POLL_CAP_SECONDS)
             continue
+        blind_since = None
+        blind_wait = _BLIND_POLL_SECONDS
         groups.discard(own_group)
         if groups:
             quiet_since = None
