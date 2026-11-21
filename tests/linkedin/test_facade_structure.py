@@ -64,6 +64,7 @@ PUBLIC_SIGNATURES = {
     "ignore_invitation": "(self, username: 'str') -> 'dict[str, Any]'",
     "set_post_reaction": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'",
     "set_person_followed": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'",
+    "set_company_followed": "(self, company: 'str', followed: 'bool') -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -101,6 +102,7 @@ DELEGATES = {
     "ignore_invitation": ("_invitation_actions", "ignore_invitation"),
     "set_post_reaction": ("_post_actions", "set_post_reaction"),
     "set_person_followed": ("_person_actions", "set_person_followed"),
+    "set_company_followed": ("_company_actions", "set_company_followed"),
 }
 
 DELEGATE_CALLS = {
@@ -138,11 +140,13 @@ DELEGATE_CALLS = {
     "ignore_invitation": "self._invitation_actions.ignore_invitation(username)",
     "set_post_reaction": "self._post_actions.set_post_reaction(post, reaction)",
     "set_person_followed": "self._person_actions.set_person_followed(username, followed)",
+    "set_company_followed": "self._company_actions.set_company_followed(company, followed)",
 }
 
 FACADE_STATE = {
     "_capture",
     "_company",
+    "_company_actions",
     "_connection",
     "_content",
     "_conversations",

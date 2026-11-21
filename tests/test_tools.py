@@ -55,6 +55,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.ignore_invitation = AsyncMock(return_value=result)
     mock.set_post_reaction = AsyncMock(return_value=result)
     mock.set_person_followed = AsyncMock(return_value=result)
+    mock.set_company_followed = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -348,6 +349,8 @@ _A_VALID_CALL = [
     ("company", "get_company_posts", {"company_name": "anthropic"}),
     ("company", "search_companies", {"keywords": "fintech"}),
     ("company", "get_company_employees", {"company_name": "anthropic"}),
+    ("company", "follow_company", {"company_name": "anthropic"}),
+    ("company", "unfollow_company", {"company_name": "anthropic"}),
     ("job", "get_job_details", {"job_id": "4252026496"}),
     ("job", "get_job_apply_url", {"job_id": "4252026496"}),
     ("job", "search_jobs", {"keywords": "python"}),
@@ -2989,6 +2992,28 @@ class TestIgnoreInvitationTool:
         assert tool.annotations.read_only_hint is False
         assert tool.annotations.destructive_hint is True
         assert tool.annotations.idempotent_hint is False
+
+
+class TestCompanyFollowTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "followed"),
+        [("follow_company", True), ("unfollow_company", False)],
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, followed):
+        expected = {"url": "u", "company": "acme", "followed": followed, "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.company import register_company_tools
+
+        mcp = FastMCP("test")
+        register_company_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            tool_name, {"company_name": "https://www.linkedin.com/company/acme/"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_company_followed.assert_awaited_once_with("acme", followed)
 
 
 class TestFollowTools:

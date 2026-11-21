@@ -487,6 +487,41 @@ async def _unfollow_person_scenario() -> dict[str, Any]:
     )
 
 
+async def _unfollow_company_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_company_followed__unfollowed",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    url = "https://www.linkedin.com/company/analytical-engine/"
+    page.goto_landings.extend([url, url])
+    page.declare_locator("button[data-mcp-company-follow]", "company_follow_button")
+    page.declare_locator(
+        '[role="alertdialog"] button[data-test-dialog-primary-btn]',
+        "company_unfollow_confirm",
+    )
+    page.script(
+        "evaluate:company_follow",
+        {"found": True, "followed": True},
+        # The confirmation is open; the page still shows followed.
+        {"found": True, "followed": True},
+        {"found": True, "followed": False},
+        # The reload has to show the unfollow too.
+        {"found": True, "followed": False},
+    )
+    page.script("company_unfollow_confirm.count", 1)
+    extractor = _extractor(page)
+    arguments = {"company": "analytical-engine", "followed": False}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_company_followed"):
+            result = await extractor.set_company_followed(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "set_company_followed", "arguments": arguments}, result
+    )
+
+
 async def _ignore_invitation_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "ignore_invitation__ignored",
@@ -1429,6 +1464,7 @@ TOOL_FACADE_METHODS = {
     "ignore_invitation",
     "set_post_reaction",
     "set_person_followed",
+    "set_company_followed",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1464,6 +1500,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "ignore-invitation.json": await _ignore_invitation_scenario(),
         "react-to-post.json": await _react_to_post_scenario(),
         "unfollow-person.json": await _unfollow_person_scenario(),
+        "unfollow-company.json": await _unfollow_company_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

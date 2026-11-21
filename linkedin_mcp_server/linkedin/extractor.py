@@ -9,6 +9,7 @@ from patchright.async_api import Page
 from linkedin_mcp_server.config.schema import DEFAULT_TOOL_TIMEOUT_SECONDS
 from linkedin_mcp_server.linkedin.capture import SectionCapture
 from linkedin_mcp_server.linkedin.company import CompanyReader
+from linkedin_mcp_server.linkedin.company_actions import CompanyActions
 from linkedin_mcp_server.linkedin.connection_actions import ConnectionActions
 from linkedin_mcp_server.linkedin.content import PageContentReader
 from linkedin_mcp_server.linkedin.contracts import (
@@ -74,6 +75,7 @@ class LinkedInExtractor:
         self._post_actions = PostActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)
+        self._company_actions = CompanyActions(session, navigator)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -274,6 +276,12 @@ class LinkedInExtractor:
     ) -> dict[str, Any]:
         """Follow or unfollow one person, leaving them as asked."""
         return await self._person_actions.set_person_followed(username, followed)
+
+    async def set_company_followed(
+        self, company: str, followed: bool
+    ) -> dict[str, Any]:
+        """Follow or unfollow one company page, leaving it as asked."""
+        return await self._company_actions.set_company_followed(company, followed)
 
     async def ignore_invitation(self, username: str) -> dict[str, Any]:
         """Ignore the pending invitation one person sent."""

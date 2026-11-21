@@ -1,0 +1,249 @@
+{
+  "call": {
+    "arguments": {
+      "company": "analytical-engine",
+      "followed": false
+    },
+    "method": "set_company_followed"
+  },
+  "events": [
+    {
+      "call": "set_company_followed",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_company_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/company/analytical-engine/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/company/analytical-engine/",
+      "requested_url": "https://www.linkedin.com/company/analytical-engine/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_company_followed",
+      "description": "goto https://www.linkedin.com/company/analytical-engine/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_company_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/company/analytical-engine/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_company_followed",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_company_followed",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-company-follow",
+      "call": "set_company_followed",
+      "kind": "evaluate",
+      "operation": "company_follow",
+      "program_digest": "829969d105ce"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.create",
+      "locator": "company_follow_button",
+      "parent": null,
+      "selector": "button[data-mcp-company-follow]"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.element_handle",
+      "locator": "company_follow_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_follow_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_follow_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_follow_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.create",
+      "locator": "company_unfollow_confirm",
+      "parent": null,
+      "selector": "[role=\"alertdialog\"] button[data-test-dialog-primary-btn]"
+    },
+    {
+      "arg": "data-mcp-company-follow",
+      "call": "set_company_followed",
+      "kind": "evaluate",
+      "operation": "company_follow",
+      "program_digest": "829969d105ce"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.count",
+      "locator": "company_unfollow_confirm"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.create",
+      "locator": "company_unfollow_confirm",
+      "parent": null,
+      "selector": "[role=\"alertdialog\"] button[data-test-dialog-primary-btn]"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "locator.element_handle",
+      "locator": "company_unfollow_confirm",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_unfollow_confirm",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_unfollow_confirm",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_company_followed",
+      "handle": "company_unfollow_confirm",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.25
+    },
+    {
+      "arg": "data-mcp-company-follow",
+      "call": "set_company_followed",
+      "kind": "evaluate",
+      "operation": "company_follow",
+      "program_digest": "829969d105ce"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_company_followed",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_company_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/company/analytical-engine/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/company/analytical-engine/",
+      "requested_url": "https://www.linkedin.com/company/analytical-engine/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_company_followed",
+      "description": "goto https://www.linkedin.com/company/analytical-engine/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_company_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/company/analytical-engine/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_company_followed",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_company_followed",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_company_followed",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-company-follow",
+      "call": "set_company_followed",
+      "kind": "evaluate",
+      "operation": "company_follow",
+      "program_digest": "829969d105ce"
+    }
+  ],
+  "result": {
+    "company": "analytical-engine",
+    "followed": false,
+    "status": "unfollowed",
+    "url": "https://www.linkedin.com/company/analytical-engine/"
+  },
+  "scenario": "set_company_followed__unfollowed",
+  "schema_version": 1
+}

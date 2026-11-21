@@ -97,6 +97,8 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `reply_to_conversation` | Reply inside an existing thread or InMail by thread ID. Sends after confirmation. |
 | `get_company_profile` | Read company information, with optional sections for posts and open jobs. |
 | `get_company_posts` | Read recent posts from a company's feed, with links to the original posts. |
+| `follow_company` | Follow a company page so its posts reach your feed. |
+| `unfollow_company` | Stop following a company page. |
 | `search_companies` | Find companies by keyword and return links to their LinkedIn profiles. |
 | `get_company_employees` | Find company employees, optionally filtered by name, title, or skill. |
 | `search_jobs` | Find job postings by keyword and location, with job IDs for reading details. |

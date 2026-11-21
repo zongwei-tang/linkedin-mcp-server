@@ -79,6 +79,8 @@ TOOL_DELEGATES = {
     "react_to_post": "set_post_reaction",
     "follow_person": "set_person_followed",
     "unfollow_person": "set_person_followed",
+    "follow_company": "set_company_followed",
+    "unfollow_company": "set_company_followed",
 }
 
 
@@ -109,6 +111,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
     expected_state = {
         "_capture",
         "_company",
+        "_company_actions",
         "_connection",
         "_content",
         "_conversations",

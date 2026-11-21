@@ -18,6 +18,7 @@ a page-owning collaborator.
 | `__init__` | _(no public definitions)_ | `browser-free` |
 | `capture` | `CaptureMode`, `CapturePlan`, `OverlayRootNotFoundError`, `RATE_LIMIT_RETRY_DELAY`, `SectionCapture`, `capture_plan_for_url()` | `page-owning` |
 | `company` | `CompanyReader` | `browser-free` |
+| `company_actions` | `COMPANY_FOLLOW_JS`, `CompanyActions`, `CompanyFollowStatus` | `page-owning` |
 | `connection` | `ActionSignals`, `ConnectionState`, `detect_connection_state()` | `browser-free` |
 | `connection_actions` | `ACTION_SIGNALS_JS`, `CLICK_INCOMING_ACCEPT_JS`, `ConnectionActions`, `INVITATION_PENDING_JS`, `OPEN_MORE_BUTTON_JS`, `ReadMainProfile`, `SENT_INVITATIONS_URL` | `page-owning` |
 | `content` | `PageContentReader` | `page-owning` |
@@ -50,12 +51,13 @@ a page-owning collaborator.
 - `__init__` -> `extractor`, `fields`
 - `capture` -> `content`, `contracts`, `feed_payload`, `link_metadata`, `navigation`, `session`, `text`
 - `company` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `search_urls`, `session`
+- `company_actions` -> `identifiers`, `navigation`, `session`
 - `connection` -> _(none)_
 - `connection_actions` -> `connection`, `identifiers`, `navigation`, `session`
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
@@ -110,6 +112,7 @@ a page-owning collaborator.
 - `search_people`
 - `search_posts`
 - `send_message`
+- `set_company_followed`
 - `set_person_followed`
 - `set_post_liked`
 - `set_post_reaction`
@@ -118,6 +121,7 @@ a page-owning collaborator.
 
 - `_capture`
 - `_company`
+- `_company_actions`
 - `_connection`
 - `_content`
 - `_conversations`

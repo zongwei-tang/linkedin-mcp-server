@@ -145,6 +145,42 @@
       "fastmcp": {
         "tags": [
           "actions",
+          "company"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Follow one company page on LinkedIn, so its posts reach your feed.\n\nA page you already follow is left alone and reported already_followed,\nso a repeated call clicks nothing. The follow is confirmed by loading\nthe page again. Undo with unfollow_company.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "company_name": {
+          "description": "LinkedIn company slug (e.g. \"microsoft\"). A company\npage URL is accepted too.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "company_name"
+      ],
+      "type": "object"
+    },
+    "name": "follow_company",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Follow Company"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
           "person"
         ]
       }
@@ -1526,6 +1562,42 @@
       "type": "object"
     },
     "title": "Send Message"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "company"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Stop following one company page on LinkedIn.\n\nLinkedIn asks to confirm, and the confirmation is accepted. A page you\ndo not follow is left alone and reported already_unfollowed. The change\nis confirmed by loading the page again. Undo with follow_company.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "company_name": {
+          "description": "LinkedIn company slug (e.g. \"microsoft\"). A company\npage URL is accepted too.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "company_name"
+      ],
+      "type": "object"
+    },
+    "name": "unfollow_company",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Unfollow Company"
   },
   {
     "_meta": {

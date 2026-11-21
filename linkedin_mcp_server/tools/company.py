@@ -240,3 +240,74 @@ def register_company_tools(
         await ctx.report_progress(progress=100, total=100, message="Complete")
 
         return result
+
+    _FOLLOW_WRITE = {
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Follow Company",
+        annotations=_FOLLOW_WRITE,
+        tags={"company", "actions"},
+    )
+    @tool_errors
+    async def follow_company(company_name: str, ctx: Context) -> dict[str, Any]:
+        """
+        Follow one company page on LinkedIn, so its posts reach your feed.
+
+        A page you already follow is left alone and reported already_followed,
+        so a repeated call clicks nothing. The follow is confirmed by loading
+        the page again. Undo with unfollow_company.
+
+        Args:
+            company_name: LinkedIn company slug (e.g. "microsoft"). A company
+                page URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, company, followed (true) and status: "followed" or
+            "already_followed".
+        """
+        company_name = normalize_company_identifier(company_name)
+        extractor = await get_ready_extractor(ctx, tool_name="follow_company")
+        logger.info("Following company %s", company_name)
+        await ctx.report_progress(progress=0, total=100, message="Opening the page")
+        result = await extractor.set_company_followed(company_name, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unfollow Company",
+        annotations=_FOLLOW_WRITE,
+        tags={"company", "actions"},
+    )
+    @tool_errors
+    async def unfollow_company(company_name: str, ctx: Context) -> dict[str, Any]:
+        """
+        Stop following one company page on LinkedIn.
+
+        LinkedIn asks to confirm, and the confirmation is accepted. A page you
+        do not follow is left alone and reported already_unfollowed. The change
+        is confirmed by loading the page again. Undo with follow_company.
+
+        Args:
+            company_name: LinkedIn company slug (e.g. "microsoft"). A company
+                page URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, company, followed (false) and status: "unfollowed"
+            or "already_unfollowed".
+        """
+        company_name = normalize_company_identifier(company_name)
+        extractor = await get_ready_extractor(ctx, tool_name="unfollow_company")
+        logger.info("Unfollowing company %s", company_name)
+        await ctx.report_progress(progress=0, total=100, message="Opening the page")
+        result = await extractor.set_company_followed(company_name, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result

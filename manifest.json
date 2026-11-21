@@ -121,6 +121,14 @@
       "description": "List your pending connection invitations, received or sent"
     },
     {
+      "name": "follow_company",
+      "description": "Follow a company page on LinkedIn"
+    },
+    {
+      "name": "unfollow_company",
+      "description": "Stop following a company page on LinkedIn"
+    },
+    {
       "name": "follow_person",
       "description": "Follow a person on LinkedIn without sending a connection invitation"
     },
