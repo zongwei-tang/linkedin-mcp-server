@@ -120,7 +120,7 @@
       "call": "set_post_reaction",
       "kind": "evaluate",
       "operation": "reaction_choice",
-      "program_digest": "4cd3688a14a4"
+      "program_digest": "0f3472de689b"
     },
     {
       "call": "set_post_reaction",

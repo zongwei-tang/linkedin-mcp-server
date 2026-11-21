@@ -439,7 +439,7 @@ async def _react_to_post_scenario() -> dict[str, Any]:
         {"carets": 1, "likes": 1, "pressed": True, "reaction": "PRAISE"},
     )
     page.script("evaluate:reaction_menu_prepare", True)
-    page.script("evaluate:reaction_choice", {"added": 6})
+    page.script("evaluate:reaction_choice", {"added": 6, "menus": 1})
     # Both are hidden until hovered, so both are clicked in the page.
     page.script("post_reaction_caret.evaluate:in_page_click", None)
     page.script("post_reaction_choice.evaluate:in_page_click", None)

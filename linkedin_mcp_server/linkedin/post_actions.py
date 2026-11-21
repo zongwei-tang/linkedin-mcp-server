@@ -136,16 +136,33 @@ REACTION_MENU_PREPARE_JS = r"""(before) => {
     return true;
 }"""
 
-# Marks the reaction at ``index`` among the buttons the caret click added,
-# once there are exactly the six the menu lists.
+# Marks the reaction at ``index`` in the menu the caret click added. Other
+# parts of the page keep rendering buttons while the menu opens (measured live:
+# 12 new buttons), so the menu is the one element, close above them, that
+# holds exactly six of the new buttons; its buttons are taken in DOM order.
 REACTION_CHOICE_JS = r"""(opts) => {
     const {before, mark, index} = opts;
     for (const old of document.querySelectorAll('[' + mark + ']')) {
         old.removeAttribute(mark);
     }
     const added = [...document.querySelectorAll('button:not([' + before + '])')];
-    if (added.length === 6) added[index].setAttribute(mark, '');
-    return {added: added.length};
+    const menus = new Map();
+    for (const button of added) {
+        let node = button.parentElement;
+        for (let depth = 0; node && depth < 5; depth++, node = node.parentElement) {
+            const inside = added.filter((other) => node.contains(other));
+            if (inside.length === 6) {
+                menus.set(node, inside);
+                break;
+            }
+            if (inside.length > 6) break;
+        }
+    }
+    if (menus.size === 1) {
+        const [reactions] = menus.values();
+        reactions[index].setAttribute(mark, '');
+    }
+    return {added: added.length, menus: menus.size};
 }"""
 
 
@@ -301,15 +318,15 @@ class PostActions:
         }
         deadline = self._session.monotonic() + _MENU_TIMEOUT
         found = await page.evaluate(REACTION_CHOICE_JS, options)
-        while found["added"] != 6 and self._session.monotonic() < deadline:
+        while found["menus"] != 1 and self._session.monotonic() < deadline:
             await self._session.delay(_POLL)
             found = await page.evaluate(REACTION_CHOICE_JS, options)
-        if found["added"] != 6:
+        if found["menus"] != 1:
             await page.keyboard.press("Escape")
             raise LinkedInOperationError(
-                f"The reactions menu of {url} showed {found['added']} new "
-                "buttons, where the six reactions were expected. Nothing was "
-                "chosen."
+                f"The reactions menu of {url} could not be told apart: of "
+                f"{found['added']} new buttons, {found['menus']} groups of six "
+                "were found where one was expected. Nothing was chosen."
             )
         await self._click(f"button[{_CHOICE_MARK}]", in_page=True)
 

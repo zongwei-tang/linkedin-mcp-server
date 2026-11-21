@@ -65,6 +65,17 @@ document.querySelector('[data-finite-scroll-hotkey="l"]').addEventListener('clic
         document.body.insertAdjacentHTML('beforeend', '<button>Gefällt mir</button>');
         return;
     }
+    // As live: other parts of the page render buttons while the menu opens.
+    if (document.body.hasAttribute('data-busy-page')) {
+        for (let i = 0; i < 6; i++) {
+            document.body.insertAdjacentHTML('beforeend', '<div><button>Antworten</button></div>');
+        }
+    }
+    if (document.body.hasAttribute('data-two-menus')) {
+        const other = document.createElement('div');
+        for (let i = 0; i < 6; i++) other.appendChild(document.createElement('button'));
+        document.body.appendChild(other);
+    }
     const menu = document.createElement('div');
     // As live: the menu is not visible until a hover animates it in.
     if (document.body.hasAttribute('data-hidden-menu')) {
@@ -240,3 +251,19 @@ async def test_a_menu_hidden_until_hovered_is_still_chosen_from(dom_page):
 
     assert result["status"] == "reacted"
     assert await log(dom_page) == ["caret", "PRAISE"]
+
+
+async def test_buttons_rendered_elsewhere_while_the_menu_opens_are_ignored(dom_page):
+    # The second live failure: 12 new buttons, six of them not the menu's.
+    result = await act(
+        dom_page, post_page("PRAISE"), "love", body_attrs={"data-busy-page": ""}
+    )
+
+    assert result["status"] == "reacted"
+    assert await log(dom_page) == ["caret", "EMPATHY"]
+
+
+async def test_two_groups_of_six_choose_nothing(dom_page):
+    with pytest.raises(LinkedInOperationError, match="Nothing was chosen"):
+        await act(dom_page, post_page(None), "love", body_attrs={"data-two-menus": ""})
+    assert await log(dom_page) == ["caret"]
