@@ -151,9 +151,11 @@ JOB_APPLY_EN_US = _JOB_APPLY_TEXT["en-US"]
 
 # Patterns that mark the start of LinkedIn page chrome (sidebar/footer).
 # Everything from the earliest match onwards is stripped.
+# Footer nav links: "About" immediately followed by "Accessibility" or "Talent Solutions"
+_FOOTER_START = re.compile(r"^About\n+(?:Accessibility|Talent Solutions)", re.MULTILINE)
+
 _NOISE_MARKERS: list[re.Pattern[str]] = [
-    # Footer nav links: "About" immediately followed by "Accessibility" or "Talent Solutions"
-    re.compile(r"^About\n+(?:Accessibility|Talent Solutions)", re.MULTILINE),
+    _FOOTER_START,
     # Sidebar profile recommendations
     re.compile(r"^More profiles for you$", re.MULTILINE),
     # Sidebar premium upsell
@@ -204,6 +206,31 @@ def truncate_linkedin_noise(text: str) -> str:
             earliest = match.start()
 
     return text[:earliest].strip()
+
+
+# The last line of LinkedIn's footer. The company name and the year are not
+# translated, so this holds in every locale the other markers do.
+_FOOTER_END = re.compile(r"^LinkedIn Corporation © \d{4}$", re.MULTILINE)
+
+
+def drop_leading_rail(text: str) -> str:
+    """The content of a page whose left rail and footer come before it.
+
+    Measured 2026-11-21 on Catch up and People you may know (/mynetwork/):
+    ``<main>`` reads as the "Manage my network" rail, then the footer, then the
+    page's own content, so truncating at the footer, as every other page is
+    read, keeps the rail and drops everything the page is for. Here the rail and
+    the footer go, up to the footer's copyright line, and the rest is trimmed as
+    usual. Without that line nothing marks where the footer ends, so the text is
+    truncated as on any other page.
+    """
+    footer = _FOOTER_START.search(text)
+    if footer is None:
+        return truncate_linkedin_noise(text)
+    end = _FOOTER_END.search(text, footer.start())
+    if end is None:
+        return truncate_linkedin_noise(text)
+    return truncate_linkedin_noise(text[end.end() :])
 
 
 # Messaging-page chrome around an opened conversation thread. innerText on

@@ -75,14 +75,14 @@ READS = [
         None,
         f"{L}/mynetwork/catch-up/all/",
         "catch_up",
-        CaptureMode.ACTIVITY,
+        CaptureMode.ACTIVITY | CaptureMode.RAIL_FIRST,
     ),
     (
         "people_you_may_know",
         None,
         f"{L}/mynetwork/grow/",
         "people_you_may_know",
-        CaptureMode.ACTIVITY,
+        CaptureMode.ACTIVITY | CaptureMode.RAIL_FIRST,
     ),
     (
         "dashboard",

@@ -83,6 +83,13 @@ _OWN_PAGES: dict[str, tuple[str, str]] = {
     "content_analytics": ("/analytics/creator/content/", "content_analytics"),
 }
 
+# Own pages read otherwise than a plain activity list. Measured 2026-11-21:
+# these two put the "Manage my network" rail and the footer first.
+_OWN_PAGE_MODES: dict[str, CaptureMode] = {
+    "catch_up": CaptureMode.ACTIVITY | CaptureMode.RAIL_FIRST,
+    "people_you_may_know": CaptureMode.ACTIVITY | CaptureMode.RAIL_FIRST,
+}
+
 # Pages named by the segment after their route: (route, field, numeric, suffix,
 # section, mode).
 _REFERENCED_PAGES: dict[str, tuple[str, str, bool, str, str, CaptureMode]] = {
@@ -135,7 +142,8 @@ def page_target(kind: str, reference: str | None = None) -> PageTarget:
         if reference:
             raise InvalidReferenceError(f"{kind} takes no reference.")
         path, section = _OWN_PAGES[kind]
-        return PageTarget(f"{_LINKEDIN}{path}", section, CaptureMode.ACTIVITY)
+        mode = _OWN_PAGE_MODES.get(kind, CaptureMode.ACTIVITY)
+        return PageTarget(f"{_LINKEDIN}{path}", section, mode)
     if kind in _REFERENCED_PAGES:
         route, field, numeric, suffix, section, mode = _REFERENCED_PAGES[kind]
         if not reference or not reference.strip():

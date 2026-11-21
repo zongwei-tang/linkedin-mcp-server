@@ -13,6 +13,7 @@ from linkedin_mcp_server.linkedin.text import (
     strip_linkedin_noise,
     truncate_linkedin_noise,
 )
+from linkedin_mcp_server.linkedin.text import drop_leading_rail
 
 
 class TestJobSearchText:
@@ -342,3 +343,38 @@ class TestStripConversationChrome:
 
     def test_empty_string(self):
         assert strip_conversation_chrome("") == ""
+
+
+# The order measured on Catch up and People you may know, 2026-11-21.
+_RAIL = "Manage my network\n\nConnections\n266\nGroups\nPages\n78\n\n"
+_FOOTER = (
+    "About\n\nAccessibility\n\nHelp Center\n\nPrivacy & Terms\n\n"
+    "Get the LinkedIn app\n\nMore\n\nLinkedIn Corporation © 2026\n"
+)
+
+
+class TestDropLeadingRail:
+    def test_the_content_after_a_leading_footer_is_kept(self):
+        text = _RAIL + _FOOTER + "Ada Lovelace\nStarted a new position\n"
+
+        assert drop_leading_rail(text) == "Ada Lovelace\nStarted a new position"
+        # Read as every other page is, the same text keeps only the rail.
+        assert truncate_linkedin_noise(text).startswith("Manage my network")
+        assert "Ada" not in truncate_linkedin_noise(text)
+
+    def test_chrome_after_the_content_is_still_trimmed(self):
+        text = _RAIL + _FOOTER + "Ada Lovelace\n\nMore profiles for you\nSomeone"
+
+        assert drop_leading_rail(text) == "Ada Lovelace"
+
+    def test_a_footer_without_its_last_line_is_truncated_as_usual(self):
+        text = _RAIL + "About\nAccessibility\nHelp Center\nAda Lovelace"
+
+        assert drop_leading_rail(text) == truncate_linkedin_noise(text)
+
+    def test_a_page_with_no_footer_is_unchanged(self):
+        assert drop_leading_rail("Ada Lovelace\nEngineer") == "Ada Lovelace\nEngineer"
+
+    def test_only_chrome_leaves_nothing(self):
+        # Nothing after the footer is what a rate-limited page reads as.
+        assert drop_leading_rail(_RAIL + _FOOTER) == ""

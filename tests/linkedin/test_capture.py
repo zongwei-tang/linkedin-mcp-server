@@ -268,6 +268,53 @@ class TestExtractPage:
         assert result.text == ""
         assert result.references == []
 
+    @pytest.mark.parametrize(
+        ("mode", "kept"),
+        [
+            (CaptureMode.ACTIVITY | CaptureMode.RAIL_FIRST, "Ada Lovelace"),
+            (CaptureMode.ACTIVITY, "Manage my network"),
+        ],
+    )
+    async def test_a_rail_first_page_keeps_what_follows_its_footer(
+        self, mock_page, mode, kept
+    ):
+        # Catch up reads as the rail, the footer, then the page's own content.
+        mock_page.evaluate = AsyncMock(
+            return_value={
+                "source": "root",
+                "text": (
+                    "Manage my network\nConnections\n266\n\n"
+                    "About\nAccessibility\nHelp Center\n"
+                    "LinkedIn Corporation © 2026\n"
+                    "Ada Lovelace\nStarted a new position"
+                ),
+                "references": [],
+            }
+        )
+        capture = _capture(mock_page)
+        with (
+            patch(
+                "linkedin_mcp_server.linkedin.session.scroll_to_bottom",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "linkedin_mcp_server.linkedin.session.detect_rate_limit",
+                new_callable=AsyncMock,
+            ),
+            patch(
+                "linkedin_mcp_server.linkedin.session.handle_modal_close",
+                new_callable=AsyncMock,
+                return_value=False,
+            ),
+        ):
+            result = await capture._capture_once(
+                "https://www.linkedin.com/mynetwork/catch-up/all/",
+                section_name="catch_up",
+                plan=CapturePlan(mode),
+            )
+
+        assert result.text.startswith(kept)
+
 
 class TestActivityFeedExtraction:
     """Tests for activity capture plans and wait behavior."""

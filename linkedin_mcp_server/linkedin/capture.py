@@ -44,6 +44,7 @@ from linkedin_mcp_server.linkedin.text import (
     DetailCaptureTextTable,
     JobPostingTextTable,
     filter_linkedin_noise_lines,
+    drop_leading_rail,
     truncate_linkedin_noise,
 )
 
@@ -71,6 +72,9 @@ class CaptureMode(Flag):
     OVERLAY = auto()
     POST_PERMALINKS = auto()
     JOB_POSTING = auto()
+    #: The page's left rail and footer come before its content in <main>, so
+    #: the footer is cut out rather than everything after it.
+    RAIL_FIRST = auto()
 
 
 @dataclass(frozen=True)
@@ -463,7 +467,11 @@ class SectionCapture:
 
         if not raw:
             return ExtractedSection(text="", references=[])
-        truncated = truncate_linkedin_noise(raw)
+        truncated = (
+            drop_leading_rail(raw)
+            if CaptureMode.RAIL_FIRST in plan.mode
+            else truncate_linkedin_noise(raw)
+        )
         if not truncated and raw.strip():
             logger.warning(
                 "Page %s returned only LinkedIn chrome (likely rate-limited)", url
