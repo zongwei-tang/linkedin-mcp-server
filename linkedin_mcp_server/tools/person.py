@@ -395,3 +395,84 @@ def register_person_tools(
             result["unknown_sections"] = unknown
 
         return result
+
+    _FOLLOW_WRITE = {
+        "readOnlyHint": False,
+        "destructiveHint": False,
+        "idempotentHint": True,
+        "openWorldHint": True,
+    }
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Follow Person",
+        annotations=_FOLLOW_WRITE,
+        tags={"person", "actions"},
+    )
+    @tool_errors
+    async def follow_person(
+        linkedin_username: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Follow one person on LinkedIn, so their posts reach your feed.
+
+        Following is not connecting: no invitation is sent. A person you
+        already follow is left alone and reported already_followed, so a
+        repeated call clicks nothing. The follow is confirmed by loading the
+        profile again. Undo with unfollow_person. Works on profiles that show
+        Follow in their top card; a first-degree connection keeps it under
+        More, which this does not open.
+
+        Args:
+            linkedin_username: LinkedIn username (e.g. "williamhgates"). A
+                profile URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, username, followed (true) and status: "followed" or
+            "already_followed".
+        """
+        linkedin_username = normalize_person_identifier(linkedin_username)
+        extractor = await get_ready_extractor(ctx, tool_name="follow_person")
+        logger.info("Following %s", linkedin_username)
+        await ctx.report_progress(progress=0, total=100, message="Opening the profile")
+        result = await extractor.set_person_followed(linkedin_username, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unfollow Person",
+        annotations=_FOLLOW_WRITE,
+        tags={"person", "actions"},
+    )
+    @tool_errors
+    async def unfollow_person(
+        linkedin_username: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Stop following one person on LinkedIn.
+
+        LinkedIn asks to confirm, and the confirmation is accepted; the person
+        is not told. A connection stays a connection. A person you do not
+        follow is left alone and reported already_unfollowed. The change is
+        confirmed by loading the profile again. Undo with follow_person.
+
+        Args:
+            linkedin_username: LinkedIn username (e.g. "williamhgates"). A
+                profile URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, username, followed (false) and status: "unfollowed"
+            or "already_unfollowed".
+        """
+        linkedin_username = normalize_person_identifier(linkedin_username)
+        extractor = await get_ready_extractor(ctx, tool_name="unfollow_person")
+        logger.info("Unfollowing %s", linkedin_username)
+        await ctx.report_progress(progress=0, total=100, message="Opening the profile")
+        result = await extractor.set_person_followed(linkedin_username, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result

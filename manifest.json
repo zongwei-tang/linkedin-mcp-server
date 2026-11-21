@@ -121,6 +121,14 @@
       "description": "List your pending connection invitations, received or sent"
     },
     {
+      "name": "follow_person",
+      "description": "Follow a person on LinkedIn without sending a connection invitation"
+    },
+    {
+      "name": "unfollow_person",
+      "description": "Stop following a person on LinkedIn"
+    },
+    {
       "name": "react_to_post",
       "description": "React to a LinkedIn post with like, celebrate, support, love, insightful or funny"
     },

@@ -26,6 +26,7 @@ from linkedin_mcp_server.linkedin.message_sender import MessageSender
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.network import InvitationDirection, NetworkReader
 from linkedin_mcp_server.linkedin.person import PersonReader
+from linkedin_mcp_server.linkedin.person_actions import PersonActions
 from linkedin_mcp_server.linkedin.post_actions import PostActions, Reaction
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
@@ -72,6 +73,7 @@ class LinkedInExtractor:
         self._network = NetworkReader(capture)
         self._post_actions = PostActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
+        self._person_actions = PersonActions(session, navigator)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -266,6 +268,12 @@ class LinkedInExtractor:
     async def set_post_reaction(self, post: str, reaction: Reaction) -> dict[str, Any]:
         """Leave one post with exactly this reaction."""
         return await self._post_actions.set_post_reaction(post, reaction)
+
+    async def set_person_followed(
+        self, username: str, followed: bool
+    ) -> dict[str, Any]:
+        """Follow or unfollow one person, leaving them as asked."""
+        return await self._person_actions.set_person_followed(username, followed)
 
     async def ignore_invitation(self, username: str) -> dict[str, Any]:
         """Ignore the pending invitation one person sent."""

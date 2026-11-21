@@ -1,0 +1,254 @@
+{
+  "call": {
+    "arguments": {
+      "followed": false,
+      "username": "ada-lovelace"
+    },
+    "method": "set_person_followed"
+  },
+  "events": [
+    {
+      "call": "set_person_followed",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_followed",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_followed",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_person_followed",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-follow",
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "person_follow",
+      "program_digest": "13004e167f5c"
+    },
+    {
+      "arg": "data-mcp-before-confirm",
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "mark_all_buttons",
+      "program_digest": "da7cc161f958"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "locator.create",
+      "locator": "person_follow_button",
+      "parent": null,
+      "selector": "button[data-mcp-follow]"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "locator.element_handle",
+      "locator": "person_follow_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "person_follow_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "person_follow_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "person_follow_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": "data-mcp-follow",
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "person_follow",
+      "program_digest": "13004e167f5c"
+    },
+    {
+      "arg": {
+        "before": "data-mcp-before-confirm",
+        "mark": "data-mcp-confirm"
+      },
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "unfollow_confirm",
+      "program_digest": "2f86591a9035"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "locator.create",
+      "locator": "unfollow_confirm_button",
+      "parent": null,
+      "selector": "button[data-mcp-confirm]"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "locator.element_handle",
+      "locator": "unfollow_confirm_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "unfollow_confirm_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "unfollow_confirm_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_followed",
+      "handle": "unfollow_confirm_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.25
+    },
+    {
+      "arg": "data-mcp-follow",
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "person_follow",
+      "program_digest": "13004e167f5c"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_person_followed",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_followed",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_followed",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_followed",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_followed",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_person_followed",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-follow",
+      "call": "set_person_followed",
+      "kind": "evaluate",
+      "operation": "person_follow",
+      "program_digest": "13004e167f5c"
+    }
+  ],
+  "result": {
+    "followed": false,
+    "status": "unfollowed",
+    "url": "https://www.linkedin.com/in/ada-lovelace/",
+    "username": "ada-lovelace"
+  },
+  "scenario": "set_person_followed__unfollowed",
+  "schema_version": 1
+}

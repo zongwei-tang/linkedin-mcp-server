@@ -76,7 +76,7 @@
       "arg": "data-mcp-before-menu",
       "call": "set_post_reaction",
       "kind": "evaluate",
-      "operation": "reaction_menu_prepare",
+      "operation": "mark_all_buttons",
       "program_digest": "da7cc161f958"
     },
     {

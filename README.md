@@ -85,6 +85,8 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 |------|-------------|
 | `get_person_profile` | Read profile sections: experience, skills, recommendations, posts, comments. |
 | `get_my_profile` | Read your own profile, with the same section selection as other profiles. |
+| `follow_person` | Follow a person so their posts reach your feed; no invitation is sent. |
+| `unfollow_person` | Stop following a person; a connection stays a connection. |
 | `connect_with_person` | Send a connection request with an optional note, or accept an incoming one. |
 | `get_sidebar_profiles` | Find recommended profile links, including people you may know. |
 | `get_inbox` | List recent inbox conversations, with links to open individual threads. |

@@ -77,6 +77,8 @@ TOOL_DELEGATES = {
     "unlike_post": "set_post_liked",
     "ignore_invitation": "ignore_invitation",
     "react_to_post": "set_post_reaction",
+    "follow_person": "set_person_followed",
+    "unfollow_person": "set_person_followed",
 }
 
 
@@ -116,6 +118,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_message_sender",
         "_network",
         "_person",
+        "_person_actions",
         "_post_actions",
         "_posts",
     }

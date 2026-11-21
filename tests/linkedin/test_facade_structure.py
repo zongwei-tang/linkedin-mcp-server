@@ -63,6 +63,7 @@ PUBLIC_SIGNATURES = {
     "set_post_liked": "(self, post: 'str', liked: 'bool') -> 'dict[str, Any]'",
     "ignore_invitation": "(self, username: 'str') -> 'dict[str, Any]'",
     "set_post_reaction": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'",
+    "set_person_followed": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'",
 }
 
 DELEGATES = {
@@ -99,6 +100,7 @@ DELEGATES = {
     "set_post_liked": ("_post_actions", "set_post_liked"),
     "ignore_invitation": ("_invitation_actions", "ignore_invitation"),
     "set_post_reaction": ("_post_actions", "set_post_reaction"),
+    "set_person_followed": ("_person_actions", "set_person_followed"),
 }
 
 DELEGATE_CALLS = {
@@ -135,6 +137,7 @@ DELEGATE_CALLS = {
     "set_post_liked": "self._post_actions.set_post_liked(post, liked)",
     "ignore_invitation": "self._invitation_actions.ignore_invitation(username)",
     "set_post_reaction": "self._post_actions.set_post_reaction(post, reaction)",
+    "set_person_followed": "self._person_actions.set_person_followed(username, followed)",
 }
 
 FACADE_STATE = {
@@ -149,6 +152,7 @@ FACADE_STATE = {
     "_message_sender",
     "_network",
     "_person",
+    "_person_actions",
     "_post_actions",
     "_posts",
 }

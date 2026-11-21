@@ -37,6 +37,7 @@ a page-owning collaborator.
 | `navigation` | `PageNavigator`, `WaitUntil` | `page-owning` |
 | `network` | `CONNECTIONS_URL`, `INVITATION_URLS`, `InvitationDirection`, `NOTIFICATIONS_URL`, `NetworkReader`, `PROFILE_VIEWS_URL` | `browser-free` |
 | `person` | `PersonReader` | `page-owning` |
+| `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS` | `page-owning` |
 | `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
 | `posts` | `PostSearch` | `browser-free` |
 | `profile_page` | `MessageTarget`, `MessageTargetResolution`, `ProfilePageReader`, `ReadMessageTarget` | `browser-free` |
@@ -54,7 +55,7 @@ a page-owning collaborator.
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `post_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
@@ -68,6 +69,7 @@ a page-owning collaborator.
 - `navigation` -> `session`
 - `network` -> `capture`, `connection_actions`, `contracts`
 - `person` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `search_urls`, `session`, `text`
+- `person_actions` -> `identifiers`, `navigation`, `session`
 - `post_actions` -> `identifiers`, `navigation`, `session`
 - `posts` -> `capture`, `contracts`, `identifiers`, `link_metadata`, `search_urls`
 - `profile_page` -> `session`
@@ -108,6 +110,7 @@ a page-owning collaborator.
 - `search_people`
 - `search_posts`
 - `send_message`
+- `set_person_followed`
 - `set_post_liked`
 - `set_post_reaction`
 
@@ -124,6 +127,7 @@ a page-owning collaborator.
 - `_message_sender`
 - `_network`
 - `_person`
+- `_person_actions`
 - `_post_actions`
 - `_posts`
 

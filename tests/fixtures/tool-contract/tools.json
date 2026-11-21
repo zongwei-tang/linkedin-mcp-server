@@ -144,6 +144,42 @@
     "_meta": {
       "fastmcp": {
         "tags": [
+          "actions",
+          "person"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Follow one person on LinkedIn, so their posts reach your feed.\n\nFollowing is not connecting: no invitation is sent. A person you\nalready follow is left alone and reported already_followed, so a\nrepeated call clicks nothing. The follow is confirmed by loading the\nprofile again. Undo with unfollow_person. Works on profiles that show\nFollow in their top card; a first-degree connection keeps it under\nMore, which this does not open.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "linkedin_username": {
+          "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "linkedin_username"
+      ],
+      "type": "object"
+    },
+    "name": "follow_person",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Follow Person"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
           "company"
         ]
       }
@@ -1490,6 +1526,42 @@
       "type": "object"
     },
     "title": "Send Message"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "person"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Stop following one person on LinkedIn.\n\nLinkedIn asks to confirm, and the confirmation is accepted; the person\nis not told. A connection stays a connection. A person you do not\nfollow is left alone and reported already_unfollowed. The change is\nconfirmed by loading the profile again. Undo with follow_person.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "linkedin_username": {
+          "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "linkedin_username"
+      ],
+      "type": "object"
+    },
+    "name": "unfollow_person",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Unfollow Person"
   },
   {
     "_meta": {

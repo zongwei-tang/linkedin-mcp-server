@@ -438,7 +438,7 @@ async def _react_to_post_scenario() -> dict[str, Any]:
         # The reload has to show the reaction's own code too.
         {"carets": 1, "likes": 1, "pressed": True, "reaction": "PRAISE"},
     )
-    page.script("evaluate:reaction_menu_prepare", True)
+    page.script("evaluate:mark_all_buttons", True)
     page.script("evaluate:reaction_choice", {"added": 6, "menus": 1})
     # Both are hidden until hovered, so both are clicked in the page.
     page.script("post_reaction_caret.evaluate:in_page_click", None)
@@ -451,6 +451,39 @@ async def _react_to_post_scenario() -> dict[str, Any]:
     page.assert_clean()
     return recorder.trace(
         {"method": "set_post_reaction", "arguments": arguments}, result
+    )
+
+
+async def _unfollow_person_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_person_followed__unfollowed",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    profile = "https://www.linkedin.com/in/ada-lovelace/"
+    page.goto_landings.extend([profile, profile])
+    page.declare_locator("button[data-mcp-follow]", "person_follow_button")
+    page.declare_locator("button[data-mcp-confirm]", "unfollow_confirm_button")
+    page.script(
+        "evaluate:person_follow",
+        {"candidates": 1, "followed": True},
+        # The confirmation is open; the top card still shows followed.
+        {"candidates": 1, "followed": True},
+        {"candidates": 1, "followed": False},
+        # The reload has to show the unfollow too.
+        {"candidates": 1, "followed": False},
+    )
+    page.script("evaluate:mark_all_buttons", True)
+    page.script("evaluate:unfollow_confirm", {"plain": 2})
+    extractor = _extractor(page)
+    arguments = {"username": "ada-lovelace", "followed": False}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_person_followed"):
+            result = await extractor.set_person_followed(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "set_person_followed", "arguments": arguments}, result
     )
 
 
@@ -1395,6 +1428,7 @@ TOOL_FACADE_METHODS = {
     "set_post_liked",
     "ignore_invitation",
     "set_post_reaction",
+    "set_person_followed",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1429,6 +1463,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "like-post.json": await _like_post_scenario(),
         "ignore-invitation.json": await _ignore_invitation_scenario(),
         "react-to-post.json": await _react_to_post_scenario(),
+        "unfollow-person.json": await _unfollow_person_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

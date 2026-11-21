@@ -54,6 +54,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.set_post_liked = AsyncMock(return_value=result)
     mock.ignore_invitation = AsyncMock(return_value=result)
     mock.set_post_reaction = AsyncMock(return_value=result)
+    mock.set_person_followed = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -208,6 +209,18 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
         ),
         ("post", "like_post", {"post": "/feed/"}, "post is not a LinkedIn post"),
         (
+            "person",
+            "follow_person",
+            {"linkedin_username": "../feed"},
+            "not a LinkedIn public identifier",
+        ),
+        (
+            "person",
+            "unfollow_person",
+            {"linkedin_username": "../feed"},
+            "not a LinkedIn public identifier",
+        ),
+        (
             "network",
             "ignore_invitation",
             {"linkedin_username": "../feed"},
@@ -329,6 +342,8 @@ _A_VALID_CALL = [
     ("person", "connect_with_person", {"linkedin_username": "alice"}),
     ("person", "get_sidebar_profiles", {"linkedin_username": "alice"}),
     ("person", "get_my_profile", {}),
+    ("person", "follow_person", {"linkedin_username": "alice"}),
+    ("person", "unfollow_person", {"linkedin_username": "alice"}),
     ("company", "get_company_profile", {"company_name": "anthropic"}),
     ("company", "get_company_posts", {"company_name": "anthropic"}),
     ("company", "search_companies", {"keywords": "fintech"}),
@@ -2974,6 +2989,27 @@ class TestIgnoreInvitationTool:
         assert tool.annotations.read_only_hint is False
         assert tool.annotations.destructive_hint is True
         assert tool.annotations.idempotent_hint is False
+
+
+class TestFollowTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "followed"), [("follow_person", True), ("unfollow_person", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, followed):
+        expected = {"url": "u", "username": "ada", "followed": followed, "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.person import register_person_tools
+
+        mcp = FastMCP("test")
+        register_person_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            tool_name, {"linkedin_username": "https://www.linkedin.com/in/ada/"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_person_followed.assert_awaited_once_with("ada", followed)
 
 
 class TestReactTool:
