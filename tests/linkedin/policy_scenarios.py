@@ -475,7 +475,7 @@ async def _unfollow_person_scenario() -> dict[str, Any]:
         {"candidates": 1, "followed": False},
     )
     page.script("evaluate:mark_all_buttons", True)
-    page.script("evaluate:unfollow_confirm", {"plain": 2})
+    page.script("evaluate:unfollow_confirm", {"plain": 2, "dialogs": 1})
     extractor = _extractor(page)
     arguments = {"username": "ada-lovelace", "followed": False}
     async with boundaries(recorder, clock):

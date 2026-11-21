@@ -71,6 +71,15 @@ card.addEventListener('click', () => {
     const followed = !!card.querySelector('#check-outline-small');
     if (!followed) { if (!document.body.hasAttribute('data-ignore')) show(true); return; }
     if (document.body.hasAttribute('data-no-ask')) { show(false); return; }
+    // As live: the rest of the profile keeps rendering plain buttons.
+    if (document.body.hasAttribute('data-busy-page')) {
+        const section = document.createElement('section');
+        for (let i = 0; i < 109; i++) section.appendChild(document.createElement('button'));
+        // And a card that also holds two plain buttons, but no close button.
+        section.insertAdjacentHTML('beforeend',
+            '<div><button>Verbinden</button><button>Nachricht</button></div>');
+        document.querySelector('main').appendChild(section);
+    }
     ask();
 });
 for (const other of document.querySelectorAll('[data-who="subscribe"], aside button')) {
@@ -219,3 +228,11 @@ async def test_a_click_that_changes_nothing_is_an_error(dom_page):
 async def test_a_follow_the_reload_does_not_show_is_an_error(dom_page):
     with pytest.raises(LinkedInOperationError, match="not after a reload"):
         await act(dom_page, profile(False), True, reload_html=profile(False))
+
+
+async def test_buttons_rendered_elsewhere_while_it_asks_are_ignored(dom_page):
+    # The live failure: 109 new plain buttons beside the confirmation's two.
+    result = await act(dom_page, profile(True), False, body_attrs=["data-busy-page"])
+
+    assert result["status"] == "unfollowed"
+    assert await log(dom_page) == ["top", "unfollow"]

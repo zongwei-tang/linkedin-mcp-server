@@ -11,7 +11,10 @@ locale:
   carries the same plus icon five levels away from More, so neither matches.
 - Clicking the followed control opens a confirmation whose new buttons are a
   close button around an `xmark` icon and two without icons, Cancel then
-  Unfollow. Unfollow is the second of the two; Escape cancels.
+  Unfollow. Unfollow is the second of the two; Escape cancels. The rest of the
+  profile can keep rendering buttons while it opens (measured live: 109 new
+  plain buttons), so the confirmation is the one container close above its
+  buttons that holds its icon close button and exactly two plain ones.
 
 The icon names are identifiers, not words, and the confirmation is read by
 position, so no label is read.
@@ -96,17 +99,35 @@ MARK_BUTTONS_JS = r"""(before) => {
     return true;
 }"""
 
-# The confirmation's own action: the second of the new buttons that carry no
-# icon (the close button carries one).
+# The confirmation's own action: the second of its two new buttons that carry
+# no icon. The confirmation is told from buttons rendered elsewhere at the same
+# time by its container: the one element, close above them, that holds exactly
+# two new plain buttons and a new button around an icon (its close button).
 CONFIRM_UNFOLLOW_JS = r"""(opts) => {
     const {before, mark} = opts;
     for (const old of document.querySelectorAll('[' + mark + ']')) {
         old.removeAttribute(mark);
     }
-    const plain = [...document.querySelectorAll('button:not([' + before + '])')]
-        .filter((button) => !button.querySelector('svg, img'));
-    if (plain.length === 2) plain[1].setAttribute(mark, '');
-    return {plain: plain.length};
+    const added = [...document.querySelectorAll('button:not([' + before + '])')];
+    const plain = added.filter((button) => !button.querySelector('svg, img'));
+    const closers = added.filter((button) => button.querySelector('svg, img'));
+    const dialogs = new Map();
+    for (const button of plain) {
+        let node = button.parentElement;
+        for (let depth = 0; node && depth < 8; depth++, node = node.parentElement) {
+            const inside = plain.filter((other) => node.contains(other));
+            if (inside.length > 2) break;
+            if (inside.length === 2 && closers.some((closer) => node.contains(closer))) {
+                dialogs.set(node, inside);
+                break;
+            }
+        }
+    }
+    if (dialogs.size === 1) {
+        const [actions] = dialogs.values();
+        actions[1].setAttribute(mark, '');
+    }
+    return {plain: plain.length, dialogs: dialogs.size};
 }"""
 
 
@@ -201,14 +222,15 @@ class PersonActions:
                 # Unfollowed without asking, which is the outcome asked for.
                 return
             found = await page.evaluate(CONFIRM_UNFOLLOW_JS, options)
-            if found["plain"] == 2:
+            if found["dialogs"] == 1:
                 break
             if self._session.monotonic() >= deadline:
                 await page.keyboard.press("Escape")
                 raise LinkedInOperationError(
-                    f"Unfollow was clicked on {url}, but its confirmation showed "
-                    f"{found['plain']} plain buttons where Cancel and Unfollow "
-                    "were expected. It was closed; nothing was confirmed."
+                    f"Unfollow was clicked on {url}, but no single confirmation "
+                    f"with Cancel and Unfollow could be told apart ({found['plain']} "
+                    f"new plain buttons, {found['dialogs']} candidate dialogs). It "
+                    "was closed; nothing was confirmed."
                 )
             await self._session.delay(_POLL)
         await self._click(f"button[{_CONFIRM_MARK}]")
