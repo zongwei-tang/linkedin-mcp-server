@@ -17,6 +17,7 @@ from fastmcp.exceptions import ToolError
 
 from linkedin_mcp_server.core.throttle import (
     browser_call_record,
+    refused_document,
     reset_throttle_record,
     throttle_evidence,
     throttled_count,
@@ -45,6 +46,21 @@ def response(
 
 class Request:
     """A stand-in for a Playwright ``Request``, weak-referenceable like one."""
+
+    resource_type = "fetch"
+
+
+class DocumentRequest(Request):
+    """A page load's own request."""
+
+    resource_type = "document"
+
+
+def page_load(status: int, url: str) -> SimpleNamespace:
+    """The response to a page load, as opposed to a request the page made."""
+    loaded = response(status, url)
+    loaded.request = DocumentRequest()
+    return loaded
 
 
 def handlers() -> dict[str, Callable[[Any], None]]:
@@ -411,3 +427,30 @@ class TestTheRecordBelongsToOneCall:
 
         assert throttled_count() == 1
         assert seen["evidence"] is None
+
+
+class TestARefusedPageLoad:
+    """Only a refused page load says the page asked for never came."""
+
+    @pytest.mark.usefixtures("in_a_browser_call")
+    def test_the_refused_page_is_named_by_its_path(self):
+        record(page_load(429, "https://www.linkedin.com/feed/?trk=x"))
+
+        refused = refused_document("/feed/")
+        assert refused is not None and refused.status == 429
+
+    @pytest.mark.usefixtures("in_a_browser_call")
+    def test_a_refused_request_beside_a_page_that_loaded_is_not_the_page(self):
+        record(
+            page_load(200, "https://www.linkedin.com/feed/"),
+            response(429, "https://www.linkedin.com/feed/"),
+        )
+
+        assert throttled_count() == 1
+        assert refused_document("/feed/") is None
+
+    def test_outside_a_browser_call_nothing_is_named(self):
+        reset_throttle_record()
+        record(page_load(429, "https://www.linkedin.com/feed/"))
+
+        assert refused_document("/feed/") is None

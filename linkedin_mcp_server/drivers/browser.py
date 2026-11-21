@@ -19,6 +19,7 @@ from linkedin_mcp_server.core import (
     AuthenticationError,
     BrowserManager,
     OffLinkedInLandingError,
+    RateLimitError,
     await_deferring_cancels,
     detect_auth_barrier_quick,
     detect_rate_limit,
@@ -37,6 +38,7 @@ from linkedin_mcp_server.core import (
 
 from linkedin_mcp_server.browser_launch import build_launch_options, describe_launch
 from linkedin_mcp_server.common_utils import utcnow_iso
+from linkedin_mcp_server.core.throttle import refused_document
 from linkedin_mcp_server.config import get_config
 from linkedin_mcp_server.debug_trace import record_page_trace
 from linkedin_mcp_server.debug_utils import stabilize_navigation
@@ -305,6 +307,22 @@ async def _feed_auth_succeeds(
         # and both destinations here outlive the call -- the trace is written to
         # disk and the log is what users paste into issue reports.
         await _log_feed_failure_context(browser, detail)
+        refused = refused_document("/feed/") if barrier is None else None
+        if refused is not None:
+            # LinkedIn refused the feed itself with a throttling status (an
+            # empty 429 fails the navigation outright). That is a rate limit,
+            # not a dead session: returning False would have the caller
+            # retire a valid profile and open a login that cannot help.
+            raise RateLimitError(
+                f"LinkedIn answered HTTP {refused.status} to /feed/ while the "
+                "session was being checked, so it is throttling this session. "
+                "The stored session was kept; wait before retrying.",
+                **(
+                    {"suggested_wait_time": refused.retry_after}
+                    if refused.retry_after is not None
+                    else {}
+                ),
+            )
         if barrier is None:
             # Nothing loaded and no barrier, so nothing proves the session is
             # dead -- and with a proxy in front, the most likely cause is the

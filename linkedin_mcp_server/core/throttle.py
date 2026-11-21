@@ -55,6 +55,9 @@ class ThrottleHit:
 _latest: ThrottleHit | None = None
 _statuses: set[int] = set()
 _count: int = 0
+# This call's page loads LinkedIn refused, by path. A refused document is the
+# one throttling a caller may act on: the page it asked for never came.
+_refused_documents: dict[str, ThrottleHit] = {}
 _watched: WeakSet[Any] = WeakSet()
 
 # Which call each request was sent during. The record is cleared as a call
@@ -107,6 +110,7 @@ def reset_throttle_record() -> None:
     _count = 0
     _latest = None
     _statuses.clear()
+    _refused_documents.clear()
 
 
 def throttled_count() -> int:
@@ -135,6 +139,18 @@ def throttle_evidence() -> str | None:
         f"recently {_path(last.url)}. LinkedIn was throttling this session, "
         f"so wait before retrying.{asked}"
     )
+
+
+def refused_document(path: str) -> ThrottleHit | None:
+    """LinkedIn's throttled answer to a page load of *path* during this call.
+
+    None outside a browser call, whose record belongs to another call. Only the
+    document itself counts, never a request the page made, so a refused beacon
+    beside a page that loaded is not mistaken for the page.
+    """
+    if not _owns_the_browser.get():
+        return None
+    return _refused_documents.get(path.rstrip("/") or "/")
 
 
 def _path(url: str) -> str:
@@ -208,3 +224,9 @@ def _record(response: Any) -> None:
     _count += 1
     _latest = hit
     _statuses.add(status)
+    try:
+        document = getattr(response.request, "resource_type", None) == "document"
+    except Exception:
+        document = False
+    if document:
+        _refused_documents[urlsplit(url).path.rstrip("/") or "/"] = hit

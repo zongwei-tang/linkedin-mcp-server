@@ -12,6 +12,7 @@ from linkedin_mcp_server.core.exceptions import (
     AccountRestrictedError,
     OffLinkedInLandingError,
     ProxyConnectionError,
+    RateLimitError,
 )
 from linkedin_mcp_server.exceptions import BrowserShutdownUnconfirmedError
 from linkedin_mcp_server.drivers.browser import (
@@ -299,6 +300,66 @@ async def test_feed_auth_retries_feed_after_remember_me_error_recovery():
 
     assert browser.page.goto.await_count == 2
     remember_me.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_a_feed_linkedin_refused_with_429_is_a_rate_limit_not_a_dead_session():
+    # Measured 2026-11-21: an empty 429 on /feed/ fails the navigation with
+    # ERR_HTTP_RESPONSE_CODE_FAILURE, and the session was then retired.
+    from linkedin_mcp_server.core.throttle import ThrottleHit
+
+    browser = _make_mock_browser()
+    browser.page.goto = AsyncMock(
+        side_effect=Exception("net::ERR_HTTP_RESPONSE_CODE_FAILURE")
+    )
+    refused = ThrottleHit(429, "https://www.linkedin.com/feed/", retry_after=42)
+
+    with (
+        patch(
+            "linkedin_mcp_server.drivers.browser.resolve_remember_me_prompt",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.detect_auth_barrier_quick",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.refused_document",
+            side_effect=lambda path: refused if path == "/feed/" else None,
+        ),
+        pytest.raises(RateLimitError) as caught,
+    ):
+        await _feed_auth_succeeds(browser)
+
+    assert caught.value.suggested_wait_time == 42
+
+
+@pytest.mark.asyncio
+async def test_a_failed_feed_load_nobody_refused_still_fails_the_check():
+    browser = _make_mock_browser()
+    browser.page.goto = AsyncMock(
+        side_effect=Exception("net::ERR_HTTP_RESPONSE_CODE_FAILURE")
+    )
+
+    with (
+        patch(
+            "linkedin_mcp_server.drivers.browser.resolve_remember_me_prompt",
+            new_callable=AsyncMock,
+            return_value=False,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.detect_auth_barrier_quick",
+            new_callable=AsyncMock,
+            return_value=None,
+        ),
+        patch(
+            "linkedin_mcp_server.drivers.browser.refused_document",
+            return_value=None,
+        ),
+    ):
+        assert await _feed_auth_succeeds(browser) is False
 
 
 @pytest.mark.asyncio
