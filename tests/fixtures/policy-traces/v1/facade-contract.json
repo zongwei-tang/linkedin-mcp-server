@@ -88,6 +88,10 @@
         "coroutine": true,
         "signature": "(self, username: 'str') -> 'dict[str, Any]'"
       },
+      "ignore_invitation": {
+        "coroutine": true,
+        "signature": "(self, username: 'str') -> 'dict[str, Any]'"
+      },
       "read_company": {
         "coroutine": true,
         "signature": "(self, company_name: 'str', requested: 'set[str]', callbacks: 'ProgressCallback | None' = None) -> 'dict[str, Any]'"
@@ -155,6 +159,7 @@
       "get_profile_views",
       "get_saved_jobs",
       "get_sidebar_profiles",
+      "ignore_invitation",
       "read_company",
       "read_job",
       "read_person",
@@ -757,6 +762,25 @@
           "properties": {
             "linkedin_username": {
               "description": "LinkedIn username of the profile page to read; a full profile URL is accepted too\n(e.g., \"stickerdaniel\", \"williamhgates\")",
+              "type": "string"
+            }
+          },
+          "required": [
+            "linkedin_username"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "ignore_invitation": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "linkedin_username": {
+              "description": "The sender's LinkedIn username, as the\nreferences of get_invitations give it. A profile URL is\naccepted too.",
               "type": "string"
             }
           },

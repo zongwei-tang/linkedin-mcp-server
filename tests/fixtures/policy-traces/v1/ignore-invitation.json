@@ -1,0 +1,197 @@
+{
+  "call": {
+    "arguments": {
+      "username": "ada-lovelace"
+    },
+    "method": "ignore_invitation"
+  },
+  "events": [
+    {
+      "call": "ignore_invitation",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "ignore_invitation",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "requested_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "ignore_invitation",
+      "description": "goto https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "ignore_invitation",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "ignore_invitation",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "ignore_invitation",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": {
+        "mark": "data-mcp-ignore",
+        "prefix": "invitation_manager_row_urn:li:invitation:",
+        "username": "ada-lovelace"
+      },
+      "call": "ignore_invitation",
+      "kind": "evaluate",
+      "operation": "invitation_row",
+      "program_digest": "689c79d11bbd"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "locator.create",
+      "locator": "invitation_ignore_button",
+      "parent": null,
+      "selector": "button[data-mcp-ignore]"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "locator.element_handle",
+      "locator": "invitation_ignore_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "ignore_invitation",
+      "handle": "invitation_ignore_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "ignore_invitation",
+      "handle": "invitation_ignore_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "ignore_invitation",
+      "handle": "invitation_ignore_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.25
+    },
+    {
+      "arg": "invitation_manager_row_urn:li:invitation:111",
+      "call": "ignore_invitation",
+      "kind": "evaluate",
+      "operation": "invitation_present",
+      "program_digest": "ccf5033ef1a3"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "ignore_invitation",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "ignore_invitation",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "requested_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "ignore_invitation",
+      "description": "goto https://www.linkedin.com/mynetwork/invitation-manager/received/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "ignore_invitation",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "ignore_invitation",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "ignore_invitation",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": "invitation_manager_row_urn:li:invitation:111",
+      "call": "ignore_invitation",
+      "kind": "evaluate",
+      "operation": "invitation_present",
+      "program_digest": "ccf5033ef1a3"
+    }
+  ],
+  "result": {
+    "invitation_id": "111",
+    "status": "ignored",
+    "url": "https://www.linkedin.com/mynetwork/invitation-manager/received/",
+    "username": "ada-lovelace"
+  },
+  "scenario": "ignore_invitation__ignored",
+  "schema_version": 1
+}

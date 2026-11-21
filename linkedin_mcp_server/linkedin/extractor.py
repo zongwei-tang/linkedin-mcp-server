@@ -18,6 +18,7 @@ from linkedin_mcp_server.linkedin.contracts import (
 )
 from linkedin_mcp_server.linkedin.conversations import ConversationReader
 from linkedin_mcp_server.linkedin.feed import FeedReader
+from linkedin_mcp_server.linkedin.invitation_actions import InvitationActions
 from linkedin_mcp_server.linkedin.job_pages import JobPageReader
 from linkedin_mcp_server.linkedin.job_policy import JobsTrackerStage
 from linkedin_mcp_server.linkedin.jobs import JobReader
@@ -70,6 +71,7 @@ class LinkedInExtractor:
         self._posts = PostSearch(capture)
         self._network = NetworkReader(capture)
         self._post_actions = PostActions(session, navigator)
+        self._invitation_actions = InvitationActions(session, navigator)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -260,6 +262,10 @@ class LinkedInExtractor:
     ) -> dict[str, Any]:
         """List pending connection invitations, received or sent."""
         return await self._network.get_invitations(direction, max_scrolls)
+
+    async def ignore_invitation(self, username: str) -> dict[str, Any]:
+        """Ignore the pending invitation one person sent."""
+        return await self._invitation_actions.ignore_invitation(username)
 
     async def get_connections(self, max_scrolls: int | None = None) -> dict[str, Any]:
         """List the signed-in member's connections."""

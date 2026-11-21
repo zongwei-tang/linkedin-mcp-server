@@ -933,6 +933,42 @@
       "fastmcp": {
         "tags": [
           "actions",
+          "network"
+        ]
+      }
+    },
+    "annotations": {
+      "destructiveHint": true,
+      "idempotentHint": false,
+      "openWorldHint": true,
+      "readOnlyHint": false
+    },
+    "description": "Ignore the pending connection invitation one person sent you.\n\nThe invitation is found in your received list by the sender's profile\nlink, and its Ignore action is chosen. The sender is not told. It\ncannot be undone: the invitation is gone, though you can still send\nyour own with connect_with_person. The change is confirmed by loading\nthe list again. To accept instead, use connect_with_person.",
+    "inputSchema": {
+      "additionalProperties": false,
+      "properties": {
+        "linkedin_username": {
+          "description": "The sender's LinkedIn username, as the\nreferences of get_invitations give it. A profile URL is\naccepted too.",
+          "type": "string"
+        }
+      },
+      "required": [
+        "linkedin_username"
+      ],
+      "type": "object"
+    },
+    "name": "ignore_invitation",
+    "outputSchema": {
+      "additionalProperties": true,
+      "type": "object"
+    },
+    "title": "Ignore Invitation"
+  },
+  {
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
           "post"
         ]
       }

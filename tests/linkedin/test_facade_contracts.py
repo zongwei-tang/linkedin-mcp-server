@@ -75,6 +75,7 @@ TOOL_DELEGATES = {
     "get_profile_views": "get_profile_views",
     "like_post": "set_post_liked",
     "unlike_post": "set_post_liked",
+    "ignore_invitation": "ignore_invitation",
 }
 
 
@@ -109,6 +110,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_content",
         "_conversations",
         "_feed",
+        "_invitation_actions",
         "_jobs",
         "_message_sender",
         "_network",

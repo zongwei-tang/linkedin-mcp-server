@@ -52,6 +52,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.get_company_employees = AsyncMock(return_value=result)
     mock.read_post = AsyncMock(return_value=result)
     mock.set_post_liked = AsyncMock(return_value=result)
+    mock.ignore_invitation = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
     mock.get_notifications = AsyncMock(return_value=result)
@@ -205,6 +206,12 @@ def serve_extractor(monkeypatch: pytest.MonkeyPatch) -> Callable[[Any], AsyncMoc
             "post is not a LinkedIn post",
         ),
         ("post", "like_post", {"post": "/feed/"}, "post is not a LinkedIn post"),
+        (
+            "network",
+            "ignore_invitation",
+            {"linkedin_username": "../feed"},
+            "not a LinkedIn public identifier",
+        ),
         ("post", "unlike_post", {"post": "/in/ada/"}, "post is not a LinkedIn post"),
         (
             "messaging",
@@ -283,6 +290,7 @@ async def test_invalid_reference_is_rejected_before_extractor(
     from linkedin_mcp_server.tools.company import register_company_tools
     from linkedin_mcp_server.tools.job import register_job_tools
     from linkedin_mcp_server.tools.messaging import register_messaging_tools
+    from linkedin_mcp_server.tools.network import register_network_tools
     from linkedin_mcp_server.tools.person import register_person_tools
     from linkedin_mcp_server.tools.post import register_post_tools
 
@@ -290,6 +298,7 @@ async def test_invalid_reference_is_rejected_before_extractor(
         "company": register_company_tools,
         "job": register_job_tools,
         "messaging": register_messaging_tools,
+        "network": register_network_tools,
         "person": register_person_tools,
         "post": register_post_tools,
     }
@@ -346,6 +355,7 @@ _A_VALID_CALL = [
     ("network", "get_connections", {}),
     ("network", "get_notifications", {}),
     ("network", "get_profile_views", {}),
+    ("network", "ignore_invitation", {"linkedin_username": "alice"}),
 ]
 
 
@@ -2917,6 +2927,41 @@ class TestFeedTools:
 
         with pytest.raises(ValidationError, match="num_posts"):
             await mcp.call_tool("get_feed", {"num_posts": 51})
+
+
+class TestIgnoreInvitationTool:
+    async def test_it_forwards_the_normalized_username(self, serve_extractor):
+        expected = {
+            "url": "u",
+            "username": "ada",
+            "invitation_id": "1",
+            "status": "ignored",
+        }
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.network import register_network_tools
+
+        mcp = FastMCP("test")
+        register_network_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            "ignore_invitation",
+            {"linkedin_username": "https://www.linkedin.com/in/ada/"},
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.ignore_invitation.assert_awaited_once_with("ada")
+
+    async def test_it_is_marked_destructive_and_not_idempotent(self):
+        from linkedin_mcp_server.tools.network import register_network_tools
+
+        mcp = FastMCP("test")
+        register_network_tools(mcp)
+        tool = await mcp.get_tool("ignore_invitation")
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is False
+        assert tool.annotations.destructive_hint is True
+        assert tool.annotations.idempotent_hint is False
 
 
 class TestLikeTools:

@@ -121,6 +121,10 @@
       "description": "List your pending connection invitations, received or sent"
     },
     {
+      "name": "ignore_invitation",
+      "description": "Ignore the pending connection invitation one person sent you"
+    },
+    {
       "name": "get_connections",
       "description": "List your first-degree LinkedIn connections, most recently added first"
     },

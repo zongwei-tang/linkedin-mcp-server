@@ -420,6 +420,37 @@ async def _like_post_scenario() -> dict[str, Any]:
     return recorder.trace({"method": "set_post_liked", "arguments": arguments}, result)
 
 
+async def _ignore_invitation_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "ignore_invitation__ignored",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    url = "https://www.linkedin.com/mynetwork/invitation-manager/received/"
+    page.goto_landings.extend([url, url])
+    page.declare_locator("button[data-mcp-ignore]", "invitation_ignore_button")
+    page.script(
+        "evaluate:invitation_row",
+        {"rows": 2, "matches": 1, "buttons": 2, "invitation": "111", "text": 900},
+    )
+    page.script(
+        "evaluate:invitation_present",
+        {"present": False, "text": 900},
+        # The reload rendered the list, and the row is not in it.
+        {"present": False, "text": 600},
+    )
+    extractor = _extractor(page)
+    arguments = {"username": "ada-lovelace"}
+    async with boundaries(recorder, clock):
+        with recorder.context("ignore_invitation"):
+            result = await extractor.ignore_invitation(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "ignore_invitation", "arguments": arguments}, result
+    )
+
+
 async def _dismiss_job_scenario() -> dict[str, Any]:
     recorder = TraceRecorder("dismiss_job__dismissed", _COMMON_ALLOWED | {"title"})
     clock = FakeClock(recorder)
@@ -1328,6 +1359,7 @@ TOOL_FACADE_METHODS = {
     "get_notifications",
     "get_profile_views",
     "set_post_liked",
+    "ignore_invitation",
 }
 COMPATIBILITY_METHODS = {"get_page_text", "click_button_by_text"}
 
@@ -1360,6 +1392,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "saved-jobs.json": await _saved_jobs_scenario(),
         "dismiss-job.json": await _dismiss_job_scenario(),
         "like-post.json": await _like_post_scenario(),
+        "ignore-invitation.json": await _ignore_invitation_scenario(),
         "feed-stale.json": await _feed_stale_scenario(),
         "feed-response-success.json": await _feed_response_scenario(body_failure=False),
         "feed-response-failure.json": await _feed_response_scenario(body_failure=True),

@@ -14,6 +14,7 @@ from pydantic import Field
 
 from linkedin_mcp_server.config.schema import DEFAULT_TOOL_TIMEOUT_SECONDS
 from linkedin_mcp_server.dependencies import get_ready_extractor, tool_errors
+from linkedin_mcp_server.linkedin.identifiers import normalize_person_identifier
 
 logger = logging.getLogger(__name__)
 
@@ -157,5 +158,51 @@ def register_network_tools(
             progress=0, total=100, message="Reading your profile views"
         )
         result = await extractor.get_profile_views(max_scrolls=max_scrolls)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Ignore Invitation",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": True,
+            "idempotentHint": False,
+            "openWorldHint": True,
+        },
+        tags={"network", "actions"},
+    )
+    @tool_errors
+    async def ignore_invitation(
+        linkedin_username: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Ignore the pending connection invitation one person sent you.
+
+        The invitation is found in your received list by the sender's profile
+        link, and its Ignore action is chosen. The sender is not told. It
+        cannot be undone: the invitation is gone, though you can still send
+        your own with connect_with_person. The change is confirmed by loading
+        the list again. To accept instead, use connect_with_person.
+
+        Args:
+            linkedin_username: The sender's LinkedIn username, as the
+                references of get_invitations give it. A profile URL is
+                accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, username, invitation_id and status "ignored".
+            Only invitations on the first load of the received list are
+            searched.
+        """
+        linkedin_username = normalize_person_identifier(linkedin_username)
+        extractor = await get_ready_extractor(ctx, tool_name="ignore_invitation")
+        logger.info("Ignoring invitation from %s", linkedin_username)
+        await ctx.report_progress(
+            progress=0, total=100, message="Opening your invitations"
+        )
+        result = await extractor.ignore_invitation(linkedin_username)
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result
