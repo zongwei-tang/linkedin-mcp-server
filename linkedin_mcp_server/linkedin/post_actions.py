@@ -14,6 +14,10 @@ Measured 2026-11-20 on a `/feed/update/<urn>/` page, English locale:
   `aria-pressed` Like, so everything inside one is excluded.
 
 No label is read: the Like button's text and `aria-label` are translated.
+
+Verified live 2026-11-20 through the MCP tools on one post: like, like again
+(already_liked, no click), unlike, unlike again (already_unliked, no click),
+each confirmed by a reload.
 """
 
 from __future__ import annotations
