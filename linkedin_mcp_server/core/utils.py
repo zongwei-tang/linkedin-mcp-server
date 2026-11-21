@@ -535,15 +535,25 @@ async def scroll_job_sidebar(
 async def handle_modal_close(page: Page) -> bool:
     """Close any popup modals that might be blocking content.
 
+    Only a button inside an open dialog is clicked. Page cards carry the same
+    close buttons (a suggestion's X can be labelled "Dismiss"), and clicking
+    one would change the account from a read-only tool.
+
     Returns:
         True if a modal was closed, False otherwise
     """
     try:
-        close_button = page.locator(
-            'button[aria-label="Dismiss"], '
-            'button[aria-label="Close"], '
-            "button.artdeco-modal__dismiss"
-        ).first
+        # dialog[open], not dialog: a closed <dialog> earlier in the page would
+        # be .first, never visible, and keep the open one from being closed.
+        close_button = (
+            page.locator('[role="dialog"], dialog[open]')
+            .locator(
+                'button[aria-label="Dismiss"], '
+                'button[aria-label="Close"], '
+                "button.artdeco-modal__dismiss"
+            )
+            .first
+        )
 
         if await close_button.is_visible(timeout=1000):
             async with linkedin_element(close_button, timeout=1000) as button:
