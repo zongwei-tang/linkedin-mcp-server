@@ -238,6 +238,73 @@ def register_post_tools(
 
     @mcp.tool(
         timeout=tool_timeout,
+        title="Save Post",
+        annotations=_WRITE,
+        tags={"post", "actions"},
+    )
+    @tool_errors
+    async def save_post(post: str, ctx: Context) -> dict[str, Any]:
+        """
+        Save one LinkedIn post to your saved posts. Private: the author is not told.
+
+        The post's menu is read first: a post already saved is left alone and
+        reported already_saved, so a repeated call changes nothing. The save is
+        confirmed by loading the post again. List saved posts with
+        get_saved_posts; undo with unsave_post.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, post (its path), saved (true) and status: "saved" or
+            "already_saved".
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="save_post")
+        logger.info("Saving post: %s", post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.set_post_saved(post, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unsave Post",
+        annotations=_WRITE,
+        tags={"post", "actions"},
+    )
+    @tool_errors
+    async def unsave_post(post: str, ctx: Context) -> dict[str, Any]:
+        """
+        Remove one post from your saved posts.
+
+        A post that is not saved is left alone and reported already_unsaved, so
+        a repeated call changes nothing. The change is confirmed by loading the
+        post again.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, post (its path), saved (false) and status:
+            "unsaved" or "already_unsaved".
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="unsave_post")
+        logger.info("Unsaving post: %s", post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.set_post_saved(post, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
         title="React to Post",
         annotations=_WRITE,
         tags={"post", "actions"},

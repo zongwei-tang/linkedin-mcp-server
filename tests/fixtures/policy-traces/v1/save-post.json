@@ -1,0 +1,287 @@
+{
+  "call": {
+    "arguments": {
+      "post": "urn:li:activity:7212345678901234567",
+      "saved": true
+    },
+    "method": "set_post_saved"
+  },
+  "events": [
+    {
+      "call": "set_post_saved",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_post_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "requested_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_post_saved",
+      "description": "goto https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_post_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_post_saved",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_post_saved",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-post-menu",
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "post_menu",
+      "program_digest": "7002415b2962"
+    },
+    {
+      "arg": "data-mcp-before-post-menu",
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "mark_all_controls",
+      "program_digest": "d2045c9291d1"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.create",
+      "locator": "post_menu_button",
+      "parent": null,
+      "selector": "button[data-mcp-post-menu]"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.element_handle",
+      "locator": "post_menu_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": {
+        "before": "data-mcp-before-post-menu",
+        "mark": "data-mcp-save-item"
+      },
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "post_save_item",
+      "program_digest": "900967168765"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.create",
+      "locator": "post_save_item",
+      "parent": null,
+      "selector": "[data-mcp-save-item]"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.element_handle",
+      "locator": "post_save_item",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_save_item",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_save_item",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_save_item",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_post_saved",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_post_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "requested_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_post_saved",
+      "description": "goto https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_post_saved",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_post_saved",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_post_saved",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-post-menu",
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "post_menu",
+      "program_digest": "7002415b2962"
+    },
+    {
+      "arg": "data-mcp-before-post-menu",
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "mark_all_controls",
+      "program_digest": "d2045c9291d1"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.create",
+      "locator": "post_menu_button",
+      "parent": null,
+      "selector": "button[data-mcp-post-menu]"
+    },
+    {
+      "call": "set_post_saved",
+      "kind": "locator.element_handle",
+      "locator": "post_menu_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_post_saved",
+      "handle": "post_menu_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": {
+        "before": "data-mcp-before-post-menu",
+        "mark": "data-mcp-save-item"
+      },
+      "call": "set_post_saved",
+      "kind": "evaluate",
+      "operation": "post_save_item",
+      "program_digest": "900967168765"
+    },
+    {
+      "call": "set_post_saved",
+      "key": "Escape",
+      "kind": "keyboard.press"
+    }
+  ],
+  "result": {
+    "post": "/feed/update/urn:li:activity:7212345678901234567/",
+    "saved": true,
+    "status": "saved",
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+  },
+  "scenario": "set_post_saved__saved",
+  "schema_version": 1
+}

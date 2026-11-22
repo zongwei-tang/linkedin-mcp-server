@@ -52,6 +52,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.get_company_employees = AsyncMock(return_value=result)
     mock.read_post = AsyncMock(return_value=result)
     mock.set_post_liked = AsyncMock(return_value=result)
+    mock.set_post_saved = AsyncMock(return_value=result)
     mock.ignore_invitation = AsyncMock(return_value=result)
     mock.set_post_reaction = AsyncMock(return_value=result)
     mock.set_person_followed = AsyncMock(return_value=result)
@@ -419,6 +420,8 @@ _A_VALID_CALL = [
     ("post", "get_post_details", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "like_post", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "unlike_post", {"post": "urn:li:activity:7212345678901234567"}),
+    ("post", "save_post", {"post": "urn:li:activity:7212345678901234567"}),
+    ("post", "unsave_post", {"post": "urn:li:activity:7212345678901234567"}),
     (
         "post",
         "react_to_post",
@@ -3221,6 +3224,51 @@ class TestReactTool:
                 "react_to_post",
                 {"post": "urn:li:activity:7212345678901234567", "reaction": "angry"},
             )
+
+
+class TestSavePostTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "saved"), [("save_post", True), ("unsave_post", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, saved):
+        expected = {
+            "url": "u",
+            "post": "/feed/update/urn:li:activity:1/",
+            "saved": saved,
+            "status": "x",
+        }
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            tool_name, {"post": "urn:li:activity:7212345678901234567"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_post_saved.assert_awaited_once_with(
+            "urn:li:activity:7212345678901234567", saved
+        )
+
+    @pytest.mark.parametrize("tool_name", ["save_post", "unsave_post"])
+    async def test_a_reference_that_is_no_post_never_opens_the_browser(
+        self, serve_extractor, tool_name
+    ):
+        from fastmcp.exceptions import ToolError
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mock_extractor = _make_mock_extractor({})
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        with pytest.raises(ToolError, match="post is not a LinkedIn post"):
+            await mcp.call_tool(tool_name, {"post": "/in/ada/"})
+        mock_extractor.set_post_saved.assert_not_awaited()
 
 
 class TestLikeTools:

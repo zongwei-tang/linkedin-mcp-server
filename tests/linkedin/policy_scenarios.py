@@ -420,6 +420,36 @@ async def _like_post_scenario() -> dict[str, Any]:
     return recorder.trace({"method": "set_post_liked", "arguments": arguments}, result)
 
 
+async def _save_post_scenario() -> dict[str, Any]:
+    recorder = TraceRecorder(
+        "set_post_saved__saved",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    post = "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+    page.goto_landings.extend([post, post])
+    page.declare_locator("button[data-mcp-post-menu]", "post_menu_button")
+    page.declare_locator("[data-mcp-save-item]", "post_save_item")
+    page.script(
+        "evaluate:post_menu", {"carets": 1, "menus": 1}, {"carets": 1, "menus": 1}
+    )
+    page.script("evaluate:mark_all_controls", True, True)
+    page.script(
+        "evaluate:post_save_item",
+        {"items": 1, "saved": False},
+        # The reload's menu has to show the save too, and only that confirms it.
+        {"items": 1, "saved": True},
+    )
+    extractor = _extractor(page)
+    arguments = {"post": "urn:li:activity:7212345678901234567", "saved": True}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_post_saved"):
+            result = await extractor.set_post_saved(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_post_saved", "arguments": arguments}, result)
+
+
 async def _react_to_post_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "set_post_reaction__celebrate",
@@ -1498,6 +1528,7 @@ TOOL_FACADE_METHODS = {
     "get_notifications",
     "get_profile_views",
     "set_post_liked",
+    "set_post_saved",
     "ignore_invitation",
     "set_post_reaction",
     "set_person_followed",
@@ -1536,6 +1567,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "saved-jobs.json": await _saved_jobs_scenario(),
         "dismiss-job.json": await _dismiss_job_scenario(),
         "like-post.json": await _like_post_scenario(),
+        "save-post.json": await _save_post_scenario(),
         "ignore-invitation.json": await _ignore_invitation_scenario(),
         "react-to-post.json": await _react_to_post_scenario(),
         "unfollow-person.json": await _unfollow_person_scenario(),

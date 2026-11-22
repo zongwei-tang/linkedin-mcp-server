@@ -31,6 +31,7 @@ from linkedin_mcp_server.linkedin.pages import PageKind, PageReader
 from linkedin_mcp_server.linkedin.person import PersonReader
 from linkedin_mcp_server.linkedin.person_actions import PersonActions
 from linkedin_mcp_server.linkedin.post_actions import PostActions, Reaction
+from linkedin_mcp_server.linkedin.post_save_actions import PostSaveActions
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
 from linkedin_mcp_server.linkedin.session import PageSession
@@ -76,6 +77,7 @@ class LinkedInExtractor:
         self._network = NetworkReader(capture)
         self._pages = PageReader(capture, session)
         self._post_actions = PostActions(session, navigator)
+        self._post_save_actions = PostSaveActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)
         self._company_actions = CompanyActions(session, navigator)
@@ -264,6 +266,10 @@ class LinkedInExtractor:
     async def set_post_liked(self, post: str, liked: bool) -> dict[str, Any]:
         """Like or unlike one post, leaving it as asked."""
         return await self._post_actions.set_post_liked(post, liked)
+
+    async def set_post_saved(self, post: str, saved: bool) -> dict[str, Any]:
+        """Save or unsave one post, leaving it as asked."""
+        return await self._post_save_actions.set_post_saved(post, saved)
 
     async def read_page(
         self,

@@ -61,6 +61,7 @@ PUBLIC_SIGNATURES = {
     "get_notifications": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
     "get_profile_views": "(self, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'",
     "set_post_liked": "(self, post: 'str', liked: 'bool') -> 'dict[str, Any]'",
+    "set_post_saved": "(self, post: 'str', saved: 'bool') -> 'dict[str, Any]'",
     "ignore_invitation": "(self, username: 'str') -> 'dict[str, Any]'",
     "set_post_reaction": "(self, post: 'str', reaction: 'Reaction') -> 'dict[str, Any]'",
     "set_person_followed": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'",
@@ -101,6 +102,7 @@ DELEGATES = {
     "get_notifications": ("_network", "get_notifications"),
     "get_profile_views": ("_network", "get_profile_views"),
     "set_post_liked": ("_post_actions", "set_post_liked"),
+    "set_post_saved": ("_post_save_actions", "set_post_saved"),
     "ignore_invitation": ("_invitation_actions", "ignore_invitation"),
     "set_post_reaction": ("_post_actions", "set_post_reaction"),
     "set_person_followed": ("_person_actions", "set_person_followed"),
@@ -141,6 +143,7 @@ DELEGATE_CALLS = {
     "get_notifications": "self._network.get_notifications(max_scrolls)",
     "get_profile_views": "self._network.get_profile_views(max_scrolls)",
     "set_post_liked": "self._post_actions.set_post_liked(post, liked)",
+    "set_post_saved": "self._post_save_actions.set_post_saved(post, saved)",
     "ignore_invitation": "self._invitation_actions.ignore_invitation(username)",
     "set_post_reaction": "self._post_actions.set_post_reaction(post, reaction)",
     "set_person_followed": "self._person_actions.set_person_followed(username, followed)",
@@ -166,6 +169,7 @@ FACADE_STATE = {
     "_person",
     "_person_actions",
     "_post_actions",
+    "_post_save_actions",
     "_posts",
 }
 

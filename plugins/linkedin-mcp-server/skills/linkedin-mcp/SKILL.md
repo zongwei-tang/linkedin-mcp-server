@@ -27,6 +27,8 @@ work, health checks, or background maintenance.
   thread.
 - `like_post`, `react_to_post` and `unlike_post` are write actions others can see. Use them only
   on a post the user named.
+- `save_post` and `unsave_post` change only the user's own saved posts (the
+  author is not told). Use them for the post the user named.
 - `follow_person`, `unfollow_person`, `follow_company` and `unfollow_company`
   change whose posts reach the user's feed. Use them only for the person or
   page the user named.
@@ -75,7 +77,8 @@ instances, clear profiles, or replace the user's browser session.
 - Messages: `get_inbox`, `get_conversation`, and `search_conversations`.
 - Writes: `send_message`, `reply_to_conversation` (answer an existing thread,
   InMail included), `connect_with_person`, `archive_conversation`,
-  `like_post`, `react_to_post`, `unlike_post`, `follow_person`,
+  `like_post`, `react_to_post`, `unlike_post`, `save_post`, `unsave_post`,
+  `follow_person`,
   `unfollow_person`, `follow_company`, `unfollow_company`,
   `ignore_invitation`, `save_job`, `unsave_job` and `dismiss_job`, subject to
   the explicit authorization rules above.

@@ -125,6 +125,14 @@
       "description": "Remove the signed-in member's like or other reaction from a LinkedIn post; a post with none is left alone"
     },
     {
+      "name": "save_post",
+      "description": "Save a LinkedIn post to your saved posts, privately; a post already saved is left alone"
+    },
+    {
+      "name": "unsave_post",
+      "description": "Remove a LinkedIn post from your saved posts; a post not saved is left alone"
+    },
+    {
       "name": "get_saved_posts",
       "description": "List the posts and articles you saved"
     },

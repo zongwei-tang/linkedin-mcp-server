@@ -116,6 +116,8 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `like_post` | Like a post; one you already like is left alone. Undo with `unlike_post`. |
 | `react_to_post` | React to a post with like, celebrate, support, love, insightful or funny. |
 | `unlike_post` | Remove your like or other reaction; one without is left alone. |
+| `save_post` | Save a post to your saved posts, privately. Undo with `unsave_post`. |
+| `unsave_post` | Remove a post from your saved posts; one not saved is left alone. |
 | `get_invitations` | List your pending connection invitations, received or sent. |
 | `ignore_invitation` | Ignore one person's pending invitation. The sender is not told. Irreversible. |
 | `get_connections` | List your first-degree connections, most recently added first. |

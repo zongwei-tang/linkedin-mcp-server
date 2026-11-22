@@ -42,6 +42,7 @@ a page-owning collaborator.
 | `person` | `PersonReader` | `page-owning` |
 | `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS` | `page-owning` |
 | `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
+| `post_save_actions` | `MARK_CONTROLS_JS`, `POST_MENU_JS`, `PostSaveActions`, `SAVE_ITEM_JS`, `SaveStatus` | `page-owning` |
 | `posts` | `PostSearch` | `browser-free` |
 | `profile_page` | `MessageTarget`, `MessageTargetResolution`, `ProfilePageReader`, `ReadMessageTarget` | `browser-free` |
 | `search_urls` | `CONTENT_DATE_POSTED_MAP`, `CONTENT_TYPE_MAP`, `EXPERIENCE_LEVEL_MAP`, `JOB_DATE_POSTED_MAP`, `JOB_TYPE_MAP`, `NETWORK_TOKENS`, `SORT_BY_MAP`, `WORK_TYPE_MAP`, `build_company_search_url()`, `build_content_search_url()`, `build_job_search_url()`, `build_people_search_url()` | `browser-free` |
@@ -59,7 +60,7 @@ a page-owning collaborator.
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `post_save_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
@@ -77,6 +78,7 @@ a page-owning collaborator.
 - `person` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `search_urls`, `session`, `text`
 - `person_actions` -> `identifiers`, `navigation`, `session`
 - `post_actions` -> `identifiers`, `navigation`, `session`
+- `post_save_actions` -> `identifiers`, `navigation`, `session`
 - `posts` -> `capture`, `contracts`, `identifiers`, `link_metadata`, `search_urls`
 - `profile_page` -> `session`
 - `search_urls` -> `contracts`
@@ -122,6 +124,7 @@ a page-owning collaborator.
 - `set_person_followed`
 - `set_post_liked`
 - `set_post_reaction`
+- `set_post_saved`
 
 ## `LinkedInExtractor` construction-state allowlist
 
@@ -141,6 +144,7 @@ a page-owning collaborator.
 - `_person`
 - `_person_actions`
 - `_post_actions`
+- `_post_save_actions`
 - `_posts`
 
 ## Dependency-direction violations
