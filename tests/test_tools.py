@@ -44,6 +44,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.get_conversation = AsyncMock(return_value=result)
     mock.search_conversations = AsyncMock(return_value=result)
     mock.archive_conversation = AsyncMock(return_value=result)
+    mock.set_thread_flag = AsyncMock(return_value=result)
     mock.send_message = AsyncMock(return_value=result)
     mock.reply_to_conversation = AsyncMock(return_value=result)
     mock.get_my_profile = AsyncMock(return_value=result)
@@ -405,6 +406,10 @@ _A_VALID_CALL = [
     ("messaging", "get_conversation", {"linkedin_username": "alice"}),
     ("messaging", "search_conversations", {"keywords": "hello"}),
     ("messaging", "archive_conversation", {"thread_id": "2-abc123"}),
+    ("messaging", "star_conversation", {"thread_id": "2-abc123"}),
+    ("messaging", "unstar_conversation", {"thread_id": "2-abc123"}),
+    ("messaging", "mute_conversation", {"thread_id": "2-abc123"}),
+    ("messaging", "unmute_conversation", {"thread_id": "2-abc123"}),
     (
         "messaging",
         "send_message",
@@ -3224,6 +3229,49 @@ class TestReactTool:
                 "react_to_post",
                 {"post": "urn:li:activity:7212345678901234567", "reaction": "angry"},
             )
+
+
+class TestConversationFlagTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "flag", "value"),
+        [
+            ("star_conversation", "starred", True),
+            ("unstar_conversation", "starred", False),
+            ("mute_conversation", "muted", True),
+            ("unmute_conversation", "muted", False),
+        ],
+    )
+    async def test_each_sets_its_own_flag(
+        self, serve_extractor, tool_name, flag, value
+    ):
+        expected = {"url": "u", "thread_id": "2-abc", flag: value, "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.messaging import register_messaging_tools
+
+        mcp = FastMCP("test")
+        register_messaging_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(tool_name, {"thread_id": "2-abc"})
+
+        assert result.structured_content == expected
+        mock_extractor.set_thread_flag.assert_awaited_once_with("2-abc", flag, value)
+
+    @pytest.mark.parametrize("tool_name", ["star_conversation", "mute_conversation"])
+    async def test_a_path_is_refused_before_the_browser(
+        self, serve_extractor, tool_name
+    ):
+        from fastmcp.exceptions import ToolError
+
+        from linkedin_mcp_server.tools.messaging import register_messaging_tools
+
+        mock_extractor = _make_mock_extractor({})
+        mcp = FastMCP("test")
+        register_messaging_tools(mcp)
+        serve_extractor(mock_extractor)
+        with pytest.raises(ToolError):
+            await mcp.call_tool(tool_name, {"thread_id": "../feed"})
+        mock_extractor.set_thread_flag.assert_not_awaited()
 
 
 class TestSavePostTools:

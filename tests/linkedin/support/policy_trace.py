@@ -702,6 +702,7 @@ def semantic_program_id(program: str) -> str:
         ("result.dismiss = dismiss.length", "job_search_card"),
         ("likes[0].setAttribute(mark", "post_like"),
         ("menus[0].setAttribute(mark", "post_menu"),
+        ("hits[0].setAttribute(mark", "thread_menu_item"),
         ("el.setAttribute(before, '')", "mark_all_controls"),
         ("name.startsWith('bookmark-')", "post_save_item"),
         ("(element) => element.click()", "in_page_click"),

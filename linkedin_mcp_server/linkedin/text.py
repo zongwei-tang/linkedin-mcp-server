@@ -293,12 +293,25 @@ class ConversationActionTextTable:
     # the thread is archived: an archived thread opened by its URL offers
     # Archive too, so the folder is read from LinkedIn's data instead.
     archive_item: str
+    # Whole visible text of the items that star, unstar, mute and unmute the
+    # thread, measured 2026-11-22 on an inbox thread by choosing each and
+    # reloading. The item says which way it goes, but the state is still read
+    # from LinkedIn's data (its STARRED category, its MUTE notification
+    # status), never from these words.
+    star_item: str
+    unstar_item: str
+    mute_item: str
+    unmute_item: str
 
 
 _CONVERSATION_ACTION_TEXT: dict[str, ConversationActionTextTable] = {
     "en-US": ConversationActionTextTable(
         options_prefix=_MESSAGING_CHROME_STRINGS["en"].thread_header_prefix,
         archive_item="Archive",
+        star_item="Star",
+        unstar_item="Remove star",
+        mute_item="Mute",
+        unmute_item="Unmute",
     ),
 }
 

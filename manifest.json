@@ -277,6 +277,22 @@
       "description": "Archive a LinkedIn messaging thread by thread ID, confirmed on a reload and never unarchived by a repeat call"
     },
     {
+      "name": "star_conversation",
+      "description": "Star a LinkedIn messaging thread by thread ID; a thread already starred is left alone"
+    },
+    {
+      "name": "unstar_conversation",
+      "description": "Remove the star from a LinkedIn messaging thread; a thread without one is left alone"
+    },
+    {
+      "name": "mute_conversation",
+      "description": "Mute a LinkedIn messaging thread's notifications; a thread already muted is left alone"
+    },
+    {
+      "name": "unmute_conversation",
+      "description": "Unmute a LinkedIn messaging thread; a thread not muted is left alone"
+    },
+    {
       "name": "send_message",
       "description": "Compose and send a new message, line breaks and empty lines included, without tab or other control characters to a LinkedIn user with explicit confirmation and optional profile URN support; profile-based targeting may create a separate DM instead of replying in an existing thread (use reply_to_conversation for that), and when no normal Message action is exposed, use connect_with_person and retry after acceptance"
     },

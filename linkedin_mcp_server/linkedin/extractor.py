@@ -32,6 +32,10 @@ from linkedin_mcp_server.linkedin.person import PersonReader
 from linkedin_mcp_server.linkedin.person_actions import PersonActions
 from linkedin_mcp_server.linkedin.post_actions import PostActions, Reaction
 from linkedin_mcp_server.linkedin.post_save_actions import PostSaveActions
+from linkedin_mcp_server.linkedin.conversation_flag_actions import (
+    ConversationFlagActions,
+    ThreadFlag,
+)
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
 from linkedin_mcp_server.linkedin.session import PageSession
@@ -78,6 +82,7 @@ class LinkedInExtractor:
         self._pages = PageReader(capture, session)
         self._post_actions = PostActions(session, navigator)
         self._post_save_actions = PostSaveActions(session, navigator)
+        self._conversation_flag_actions = ConversationFlagActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)
         self._company_actions = CompanyActions(session, navigator)
@@ -348,6 +353,14 @@ class LinkedInExtractor:
     async def archive_conversation(self, thread_id: str) -> dict[str, Any]:
         """Archive one messaging thread by its thread id."""
         return await self._conversations.archive_conversation(thread_id)
+
+    async def set_thread_flag(
+        self, thread_id: str, flag: ThreadFlag, value: bool
+    ) -> dict[str, Any]:
+        """Star, unstar, mute or unmute one messaging thread."""
+        return await self._conversation_flag_actions.set_thread_flag(
+            thread_id, flag, value
+        )
 
     async def send_message(
         self,

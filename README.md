@@ -93,6 +93,10 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_conversation` | Read a conversation's messages using a LinkedIn username or thread ID. |
 | `search_conversations` | Search messages by keyword and return links to matching conversation threads. |
 | `archive_conversation` | Archive a conversation by thread ID; a repeat call reports it already archived. |
+| `star_conversation` | Star a conversation by thread ID. Undo with `unstar_conversation`. |
+| `unstar_conversation` | Remove a conversation's star; one without is left alone. |
+| `mute_conversation` | Mute a conversation's notifications. Undo with `unmute_conversation`. |
+| `unmute_conversation` | Unmute a conversation; one not muted is left alone. |
 | `send_message` | Message a profile after confirmation. Threads use `reply_to_conversation`. |
 | `reply_to_conversation` | Reply inside an existing thread or InMail by thread ID. Sends after confirmation. |
 | `get_company_profile` | Read company information, with optional sections for posts and open jobs. |

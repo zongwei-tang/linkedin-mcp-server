@@ -63,6 +63,10 @@ TOOL_DELEGATES = {
     "search_companies": "search_companies",
     "search_conversations": "search_conversations",
     "archive_conversation": "archive_conversation",
+    "star_conversation": "set_thread_flag",
+    "unstar_conversation": "set_thread_flag",
+    "mute_conversation": "set_thread_flag",
+    "unmute_conversation": "set_thread_flag",
     "search_jobs": "search_jobs",
     "search_people": "search_people",
     "search_posts": "search_posts",
@@ -151,6 +155,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_person_actions",
         "_post_actions",
         "_post_save_actions",
+        "_conversation_flag_actions",
         "_posts",
     }
     assert set(vars(extractor)) == expected_state

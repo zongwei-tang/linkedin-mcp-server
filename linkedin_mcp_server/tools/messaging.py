@@ -259,6 +259,174 @@ def register_messaging_tools(
 
     @mcp.tool(
         timeout=tool_timeout,
+        title="Star Conversation",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def star_conversation(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Star one LinkedIn messaging thread, so it shows under Starred.
+
+        Opens the thread, which marks it read, and reads from LinkedIn's own
+        conversation data whether it is starred before anything is clicked. A
+        thread already in the asked state is left alone and reported
+        already_starred, so a repeated call clicks nothing. The change is
+        confirmed by loading the thread again. Undo with unstar_conversation.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, starred (true) and status: "starred" or
+            "already_starred".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="star_conversation")
+        logger.info("Starring conversation: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening conversation")
+        result = await extractor.set_thread_flag(thread_id, "starred", True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unstar Conversation",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def unstar_conversation(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Remove the star from one LinkedIn messaging thread.
+
+        Opens the thread, which marks it read, and reads from LinkedIn's own
+        conversation data whether it is starred before anything is clicked. A
+        thread already in the asked state is left alone and reported
+        already_unstarred, so a repeated call clicks nothing. The change is
+        confirmed by loading the thread again.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, starred (false) and status: "unstarred" or
+            "already_unstarred".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="unstar_conversation")
+        logger.info("Unstarring conversation: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening conversation")
+        result = await extractor.set_thread_flag(thread_id, "starred", False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Mute Conversation",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def mute_conversation(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Mute one LinkedIn messaging thread: its new messages stop notifying you.
+
+        Opens the thread, which marks it read, and reads from LinkedIn's own
+        conversation data whether it is muted before anything is clicked. A
+        thread already in the asked state is left alone and reported
+        already_muted, so a repeated call clicks nothing. The change is
+        confirmed by loading the thread again. Undo with unmute_conversation.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, muted (true) and status: "muted" or
+            "already_muted".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="mute_conversation")
+        logger.info("Muting conversation: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening conversation")
+        result = await extractor.set_thread_flag(thread_id, "muted", True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unmute Conversation",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def unmute_conversation(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Unmute one LinkedIn messaging thread, so its new messages notify you again.
+
+        Opens the thread, which marks it read, and reads from LinkedIn's own
+        conversation data whether it is muted before anything is clicked. A
+        thread already in the asked state is left alone and reported
+        already_unmuted, so a repeated call clicks nothing. The change is
+        confirmed by loading the thread again.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, muted (false) and status: "unmuted" or
+            "already_unmuted".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="unmute_conversation")
+        logger.info("Unmuting conversation: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening conversation")
+        result = await extractor.set_thread_flag(thread_id, "muted", False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
         title="Send Message",
         annotations={"destructiveHint": True, "openWorldHint": True},
         tags={"messaging", "actions"},

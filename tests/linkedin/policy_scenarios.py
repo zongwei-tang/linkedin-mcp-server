@@ -1385,6 +1385,47 @@ def _conversation_payload(*categories: str) -> bytes:
     ).encode()
 
 
+async def _star_conversation_scenario() -> dict[str, Any]:
+    """Star a thread: read unstarred, choose Star, and the reload shows it."""
+    recorder = TraceRecorder(
+        "set_thread_flag__starred",
+        _COMMON_ALLOWED | {"response.body.start", "response.body.finish"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    thread = "https://www.linkedin.com/messaging/thread/2-abc/"
+    folders = [("INBOX", "PRIMARY_INBOX"), ("INBOX", "PRIMARY_INBOX", "STARRED")]
+    page.goto_landings.extend([thread] * len(folders))
+    page.script(
+        "goto",
+        *(
+            lambda folder=folder: page.emit(
+                "response",
+                ScriptedResponse(
+                    recorder,
+                    CONVERSATIONS_RESPONSE_URL,
+                    _conversation_payload(*folder),
+                ),
+            )
+            for folder in folders
+        ),
+    )
+    page.script("evaluate:thread_options", THREAD_OPTIONS)
+    page.declare_locator("main button[data-mcp-flag-options]", "thread_options")
+    page.declare_locator("[data-mcp-flag-item]", "thread_flag_item")
+    page.script("evaluate:thread_menu_survey", {"seen": 0})
+    page.script("thread_options.click", None)
+    page.script("evaluate:thread_menu_item", {"hits": 1})
+    page.script("thread_flag_item.click", None)
+    extractor = _extractor(page)
+    arguments = {"thread_id": "2-abc", "flag": "starred", "value": True}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_thread_flag"):
+            result = await extractor.set_thread_flag(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_thread_flag", "arguments": arguments}, result)
+
+
 async def _archive_conversation_scenario(*, already: bool) -> dict[str, Any]:
     """Archive a thread, or find it archived and leave its menu untouched."""
     outcome = "already_archived" if already else "archived"
@@ -1517,6 +1558,7 @@ TOOL_FACADE_METHODS = {
     "search_companies",
     "search_conversations",
     "archive_conversation",
+    "set_thread_flag",
     "search_jobs",
     "search_people",
     "search_posts",
@@ -1642,6 +1684,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "conversation-row-resolution.json": (
             await _conversation_row_resolution_scenario()
         ),
+        "star-conversation.json": await _star_conversation_scenario(),
         "archive-conversation.json": await _archive_conversation_scenario(
             already=False
         ),

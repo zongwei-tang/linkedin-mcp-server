@@ -23,6 +23,7 @@ a page-owning collaborator.
 | `connection_actions` | `ACTION_SIGNALS_JS`, `CLICK_INCOMING_ACCEPT_JS`, `ConnectionActions`, `INVITATION_PENDING_JS`, `OPEN_MORE_BUTTON_JS`, `ReadMainProfile`, `SENT_INVITATIONS_URL` | `page-owning` |
 | `content` | `PageContentReader` | `page-owning` |
 | `contracts` | `ExtractedSection`, `FilterValidationError`, `RATE_LIMITED_SECTION_TEXT`, `SEND_INTERRUPTED_WARNING`, `before_the_reply_deadline()`, `message_action_result()`, `normalize_message_text()`, `rate_limited_section_error()`, `refuse_an_invalid_message()`, `refuse_an_invalid_reply()`, `reply_action_result()`, `single_section_result()` | `browser-free` |
+| `conversation_flag_actions` | `ConversationFlagActions`, `THREAD_MENU_ITEM_JS`, `ThreadFlag`, `flag_of()`, `thread_state()` | `page-owning` |
 | `conversations` | `ConversationReader`, `THREAD_MENU_ITEMS_JS`, `THREAD_MENU_SURVEY_JS`, `THREAD_OPTIONS_JS`, `is_conversations_payload_response()`, `strip_select_conversation_prefix()`, `thread_categories()` | `page-owning` |
 | `extractor` | `LinkedInExtractor` | `page-owning` |
 | `feed` | `FEED_POST_BOUNDARIES_JS`, `FeedReader` | `page-owning` |
@@ -59,8 +60,9 @@ a page-owning collaborator.
 - `connection_actions` -> `connection`, `identifiers`, `navigation`, `session`
 - `content` -> `session`, `text`
 - `contracts` -> `identifiers`, `link_metadata`
+- `conversation_flag_actions` -> `conversations`, `identifiers`, `navigation`, `session`, `text`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `post_save_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversation_flag_actions`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `post_save_actions`, `posts`, `profile_page`, `session`, `text`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
@@ -125,6 +127,7 @@ a page-owning collaborator.
 - `set_post_liked`
 - `set_post_reaction`
 - `set_post_saved`
+- `set_thread_flag`
 
 ## `LinkedInExtractor` construction-state allowlist
 
@@ -133,6 +136,7 @@ a page-owning collaborator.
 - `_company_actions`
 - `_connection`
 - `_content`
+- `_conversation_flag_actions`
 - `_conversations`
 - `_feed`
 - `_invitation_actions`

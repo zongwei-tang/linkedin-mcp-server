@@ -25,6 +25,9 @@ work, health checks, or background maintenance.
 - `archive_conversation` is a write action too: it moves a thread out of the
   user's inbox. Use it only when the user explicitly asks to archive that
   thread.
+- `star_conversation`, `unstar_conversation`, `mute_conversation` and
+  `unmute_conversation` change only the user's own view of a thread, and
+  opening the thread marks it read. Use them for the thread the user named.
 - `like_post`, `react_to_post` and `unlike_post` are write actions others can see. Use them only
   on a post the user named.
 - `save_post` and `unsave_post` change only the user's own saved posts (the
@@ -77,6 +80,8 @@ instances, clear profiles, or replace the user's browser session.
 - Messages: `get_inbox`, `get_conversation`, and `search_conversations`.
 - Writes: `send_message`, `reply_to_conversation` (answer an existing thread,
   InMail included), `connect_with_person`, `archive_conversation`,
+  `star_conversation`, `unstar_conversation`, `mute_conversation`,
+  `unmute_conversation`,
   `like_post`, `react_to_post`, `unlike_post`, `save_post`, `unsave_post`,
   `follow_person`,
   `unfollow_person`, `follow_company`, `unfollow_company`,

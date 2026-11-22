@@ -163,6 +163,10 @@
       "set_post_saved": {
         "coroutine": true,
         "signature": "(self, post: 'str', saved: 'bool') -> 'dict[str, Any]'"
+      },
+      "set_thread_flag": {
+        "coroutine": true,
+        "signature": "(self, thread_id: 'str', flag: 'ThreadFlag', value: 'bool') -> 'dict[str, Any]'"
       }
     },
     "tool_methods": [
@@ -201,7 +205,8 @@
       "set_person_followed",
       "set_post_liked",
       "set_post_reaction",
-      "set_post_saved"
+      "set_post_saved",
+      "set_thread_flag"
     ],
     "tool_schemas": {
       "archive_conversation": {
@@ -1391,6 +1396,25 @@
           "type": "object"
         }
       },
+      "mute_conversation": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "react_to_post": {
         "input": {
           "additionalProperties": false,
@@ -1898,6 +1922,25 @@
           "type": "object"
         }
       },
+      "star_conversation": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "unfollow_company": {
         "input": {
           "additionalProperties": false,
@@ -1955,6 +1998,25 @@
           "type": "object"
         }
       },
+      "unmute_conversation": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "unsave_job": {
         "input": {
           "additionalProperties": false,
@@ -1985,6 +2047,25 @@
           },
           "required": [
             "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "unstar_conversation": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
           ],
           "type": "object"
         },
