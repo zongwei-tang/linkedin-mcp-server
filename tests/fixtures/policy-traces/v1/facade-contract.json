@@ -167,6 +167,10 @@
       "set_thread_flag": {
         "coroutine": true,
         "signature": "(self, thread_id: 'str', flag: 'ThreadFlag', value: 'bool') -> 'dict[str, Any]'"
+      },
+      "set_thread_read": {
+        "coroutine": true,
+        "signature": "(self, thread_id: 'str', read: 'bool') -> 'dict[str, Any]'"
       }
     },
     "tool_methods": [
@@ -206,7 +210,8 @@
       "set_post_liked",
       "set_post_reaction",
       "set_post_saved",
-      "set_thread_flag"
+      "set_thread_flag",
+      "set_thread_read"
     ],
     "tool_schemas": {
       "archive_conversation": {
@@ -1388,6 +1393,44 @@
           },
           "required": [
             "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "mark_thread_read": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "mark_thread_unread": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "thread_id": {
+              "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it",
+              "type": "string"
+            }
+          },
+          "required": [
+            "thread_id"
           ],
           "type": "object"
         },

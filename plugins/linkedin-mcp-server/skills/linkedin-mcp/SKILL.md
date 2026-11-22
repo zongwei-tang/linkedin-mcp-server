@@ -81,7 +81,7 @@ instances, clear profiles, or replace the user's browser session.
 - Writes: `send_message`, `reply_to_conversation` (answer an existing thread,
   InMail included), `connect_with_person`, `archive_conversation`,
   `star_conversation`, `unstar_conversation`, `mute_conversation`,
-  `unmute_conversation`,
+  `unmute_conversation`, `mark_thread_unread`, `mark_thread_read`,
   `like_post`, `react_to_post`, `unlike_post`, `save_post`, `unsave_post`,
   `follow_person`,
   `unfollow_person`, `follow_company`, `unfollow_company`,

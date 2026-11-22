@@ -128,6 +128,7 @@ a page-owning collaborator.
 - `set_post_reaction`
 - `set_post_saved`
 - `set_thread_flag`
+- `set_thread_read`
 
 ## `LinkedInExtractor` construction-state allowlist
 

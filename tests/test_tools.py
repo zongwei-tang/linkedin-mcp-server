@@ -45,6 +45,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.search_conversations = AsyncMock(return_value=result)
     mock.archive_conversation = AsyncMock(return_value=result)
     mock.set_thread_flag = AsyncMock(return_value=result)
+    mock.set_thread_read = AsyncMock(return_value=result)
     mock.send_message = AsyncMock(return_value=result)
     mock.reply_to_conversation = AsyncMock(return_value=result)
     mock.get_my_profile = AsyncMock(return_value=result)
@@ -410,6 +411,8 @@ _A_VALID_CALL = [
     ("messaging", "unstar_conversation", {"thread_id": "2-abc123"}),
     ("messaging", "mute_conversation", {"thread_id": "2-abc123"}),
     ("messaging", "unmute_conversation", {"thread_id": "2-abc123"}),
+    ("messaging", "mark_thread_unread", {"thread_id": "2-abc123"}),
+    ("messaging", "mark_thread_read", {"thread_id": "2-abc123"}),
     (
         "messaging",
         "send_message",
@@ -3229,6 +3232,26 @@ class TestReactTool:
                 "react_to_post",
                 {"post": "urn:li:activity:7212345678901234567", "reaction": "angry"},
             )
+
+
+class TestConversationReadTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "read"),
+        [("mark_thread_unread", False), ("mark_thread_read", True)],
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, read):
+        expected = {"url": "u", "thread_id": "2-abc", "read": read, "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.messaging import register_messaging_tools
+
+        mcp = FastMCP("test")
+        register_messaging_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(tool_name, {"thread_id": "2-abc"})
+
+        assert result.structured_content == expected
+        mock_extractor.set_thread_read.assert_awaited_once_with("2-abc", read)
 
 
 class TestConversationFlagTools:

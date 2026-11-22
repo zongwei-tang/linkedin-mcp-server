@@ -67,6 +67,8 @@ TOOL_DELEGATES = {
     "unstar_conversation": "set_thread_flag",
     "mute_conversation": "set_thread_flag",
     "unmute_conversation": "set_thread_flag",
+    "mark_thread_unread": "set_thread_read",
+    "mark_thread_read": "set_thread_read",
     "search_jobs": "search_jobs",
     "search_people": "search_people",
     "search_posts": "search_posts",

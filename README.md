@@ -97,6 +97,8 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `unstar_conversation` | Remove a conversation's star; one without is left alone. |
 | `mute_conversation` | Mute a conversation's notifications. Undo with `unmute_conversation`. |
 | `unmute_conversation` | Unmute a conversation; one not muted is left alone. |
+| `mark_thread_unread` | Mark a conversation unread; one already unread is not opened. |
+| `mark_thread_read` | Mark a conversation read; one already read is not opened. |
 | `send_message` | Message a profile after confirmation. Threads use `reply_to_conversation`. |
 | `reply_to_conversation` | Reply inside an existing thread or InMail by thread ID. Sends after confirmation. |
 | `get_company_profile` | Read company information, with optional sections for posts and open jobs. |

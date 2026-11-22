@@ -68,8 +68,8 @@ for (const button of document.querySelectorAll('main button[data-options]')) {
         const body = document.body;
         const starred = body.hasAttribute('data-starred');
         const muted = body.hasAttribute('data-muted');
-        const labels = body.hasAttribute('data-bare') ? ['Mark as unread', 'ARCHIVE']
-            : ['Mark as unread', starred ? 'UNSTAR' : 'STAR',
+        const labels = body.hasAttribute('data-bare') ? ['ARCHIVE']
+            : ['UNREAD', starred ? 'UNSTAR' : 'STAR',
                muted ? 'UNMUTE' : 'MUTE', 'ARCHIVE'];
         // An item whose words start with another's, as a menu could add.
         if (body.hasAttribute('data-extra')) labels.push('STAR messages');
@@ -85,6 +85,7 @@ for (const button of document.querySelectorAll('main button[data-options]')) {
                 if (button.dataset.options !== 'thread' || body.hasAttribute('data-refuse')) return;
                 if (label === 'STAR' || label === 'UNSTAR') body.toggleAttribute('data-starred');
                 if (label === 'MUTE' || label === 'UNMUTE') body.toggleAttribute('data-muted');
+                if (label === 'UNREAD') body.setAttribute('data-unread', '');
             });
             menu.appendChild(item);
         }
@@ -92,7 +93,8 @@ for (const button of document.querySelectorAll('main button[data-options]')) {
     });
 }
 })();
-""".replace("UNSTAR", TEXT.unstar_item)
+""".replace("UNREAD", TEXT.mark_unread_item)
+    .replace("UNSTAR", TEXT.unstar_item)
     .replace("UNMUTE", TEXT.unmute_item)
     .replace("STAR", TEXT.star_item)
     .replace("MUTE", TEXT.mute_item)
@@ -108,8 +110,14 @@ def options(scope: str) -> str:
     )
 
 
-def thread_page(*, starred: bool = False, muted: bool = False, body: str = "") -> str:
-    attributes = (" data-starred" if starred else "") + (" data-muted" if muted else "")
+def thread_page(
+    *, starred: bool = False, muted: bool = False, unread: bool = False, body: str = ""
+) -> str:
+    attributes = (
+        (" data-starred" if starred else "")
+        + (" data-muted" if muted else "")
+        + (" data-unread" if unread else "")
+    )
     return (
         f"<body{attributes}{body}><main>"
         '<ul><li><label aria-label="Select conversation with Ada"></label>'
@@ -124,13 +132,14 @@ async def dom_page():
     async def answer(route):
         query = parse_qs(urlparse(route.request.url).query)
         if "state" in query:
-            starred, muted = query["state"][0].split(",")
+            starred, muted, unread = query["state"][0].split(",")
             conversation = {
                 "_type": "com.linkedin.messenger.Conversation",
                 "backendUrn": f"urn:li:messagingThread:{query['thread'][0]}",
                 "categories": ["INBOX", "PRIMARY_INBOX"]
                 + (["STARRED"] if starred == "1" else []),
                 "notificationStatus": "MUTE" if muted == "1" else "ACTIVE",
+                "read": unread != "1",
             }
             await route.fulfill(
                 status=200,
@@ -158,32 +167,81 @@ async def dom_page():
 
 @pytest.fixture(autouse=True)
 def _short_waits(monkeypatch):
+    monkeypatch.setattr(conversation_flag_actions, "_READ_SETTLE", 0.0)
     monkeypatch.setattr(conversation_flag_actions, "_THREAD_READY_TIMEOUT", 1.0)
     monkeypatch.setattr(conversation_flag_actions, "_THREAD_MENU_TIMEOUT", 1.0)
     monkeypatch.setattr(conversation_flag_actions, "NAV_DELAY", 0.0)
+
+
+def _actions(page) -> ConversationFlagActions:
+    session = PageSession(page)
+    return ConversationFlagActions(session, PageNavigator(session))
+
+
+async def _navigate(page, url: str) -> None:
+    """A stubbed load: fetch the conversations query with the page's state.
+
+    The messaging list (`/messaging/`) carries the thread unless the body says
+    `data-unlisted`, and opens nothing; opening the thread itself marks it
+    read once its data has loaded, as LinkedIn's does. `data-silent` loads no
+    conversation at all.
+    """
+    state = await page.evaluate(
+        """() => [document.body.hasAttribute('data-silent'),
+            document.body.hasAttribute('data-unlisted'),
+            document.body.hasAttribute('data-starred') ? '1' : '0',
+            document.body.hasAttribute('data-muted') ? '1' : '0',
+            document.body.hasAttribute('data-unread') ? '1' : '0']"""
+    )
+    listing = url.rstrip("/").endswith("/messaging")
+    if listing and await page.evaluate(
+        "() => document.body.hasAttribute('data-read-later')"
+    ):
+        # The read mark the earlier opening sent lands only now.
+        await page.evaluate(
+            """() => { if (document.body.hasAttribute('data-opened')) {
+                document.body.removeAttribute('data-unread'); } }"""
+        )
+    if state[0] or (listing and state[1]):
+        return
+    query = f"{CONVERSATIONS_URL}&thread=2-abc&state={state[2]},{state[3]},{state[4]}"
+    await page.evaluate("(u) => fetch(u).then((r) => r.text())", query)
+    if not listing:
+        await page.evaluate(
+            """() => { document.body.setAttribute('data-opened', '');
+                if (!document.body.hasAttribute('data-read-later')) {
+                    document.body.removeAttribute('data-unread'); } }"""
+        )
 
 
 async def act(page, html: str, flag: ThreadFlag, value: bool) -> dict[str, Any]:
     """Set one flag on the served page, each stubbed load fetching its state."""
     await page.goto(THREAD_URL)
     await page.set_content(html)
-    session = PageSession(page)
-    actions = ConversationFlagActions(session, PageNavigator(session))
+    actions = _actions(page)
 
     async def navigate(url: str) -> None:
-        state = await page.evaluate(
-            """() => [document.body.hasAttribute('data-silent'),
-                document.body.hasAttribute('data-starred') ? '1' : '0',
-                document.body.hasAttribute('data-muted') ? '1' : '0']"""
-        )
-        if state[0]:
-            return
-        thread = url.rstrip("/").rsplit("/", 1)[1]
-        query = f"{CONVERSATIONS_URL}&thread={thread}&state={state[1]},{state[2]}"
-        await page.evaluate("(u) => fetch(u).then((r) => r.text())", query)
+        await _navigate(page, url)
 
     with patch.object(actions._navigator, "_navigate_to_page", side_effect=navigate):
         return await actions.set_thread_flag("2-abc", flag, value)
+
+
+async def mark(page, html: str, read: bool) -> dict[str, Any]:
+    """Mark the served thread read or unread, each stubbed load as above."""
+    await page.goto(THREAD_URL)
+    await page.set_content(html)
+    actions = _actions(page)
+
+    async def navigate(url: str) -> None:
+        await _navigate(page, url)
+
+    with patch.object(actions._navigator, "_navigate_to_page", side_effect=navigate):
+        return await actions.set_thread_read("2-abc", read)
+
+
+async def unread(page) -> bool:
+    return await page.evaluate("() => document.body.hasAttribute('data-unread')")
 
 
 async def chosen(page) -> list[list[str]]:
@@ -265,3 +323,58 @@ async def test_an_item_that_only_starts_with_the_words_is_never_taken(dom_page):
 
     assert result["status"] == "starred"
     assert await chosen(dom_page) == [["thread", TEXT.star_item]]
+
+
+async def test_marking_unread_opens_the_thread_and_chooses_mark_as_unread(dom_page):
+    result = await mark(dom_page, thread_page(), False)
+
+    assert result == {
+        "url": THREAD_URL,
+        "thread_id": "2-abc",
+        "read": False,
+        "status": "marked_unread",
+    }
+    assert await chosen(dom_page) == [["thread", TEXT.mark_unread_item]]
+    assert await unread(dom_page)
+
+
+async def test_an_unread_thread_is_left_unread_and_never_opened(dom_page):
+    # Opening it would have marked it read.
+    result = await mark(dom_page, thread_page(unread=True), False)
+
+    assert result["status"] == "already_unread"
+    assert await chosen(dom_page) == []
+    assert await unread(dom_page)
+
+
+async def test_marking_read_is_opening_the_thread(dom_page):
+    result = await mark(dom_page, thread_page(unread=True), True)
+
+    assert result["status"] == "marked_read"
+    assert await chosen(dom_page) == []
+    assert not await unread(dom_page)
+
+
+async def test_a_read_thread_is_left_alone(dom_page):
+    result = await mark(dom_page, thread_page(), True)
+
+    assert result["status"] == "already_read"
+
+
+async def test_a_mark_unread_the_list_does_not_show_is_an_unknown_outcome(dom_page):
+    with pytest.raises(ActionOutcomeError, match="still read"):
+        await mark(dom_page, thread_page(body=" data-refuse"), False)
+
+
+async def test_a_thread_the_list_does_not_carry_cannot_be_confirmed(dom_page):
+    with pytest.raises(ActionOutcomeError, match="not among the recent threads"):
+        await mark(dom_page, thread_page(unread=True, body=" data-unlisted"), True)
+
+
+async def test_a_read_mark_that_lands_late_is_waited_for(dom_page):
+    # As measured: the list loaded right after the opening still said unread.
+    result = await mark(
+        dom_page, thread_page(unread=True, body=" data-read-later"), True
+    )
+
+    assert result["status"] == "marked_read"

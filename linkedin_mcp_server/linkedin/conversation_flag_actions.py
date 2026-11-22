@@ -17,9 +17,18 @@ So the state is read from the data before anything is clicked, and again
 after a reload, which must show the change. Opening a thread by its URL marks
 it read, as archive_conversation already does.
 
+Read and unread, measured 2026-11-22 the same way: the conversation data's
+`read` flag says it, and opening a thread marks it read. So the state is read
+from the messaging list (`/messaging/`), which loads the recent threads'
+data without opening any, both before acting and to confirm. Marking a thread
+read is opening it; marking it unread is opening it and choosing Mark as
+unread. A thread the list's first page does not carry cannot be confirmed.
+
 Verified live 2026-11-22 through the MCP tools on one read inbox thread,
 across three server processes: star and mute, then already_starred and
 already_muted, unstar and unmute, then already_unstarred and already_unmuted.
+Mark unread, then already_unread, mark read, then already_read, verified the
+same way (the read mark needed the wait above).
 """
 
 from __future__ import annotations
@@ -65,6 +74,13 @@ ThreadFlag = Literal["starred", "muted"]
 _OPTIONS_MARK = "data-mcp-flag-options"
 _SEEN_MARK = "data-mcp-flag-seen"
 _ITEM_MARK = "data-mcp-flag-item"
+_MESSAGING_URL = "https://www.linkedin.com/messaging/"
+#: How long an opened thread is left open before the list is asked, and how
+#: many times the list is asked. Measured live 2026-11-22: the read mark lands
+#: a few seconds after the thread opens, and a list loaded at once still
+#: showed it unread while the next process found it read.
+_READ_SETTLE = 6.0
+_LIST_READS = 2
 _STARRED_CATEGORY = "STARRED"
 _MUTED_STATUS = "MUTE"
 
@@ -111,9 +127,11 @@ def thread_state(payload: Any, thread_key: str) -> dict[str, Any] | None:
             and all(isinstance(category, str) for category in categories)
         ):
             status = node.get("notificationStatus")
+            read = node.get("read")
             found = {
                 "categories": list(categories),
                 "notificationStatus": status if isinstance(status, str) else None,
+                "read": read if isinstance(read, bool) else None,
             }
         stack.extend(node.values())
     return found
@@ -233,6 +251,67 @@ class ConversationFlagActions:
             )
         return _result(url, thread_key, flag, value, verb)
 
+    async def set_thread_read(self, thread_id: str, read: bool) -> dict[str, Any]:
+        """Mark one thread read or unread, leaving it as asked.
+
+        The state is read from the messaging list, which opens no thread, so
+        a thread already as asked is left alone and stays as it was. To mark
+        it read the thread is opened; to mark it unread it is opened and Mark
+        as unread is chosen. The list must then show the new state.
+
+        Returns:
+            {url, thread_id, read, status} where status is "marked_read",
+            "marked_unread", "already_read" or "already_unread".
+        """
+        thread_key = unquote(normalize_thread_id(thread_id))
+        url = messaging_thread_url(thread_key, "/")
+        word = "read" if read else "unread"
+        before = await self._read_listed(thread_key)
+        if before is not None and before.get("read") == read:
+            return _read_result(url, thread_key, read, f"already_{word}")
+
+        await self._read_state(url, thread_key)
+        if read:
+            await self._session.delay(_READ_SETTLE)
+        else:
+            await self._choose(url, thread_key, self._text.mark_unread_item)
+        after: dict[str, Any] | None = None
+        shown: bool | None = None
+        for _ in range(_LIST_READS):
+            await self._session.delay(NAV_DELAY)
+            after = await self._read_listed(thread_key)
+            shown = None if after is None else after.get("read")
+            if shown == read:
+                break
+        if shown != read:
+            seen = (
+                "it not among the recent threads it loads"
+                if after is None
+                else f"it still {'read' if shown else 'unread'}"
+            )
+            raise ActionOutcomeError(
+                f"Thread {thread_key} was opened to mark it {word}, but the "
+                f"messaging list then showed {seen}, so it is not confirmed. "
+                "Calling this again is safe: it reads the state first."
+            )
+        return _read_result(url, thread_key, read, f"marked_{word}")
+
+    async def _read_listed(self, thread_key: str) -> dict[str, Any] | None:
+        """The thread's state as the messaging list loads it, opening nothing."""
+        page = self._session.page
+        listener = _ThreadStateListener(page, thread_key)
+        listener.install()
+        try:
+            await self._navigator._navigate_to_page(_MESSAGING_URL)
+            await self._session.check_rate_limit()
+            deadline = self._session.monotonic() + _THREAD_READY_TIMEOUT
+            while listener.state is None and self._session.monotonic() < deadline:
+                await self._session.delay(_THREAD_POLL)
+            return listener.state
+        finally:
+            listener.remove()
+            await listener.drain()
+
     def _item_word(self, flag: ThreadFlag, value: bool) -> str:
         text = self._text
         if flag == "starred":
@@ -315,6 +394,10 @@ _STATUS: dict[ThreadFlag, dict[bool, str]] = {
     "starred": {True: "starred", False: "unstarred"},
     "muted": {True: "muted", False: "unmuted"},
 }
+
+
+def _read_result(url: str, thread_key: str, read: bool, status: str) -> dict[str, Any]:
+    return {"url": url, "thread_id": thread_key, "read": read, "status": status}
 
 
 def _result(

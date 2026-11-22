@@ -1835,6 +1835,78 @@
     }
   },
   {
+    "name": "mark_thread_read",
+    "title": "Mark Thread Read",
+    "description": "Mark one LinkedIn messaging thread read.\n\nWhether it is read is read first from your messaging list, which opens\nno thread, so a thread already read is left alone and reported\nalready_read. Otherwise the thread is opened, which is what marks it read. The change is confirmed from the messaging list,\nso a thread too old to be among its recent threads cannot be\nconfirmed.",
+    "inputSchema": {
+      "properties": {
+        "thread_id": {
+          "type": "string",
+          "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it"
+        }
+      },
+      "required": [
+        "thread_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "messaging"
+        ]
+      }
+    }
+  },
+  {
+    "name": "mark_thread_unread",
+    "title": "Mark Thread Unread",
+    "description": "Mark one LinkedIn messaging thread unread, as if its last message were new.\n\nWhether it is read is read first from your messaging list, which opens\nno thread, so a thread already unread is left alone and reported\nalready_unread. Otherwise the thread is opened and Mark as unread is chosen from its menu. The change is confirmed from the messaging list,\nso a thread too old to be among its recent threads cannot be\nconfirmed.",
+    "inputSchema": {
+      "properties": {
+        "thread_id": {
+          "type": "string",
+          "description": "LinkedIn messaging thread ID, as get_inbox,\nsearch_conversations or get_conversation return it"
+        }
+      },
+      "required": [
+        "thread_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "messaging"
+        ]
+      }
+    }
+  },
+  {
     "name": "mute_conversation",
     "title": "Mute Conversation",
     "description": "Mute one LinkedIn messaging thread: its new messages stop notifying you.\n\nOpens the thread, which marks it read, and reads from LinkedIn's own\nconversation data whether it is muted before anything is clicked. A\nthread already in the asked state is left alone and reported\nalready_muted, so a repeated call clicks nothing. The change is\nconfirmed by loading the thread again. Undo with unmute_conversation.",

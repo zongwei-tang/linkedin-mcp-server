@@ -362,6 +362,10 @@ class LinkedInExtractor:
             thread_id, flag, value
         )
 
+    async def set_thread_read(self, thread_id: str, read: bool) -> dict[str, Any]:
+        """Mark one messaging thread read or unread."""
+        return await self._conversation_flag_actions.set_thread_read(thread_id, read)
+
     async def send_message(
         self,
         linkedin_username: str,

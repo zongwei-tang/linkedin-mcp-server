@@ -1373,16 +1373,54 @@ CONVERSATIONS_RESPONSE_URL = (
 )
 
 
-def _conversation_payload(*categories: str) -> bytes:
+def _conversation_payload(*categories: str, read: bool | None = None) -> bytes:
     """The conversations query's answer for thread ``2-abc`` in ``categories``."""
-    conversation = {
+    conversation: dict[str, Any] = {
         "_type": "com.linkedin.messenger.Conversation",
         "backendUrn": "urn:li:messagingThread:2-abc",
         "categories": list(categories),
     }
+    if read is not None:
+        conversation["read"] = read
     return json.dumps(
         {"data": {"messengerConversationsByIds": [conversation]}}
     ).encode()
+
+
+async def _mark_thread_read_scenario() -> dict[str, Any]:
+    """Mark a thread read: the list says unread, the thread is opened, and the
+    list then says read. No menu is opened."""
+    recorder = TraceRecorder(
+        "set_thread_read__marked_read",
+        _COMMON_ALLOWED | {"response.body.start", "response.body.finish"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    listing = "https://www.linkedin.com/messaging/"
+    thread = "https://www.linkedin.com/messaging/thread/2-abc/"
+    loads = [(listing, False), (thread, False), (listing, True)]
+    page.goto_landings.extend([url for url, _read in loads])
+    page.script(
+        "goto",
+        *(
+            lambda read=read: page.emit(
+                "response",
+                ScriptedResponse(
+                    recorder,
+                    CONVERSATIONS_RESPONSE_URL,
+                    _conversation_payload("INBOX", "PRIMARY_INBOX", read=read),
+                ),
+            )
+            for _url, read in loads
+        ),
+    )
+    extractor = _extractor(page)
+    arguments = {"thread_id": "2-abc", "read": True}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_thread_read"):
+            result = await extractor.set_thread_read(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_thread_read", "arguments": arguments}, result)
 
 
 async def _star_conversation_scenario() -> dict[str, Any]:
@@ -1559,6 +1597,7 @@ TOOL_FACADE_METHODS = {
     "search_conversations",
     "archive_conversation",
     "set_thread_flag",
+    "set_thread_read",
     "search_jobs",
     "search_people",
     "search_posts",
@@ -1685,6 +1724,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
             await _conversation_row_resolution_scenario()
         ),
         "star-conversation.json": await _star_conversation_scenario(),
+        "mark-thread-read.json": await _mark_thread_read_scenario(),
         "archive-conversation.json": await _archive_conversation_scenario(
             already=False
         ),

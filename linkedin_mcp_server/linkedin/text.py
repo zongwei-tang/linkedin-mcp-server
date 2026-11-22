@@ -302,6 +302,9 @@ class ConversationActionTextTable:
     unstar_item: str
     mute_item: str
     unmute_item: str
+    # The item that marks the open thread unread, measured 2026-11-22. The
+    # state is read from LinkedIn's data (its `read` flag), never from it.
+    mark_unread_item: str
 
 
 _CONVERSATION_ACTION_TEXT: dict[str, ConversationActionTextTable] = {
@@ -312,6 +315,7 @@ _CONVERSATION_ACTION_TEXT: dict[str, ConversationActionTextTable] = {
         unstar_item="Remove star",
         mute_item="Mute",
         unmute_item="Unmute",
+        mark_unread_item="Mark as unread",
     ),
 }
 

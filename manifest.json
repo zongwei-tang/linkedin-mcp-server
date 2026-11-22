@@ -293,6 +293,14 @@
       "description": "Unmute a LinkedIn messaging thread; a thread not muted is left alone"
     },
     {
+      "name": "mark_thread_unread",
+      "description": "Mark a LinkedIn messaging thread unread; a thread already unread is left alone and not opened"
+    },
+    {
+      "name": "mark_thread_read",
+      "description": "Mark a LinkedIn messaging thread read; a thread already read is left alone and not opened"
+    },
+    {
       "name": "send_message",
       "description": "Compose and send a new message, line breaks and empty lines included, without tab or other control characters to a LinkedIn user with explicit confirmation and optional profile URN support; profile-based targeting may create a separate DM instead of replying in an existing thread (use reply_to_conversation for that), and when no normal Message action is exposed, use connect_with_person and retry after acceptance"
     },

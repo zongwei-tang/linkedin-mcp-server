@@ -427,6 +427,90 @@ def register_messaging_tools(
 
     @mcp.tool(
         timeout=tool_timeout,
+        title="Mark Thread Unread",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def mark_thread_unread(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Mark one LinkedIn messaging thread unread, as if its last message were new.
+
+        Whether it is read is read first from your messaging list, which opens
+        no thread, so a thread already unread is left alone and reported
+        already_unread. Otherwise the thread is opened and Mark as unread is chosen from its menu. The change is confirmed from the messaging list,
+        so a thread too old to be among its recent threads cannot be
+        confirmed.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, read (false) and status: "marked_unread" or
+            "already_unread".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="mark_thread_unread")
+        logger.info("Marking conversation unread: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening messaging")
+        result = await extractor.set_thread_read(thread_id, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Mark Thread Read",
+        annotations={
+            "readOnlyHint": False,
+            "destructiveHint": False,
+            "idempotentHint": True,
+            "openWorldHint": True,
+        },
+        tags={"messaging", "actions"},
+    )
+    @tool_errors
+    async def mark_thread_read(
+        thread_id: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Mark one LinkedIn messaging thread read.
+
+        Whether it is read is read first from your messaging list, which opens
+        no thread, so a thread already read is left alone and reported
+        already_read. Otherwise the thread is opened, which is what marks it read. The change is confirmed from the messaging list,
+        so a thread too old to be among its recent threads cannot be
+        confirmed.
+
+        Args:
+            thread_id: LinkedIn messaging thread ID, as get_inbox,
+                search_conversations or get_conversation return it
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, thread_id, read (true) and status: "marked_read" or
+            "already_read".
+        """
+        thread_id = normalize_thread_id(thread_id)
+        extractor = await get_ready_extractor(ctx, tool_name="mark_thread_read")
+        logger.info("Marking conversation read: %s", thread_id)
+        await ctx.report_progress(progress=0, total=100, message="Opening messaging")
+        result = await extractor.set_thread_read(thread_id, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
         title="Send Message",
         annotations={"destructiveHint": True, "openWorldHint": True},
         tags={"messaging", "actions"},
