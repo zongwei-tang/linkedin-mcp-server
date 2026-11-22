@@ -1,0 +1,200 @@
+{
+  "call": {
+    "arguments": {
+      "max_scrolls": 1,
+      "post": "urn:li:activity:7212345678901234567"
+    },
+    "method": "read_post_reactions"
+  },
+  "events": [
+    {
+      "call": "read_post_reactions",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_post_reactions",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "requested_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_post_reactions",
+      "description": "goto https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_post_reactions",
+      "extra": {
+        "target_url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_post_reactions",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_post_reactions",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "locator.create",
+      "locator": "reactors_button",
+      "parent": null,
+      "selector": "button[data-jump-link-target*=\"reactors\"]"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "locator.count",
+      "locator": "reactors_button"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "locator.element_handle",
+      "locator": "reactors_button",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_button",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "evaluate",
+      "operation": "post_reactors",
+      "program_digest": "5821db764b82"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "arg": "data-mcp-reactors-more",
+      "call": "read_post_reactions",
+      "kind": "evaluate",
+      "operation": "reactors_more_button",
+      "program_digest": "dfbab94709b8"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "locator.create",
+      "locator": "reactors_more",
+      "parent": null,
+      "selector": "button[data-mcp-reactors-more]"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "locator.element_handle",
+      "locator": "reactors_more",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_more",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_more",
+      "kind": "handle.click",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "read_post_reactions",
+      "handle": "reactors_more",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 0.5
+    },
+    {
+      "call": "read_post_reactions",
+      "kind": "evaluate",
+      "operation": "post_reactors",
+      "program_digest": "5821db764b82"
+    },
+    {
+      "call": "read_post_reactions",
+      "key": "Escape",
+      "kind": "keyboard.press"
+    }
+  ],
+  "result": {
+    "reaction_counts": {
+      "like": 2,
+      "total": 2
+    },
+    "references": {
+      "reactions": [
+        {
+          "context": "like",
+          "kind": "person",
+          "text": "Ada",
+          "url": "/in/ada/"
+        },
+        {
+          "context": "like",
+          "kind": "person",
+          "text": "Grace",
+          "url": "/in/grace/"
+        }
+      ]
+    },
+    "sections": {
+      "reactions": "Ada Grace"
+    },
+    "url": "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+  },
+  "scenario": "read_post_reactions__paged",
+  "schema_version": 1
+}

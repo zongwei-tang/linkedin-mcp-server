@@ -55,6 +55,7 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.read_post = AsyncMock(return_value=result)
     mock.set_post_liked = AsyncMock(return_value=result)
     mock.set_post_saved = AsyncMock(return_value=result)
+    mock.read_post_reactions = AsyncMock(return_value=result)
     mock.ignore_invitation = AsyncMock(return_value=result)
     mock.set_post_reaction = AsyncMock(return_value=result)
     mock.set_person_followed = AsyncMock(return_value=result)
@@ -428,6 +429,7 @@ _A_VALID_CALL = [
     ("post", "get_post_details", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "like_post", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "unlike_post", {"post": "urn:li:activity:7212345678901234567"}),
+    ("post", "get_post_reactions", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "save_post", {"post": "urn:li:activity:7212345678901234567"}),
     ("post", "unsave_post", {"post": "urn:li:activity:7212345678901234567"}),
     (
@@ -3295,6 +3297,36 @@ class TestConversationFlagTools:
         with pytest.raises(ToolError):
             await mcp.call_tool(tool_name, {"thread_id": "../feed"})
         mock_extractor.set_thread_flag.assert_not_awaited()
+
+
+class TestPostReactionsTool:
+    async def test_it_reads_the_reactors_of_the_post_it_is_given(self, serve_extractor):
+        expected = {"url": "u", "sections": {"reactions": "Ada"}}
+        mock_extractor = _make_mock_extractor(expected)
+
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        serve_extractor(mock_extractor)
+        result = await mcp.call_tool(
+            "get_post_reactions",
+            {"post": "urn:li:activity:7212345678901234567", "max_scrolls": 3},
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.read_post_reactions.assert_awaited_once_with(
+            "urn:li:activity:7212345678901234567", max_scrolls=3
+        )
+
+    async def test_it_is_read_only(self):
+        from linkedin_mcp_server.tools.post import register_post_tools
+
+        mcp = FastMCP("test")
+        register_post_tools(mcp)
+        tool = await mcp.get_tool("get_post_reactions")
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is True
 
 
 class TestSavePostTools:

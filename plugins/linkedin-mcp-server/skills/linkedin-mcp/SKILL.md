@@ -67,6 +67,7 @@ instances, clear profiles, or replace the user's browser session.
   application.
 - Content: `get_feed`, `search_posts` and `get_post_details`, which reads one
   post and its comments from any `feed_post` reference the others return.
+  `get_post_reactions` lists who reacted to one, each with their reaction.
 - Network: `get_invitations`, `get_connections`, `get_notifications`,
   `get_profile_views`, `get_followers`, `get_following`,
   `get_followed_pages`, `get_suggested_people`, `get_catch_up`,

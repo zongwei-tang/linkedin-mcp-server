@@ -121,6 +121,7 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_post_details` | Read one post in full with its comments, from a URN or a permalink. |
 | `like_post` | Like a post; one you already like is left alone. Undo with `unlike_post`. |
 | `react_to_post` | React to a post with like, celebrate, support, love, insightful or funny. |
+| `get_post_reactions` | List who reacted to a post, each with their reaction, and the counts. |
 | `unlike_post` | Remove your like or other reaction; one without is left alone. |
 | `save_post` | Save a post to your saved posts, privately. Undo with `unsave_post`. |
 | `unsave_post` | Remove a post from your saved posts; one not saved is left alone. |

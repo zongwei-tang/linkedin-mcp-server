@@ -160,6 +160,44 @@ def register_post_tools(
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result
 
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Post Reactions",
+        annotations={"readOnlyHint": True, "openWorldHint": True},
+        tags={"post"},
+    )
+    @tool_errors
+    async def get_post_reactions(
+        post: str,
+        ctx: Context,
+        max_scrolls: Annotated[int, Field(ge=1, le=30)] | None = None,
+    ) -> dict[str, Any]:
+        """
+        List who reacted to one LinkedIn post, and with which reaction.
+
+        Args:
+            post: The post, in any form get_post_details takes: a URN
+                ("urn:li:activity:<id>") or a "feed_post" reference
+                ("/feed/update/<urn>/" or "/posts/<slug>").
+            ctx: FastMCP context for progress reporting
+            max_scrolls: Scroll iterations in the reactors list (1-30, default
+                10); each loads about ten more people.
+
+        Returns:
+            Dict with url, sections (reactions -> raw text), references
+            (reactions -> one person each, with their reaction as context:
+            like, celebrate, support, love, insightful or funny) and
+            reaction_counts (total and one count per reaction). A post with
+            no reactors list comes back as a section error.
+        """
+        normalize_post_reference(post)
+        extractor = await get_ready_extractor(ctx, tool_name="get_post_reactions")
+        logger.info("Reading reactions of post: %s", post)
+        await ctx.report_progress(progress=0, total=100, message="Opening the post")
+        result = await extractor.read_post_reactions(post, max_scrolls=max_scrolls)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
     _WRITE = {
         "readOnlyHint": False,
         "destructiveHint": False,

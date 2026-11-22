@@ -31,6 +31,7 @@ from linkedin_mcp_server.linkedin.pages import PageKind, PageReader
 from linkedin_mcp_server.linkedin.person import PersonReader
 from linkedin_mcp_server.linkedin.person_actions import PersonActions
 from linkedin_mcp_server.linkedin.post_actions import PostActions, Reaction
+from linkedin_mcp_server.linkedin.post_reactions import PostReactionsReader
 from linkedin_mcp_server.linkedin.post_save_actions import PostSaveActions
 from linkedin_mcp_server.linkedin.conversation_flag_actions import (
     ConversationFlagActions,
@@ -82,6 +83,7 @@ class LinkedInExtractor:
         self._pages = PageReader(capture, session)
         self._post_actions = PostActions(session, navigator)
         self._post_save_actions = PostSaveActions(session, navigator)
+        self._post_reactions = PostReactionsReader(session, navigator)
         self._conversation_flag_actions = ConversationFlagActions(session, navigator)
         self._invitation_actions = InvitationActions(session, navigator)
         self._person_actions = PersonActions(session, navigator)
@@ -271,6 +273,12 @@ class LinkedInExtractor:
     async def set_post_liked(self, post: str, liked: bool) -> dict[str, Any]:
         """Like or unlike one post, leaving it as asked."""
         return await self._post_actions.set_post_liked(post, liked)
+
+    async def read_post_reactions(
+        self, post: str, max_scrolls: int | None = None
+    ) -> dict[str, Any]:
+        """Read who reacted to one post, and with which reaction."""
+        return await self._post_reactions.read_post_reactions(post, max_scrolls)
 
     async def set_post_saved(self, post: str, saved: bool) -> dict[str, Any]:
         """Save or unsave one post, leaving it as asked."""

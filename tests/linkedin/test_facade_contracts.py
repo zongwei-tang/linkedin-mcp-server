@@ -82,6 +82,7 @@ TOOL_DELEGATES = {
     "like_post": "set_post_liked",
     "unlike_post": "set_post_liked",
     "save_post": "set_post_saved",
+    "get_post_reactions": "read_post_reactions",
     "unsave_post": "set_post_saved",
     "ignore_invitation": "ignore_invitation",
     "react_to_post": "set_post_reaction",
@@ -157,6 +158,7 @@ async def test_constructor_export_and_dependency_use_the_same_facade(monkeypatch
         "_person_actions",
         "_post_actions",
         "_post_save_actions",
+        "_post_reactions",
         "_conversation_flag_actions",
         "_posts",
     }

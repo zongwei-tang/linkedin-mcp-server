@@ -450,6 +450,39 @@ async def _save_post_scenario() -> dict[str, Any]:
     return recorder.trace({"method": "set_post_saved", "arguments": arguments}, result)
 
 
+async def _post_reactions_scenario() -> dict[str, Any]:
+    """Read a post's reactors: open the dialog, page once with its button."""
+    recorder = TraceRecorder(
+        "read_post_reactions__paged",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    post = "https://www.linkedin.com/feed/update/urn:li:activity:7212345678901234567/"
+    page.goto_landings.append(post)
+    page.declare_locator('button[data-jump-link-target*="reactors"]', "reactors_button")
+    page.declare_locator("button[data-mcp-reactors-more]", "reactors_more")
+    page.script("reactors_button.count", 1)
+    tabs = [{"code": "ALL", "text": "All 2"}, {"code": "LIKE", "text": "2"}]
+    row = {"href": "https://www.linkedin.com/in/ada/", "name": "Ada", "code": "LIKE"}
+    second = {**row, "href": "https://www.linkedin.com/in/grace/", "name": "Grace"}
+    page.script(
+        "evaluate:post_reactors",
+        {"tabs": tabs, "rows": [row], "text": "Ada"},
+        {"tabs": tabs, "rows": [row, second], "text": "Ada Grace"},
+    )
+    page.script("evaluate:reactors_more_button", True)
+    extractor = _extractor(page)
+    arguments = {"post": "urn:li:activity:7212345678901234567", "max_scrolls": 1}
+    async with boundaries(recorder, clock):
+        with recorder.context("read_post_reactions"):
+            result = await extractor.read_post_reactions(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "read_post_reactions", "arguments": arguments}, result
+    )
+
+
 async def _react_to_post_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "set_post_reaction__celebrate",
@@ -1610,6 +1643,7 @@ TOOL_FACADE_METHODS = {
     "get_profile_views",
     "set_post_liked",
     "set_post_saved",
+    "read_post_reactions",
     "ignore_invitation",
     "set_post_reaction",
     "set_person_followed",
@@ -1649,6 +1683,7 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "dismiss-job.json": await _dismiss_job_scenario(),
         "like-post.json": await _like_post_scenario(),
         "save-post.json": await _save_post_scenario(),
+        "post-reactions.json": await _post_reactions_scenario(),
         "ignore-invitation.json": await _ignore_invitation_scenario(),
         "react-to-post.json": await _react_to_post_scenario(),
         "unfollow-person.json": await _unfollow_person_scenario(),

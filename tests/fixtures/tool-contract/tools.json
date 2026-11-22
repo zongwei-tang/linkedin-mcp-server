@@ -1407,6 +1407,53 @@
     }
   },
   {
+    "name": "get_post_reactions",
+    "title": "Get Post Reactions",
+    "description": "List who reacted to one LinkedIn post, and with which reaction.",
+    "inputSchema": {
+      "properties": {
+        "post": {
+          "type": "string",
+          "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\")."
+        },
+        "max_scrolls": {
+          "anyOf": [
+            {
+              "maximum": 30,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Scroll iterations in the reactors list (1-30, default\n10); each loads about ten more people."
+        }
+      },
+      "required": [
+        "post"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "post"
+        ]
+      }
+    }
+  },
+  {
     "name": "get_profile_views",
     "title": "Get Profile Views",
     "description": "Read who viewed your profile recently.\n\nHow many viewers LinkedIn names depends on your plan; the others are\ndescribed without a profile.",

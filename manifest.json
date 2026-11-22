@@ -125,6 +125,10 @@
       "description": "Remove the signed-in member's like or other reaction from a LinkedIn post; a post with none is left alone"
     },
     {
+      "name": "get_post_reactions",
+      "description": "List who reacted to a LinkedIn post, each with their reaction, and the count of each reaction"
+    },
+    {
       "name": "save_post",
       "description": "Save a LinkedIn post to your saved posts, privately; a post already saved is left alone"
     },

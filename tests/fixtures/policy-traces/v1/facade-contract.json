@@ -112,6 +112,10 @@
         "coroutine": true,
         "signature": "(self, post: 'str', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
       },
+      "read_post_reactions": {
+        "coroutine": true,
+        "signature": "(self, post: 'str', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
       "reply_to_conversation": {
         "coroutine": true,
         "signature": "(self, thread_id: 'str', message: 'str', *, confirm_send: 'bool') -> 'dict[str, Any]'"
@@ -197,6 +201,7 @@
       "read_page",
       "read_person",
       "read_post",
+      "read_post_reactions",
       "reply_to_conversation",
       "search_companies",
       "search_conversations",
@@ -1120,6 +1125,39 @@
             },
             "post": {
               "description": "The post, as a URN (\"urn:li:activity:<id>\", ugcPost and share\nURNs too) or a permalink (\"/feed/update/<urn>/\",\n\"/posts/<slug>\", or either one as a full URL).",
+              "type": "string"
+            }
+          },
+          "required": [
+            "post"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "get_post_reactions": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "max_scrolls": {
+              "anyOf": [
+                {
+                  "maximum": 30,
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Scroll iterations in the reactors list (1-30, default\n10); each loads about ten more people."
+            },
+            "post": {
+              "description": "The post, in any form get_post_details takes: a URN\n(\"urn:li:activity:<id>\") or a \"feed_post\" reference\n(\"/feed/update/<urn>/\" or \"/posts/<slug>\").",
               "type": "string"
             }
           },
