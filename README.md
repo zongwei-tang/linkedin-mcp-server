@@ -87,6 +87,9 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_my_profile` | Read your own profile, with the same section selection as other profiles. |
 | `follow_person` | Follow a person so their posts reach your feed; no invitation is sent. |
 | `unfollow_person` | Stop following a person; a connection stays a connection. |
+| `mute_person` | Hide a person's posts from your feed; they are not told. |
+| `unmute_person` | Unmute a person; LinkedIn's way back also follows them. |
+| `get_settings` | Read your settings, one category at a time, with their values. |
 | `connect_with_person` | Send a connection request with an optional note, or accept an incoming one. |
 | `get_sidebar_profiles` | Find recommended profile links, including people you may know. |
 | `get_inbox` | List recent inbox conversations, with links to open individual threads. |
@@ -111,6 +114,11 @@ Use code <strong>FOUNDING20</strong> for 20% off your first year. <a href="https
 | `get_saved_jobs` | List your saved job postings, with job IDs for looking up their details. |
 | `save_job` | Save a job posting to your saved jobs. Private; undo with `unsave_job`. |
 | `unsave_job` | Remove a job posting from your saved jobs. |
+| `archive_job` | Archive a job in your job tracker. Undo with `unarchive_job`. |
+| `unarchive_job` | Move an archived job back to saved or in progress. |
+| `get_job_alerts` | List your job alerts, each with its search and frequency. |
+| `create_job_alert` | Create a job alert for a search's keywords and location. |
+| `delete_job_alert` | Delete one of your job alerts, found by its keywords. |
 | `dismiss_job` | Dismiss a job from job search so later searches no longer show it. Irreversible. |
 | `search_people` | Find people by keyword, location, degree, company, and mutual connections. |
 | `get_job_details` | Read a job posting's description, requirements, and company details. |

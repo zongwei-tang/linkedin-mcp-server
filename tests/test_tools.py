@@ -61,6 +61,12 @@ def _make_mock_extractor(result: dict) -> MagicMock:
     mock.set_person_followed = AsyncMock(return_value=result)
     mock.set_company_followed = AsyncMock(return_value=result)
     mock.set_job_saved = AsyncMock(return_value=result)
+    mock.read_job_alerts = AsyncMock(return_value=result)
+    mock.set_job_alert = AsyncMock(return_value=result)
+    mock.archive_job = AsyncMock(return_value=result)
+    mock.unarchive_job = AsyncMock(return_value=result)
+    mock.set_person_muted = AsyncMock(return_value=result)
+    mock.read_settings = AsyncMock(return_value=result)
     mock.read_page = AsyncMock(return_value=result)
     mock.get_invitations = AsyncMock(return_value=result)
     mock.get_connections = AsyncMock(return_value=result)
@@ -403,6 +409,14 @@ _A_VALID_CALL = [
     ("job", "dismiss_job", {"job_id": "4252026496"}),
     ("job", "get_easy_apply_form", {"job_id": "4252026496"}),
     ("job", "save_job", {"job_id": "4252026496"}),
+    ("job", "get_job_alerts", {}),
+    ("job", "create_job_alert", {"keywords": "data engineer"}),
+    ("job", "delete_job_alert", {"keywords": "data engineer"}),
+    ("job", "archive_job", {"job_id": "4252026496"}),
+    ("job", "unarchive_job", {"job_id": "4252026496"}),
+    ("person", "mute_person", {"linkedin_username": "alice"}),
+    ("person", "unmute_person", {"linkedin_username": "alice"}),
+    ("person", "get_settings", {}),
     ("job", "unsave_job", {"job_id": "4252026496"}),
     ("messaging", "get_inbox", {}),
     ("messaging", "get_conversation", {"linkedin_username": "alice"}),
@@ -3327,6 +3341,181 @@ class TestPostReactionsTool:
         tool = await mcp.get_tool("get_post_reactions")
         assert tool is not None and tool.annotations is not None
         assert tool.annotations.read_only_hint is True
+
+
+def _job_mcp(mock_extractor, serve_extractor) -> FastMCP:
+    from linkedin_mcp_server.tools.job import register_job_tools
+
+    mcp = FastMCP("test")
+    register_job_tools(mcp)
+    serve_extractor(mock_extractor)
+    return mcp
+
+
+def _person_mcp(mock_extractor, serve_extractor) -> FastMCP:
+    from linkedin_mcp_server.tools.person import register_person_tools
+
+    mcp = FastMCP("test")
+    register_person_tools(mcp)
+    serve_extractor(mock_extractor)
+    return mcp
+
+
+class TestJobAlertTools:
+    async def test_get_job_alerts_reads_the_manager(self, serve_extractor):
+        expected = {"url": "u", "sections": {"job_alerts": "a"}, "job_alerts": []}
+        mock_extractor = _make_mock_extractor(expected)
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        result = await mcp.call_tool("get_job_alerts", {})
+
+        assert result.structured_content == expected
+        mock_extractor.read_job_alerts.assert_awaited_once_with()
+
+    @pytest.mark.parametrize(
+        ("tool_name", "on"), [("create_job_alert", True), ("delete_job_alert", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, on):
+        expected = {"keywords": "k", "location": None, "status": "x", "alert": None}
+        mock_extractor = _make_mock_extractor(expected)
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        result = await mcp.call_tool(
+            tool_name, {"keywords": "data engineer", "location": "Berlin"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_job_alert.assert_awaited_once_with(
+            "data engineer", "Berlin", on
+        )
+
+    async def test_the_location_is_optional(self, serve_extractor):
+        mock_extractor = _make_mock_extractor({"status": "x"})
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        await mcp.call_tool("create_job_alert", {"keywords": "data engineer"})
+
+        mock_extractor.set_job_alert.assert_awaited_once_with(
+            "data engineer", None, True
+        )
+
+    async def test_get_job_alerts_is_read_only(self):
+        from linkedin_mcp_server.tools.job import register_job_tools
+
+        mcp = FastMCP("test")
+        register_job_tools(mcp)
+        tool = await mcp.get_tool("get_job_alerts")
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is True
+
+
+class TestArchiveJobTools:
+    async def test_archive_job_normalizes_the_id_and_passes_the_stage(
+        self, serve_extractor
+    ):
+        expected = {"url": "u", "job_id": "4252026496", "stage": "saved", "status": "x"}
+        mock_extractor = _make_mock_extractor(expected)
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        result = await mcp.call_tool(
+            "archive_job",
+            {
+                "job_id": "https://www.linkedin.com/jobs/view/4252026496/",
+                "stage": "saved",
+            },
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.archive_job.assert_awaited_once_with("4252026496", "saved")
+
+    async def test_archive_job_defaults_to_applied(self, serve_extractor):
+        mock_extractor = _make_mock_extractor({"status": "x"})
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        await mcp.call_tool("archive_job", {"job_id": "4252026496"})
+
+        mock_extractor.archive_job.assert_awaited_once_with("4252026496", "applied")
+
+    async def test_unarchive_job_defaults_to_saved(self, serve_extractor):
+        mock_extractor = _make_mock_extractor({"status": "x"})
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        await mcp.call_tool("unarchive_job", {"job_id": "4252026496"})
+
+        mock_extractor.unarchive_job.assert_awaited_once_with("4252026496", "saved")
+
+    @pytest.mark.parametrize(
+        ("tool_name", "stage"),
+        [("archive_job", "in_progress"), ("unarchive_job", "applied")],
+    )
+    async def test_a_stage_linkedin_does_not_offer_never_opens_the_browser(
+        self, serve_extractor, tool_name, stage
+    ):
+        from fastmcp.exceptions import ValidationError
+
+        mock_extractor = _make_mock_extractor({})
+        mcp = _job_mcp(mock_extractor, serve_extractor)
+
+        with pytest.raises(ValidationError):
+            await mcp.call_tool(tool_name, {"job_id": "4252026496", "stage": stage})
+        mock_extractor.archive_job.assert_not_awaited()
+        mock_extractor.unarchive_job.assert_not_awaited()
+
+
+class TestMuteAndSettingsTools:
+    @pytest.mark.parametrize(
+        ("tool_name", "muted"), [("mute_person", True), ("unmute_person", False)]
+    )
+    async def test_each_sets_its_own_state(self, serve_extractor, tool_name, muted):
+        expected = {
+            "url": "u",
+            "username": "alice",
+            "name": "A",
+            "muted": muted,
+            "status": "x",
+        }
+        mock_extractor = _make_mock_extractor(expected)
+        mcp = _person_mcp(mock_extractor, serve_extractor)
+
+        result = await mcp.call_tool(
+            tool_name, {"linkedin_username": "https://www.linkedin.com/in/alice/"}
+        )
+
+        assert result.structured_content == expected
+        mock_extractor.set_person_muted.assert_awaited_once_with("alice", muted)
+
+    async def test_get_settings_reads_the_category_asked(self, serve_extractor):
+        expected = {"url": "u", "category": "notifications", "settings": []}
+        mock_extractor = _make_mock_extractor(expected)
+        mcp = _person_mcp(mock_extractor, serve_extractor)
+
+        result = await mcp.call_tool("get_settings", {"category": "notifications"})
+
+        assert result.structured_content == expected
+        mock_extractor.read_settings.assert_awaited_once_with("notifications")
+
+    async def test_get_settings_defaults_to_account_and_is_read_only(
+        self, serve_extractor
+    ):
+        mock_extractor = _make_mock_extractor({})
+        mcp = _person_mcp(mock_extractor, serve_extractor)
+
+        await mcp.call_tool("get_settings", {})
+
+        mock_extractor.read_settings.assert_awaited_once_with("account")
+        tool = await mcp.get_tool("get_settings")
+        assert tool is not None and tool.annotations is not None
+        assert tool.annotations.read_only_hint is True
+
+    async def test_an_unknown_category_never_opens_the_browser(self, serve_extractor):
+        from fastmcp.exceptions import ValidationError
+
+        mock_extractor = _make_mock_extractor({})
+        mcp = _person_mcp(mock_extractor, serve_extractor)
+
+        with pytest.raises(ValidationError):
+            await mcp.call_tool("get_settings", {"category": "billing"})
+        mock_extractor.read_settings.assert_not_awaited()
 
 
 class TestSavePostTools:

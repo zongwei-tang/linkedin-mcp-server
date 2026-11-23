@@ -17,6 +17,7 @@ from linkedin_mcp_server.config.schema import DEFAULT_TOOL_TIMEOUT_SECONDS
 from linkedin_mcp_server.dependencies import get_ready_extractor, tool_errors
 from linkedin_mcp_server.error_handler import CodedToolError, ErrorCode
 from linkedin_mcp_server.linkedin import parse_person_sections
+from linkedin_mcp_server.linkedin.account_settings import SettingsCategory
 from linkedin_mcp_server.linkedin.contracts import FilterValidationError
 from linkedin_mcp_server.linkedin.identifiers import normalize_person_identifier
 from linkedin_mcp_server.linkedin.search_urls import build_people_search_url
@@ -474,5 +475,115 @@ def register_person_tools(
         logger.info("Unfollowing %s", linkedin_username)
         await ctx.report_progress(progress=0, total=100, message="Opening the profile")
         result = await extractor.set_person_followed(linkedin_username, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Mute Person",
+        annotations=_FOLLOW_WRITE,
+        tags={"person", "actions"},
+    )
+    @tool_errors
+    async def mute_person(
+        linkedin_username: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Mute one person you do not follow: their posts stop reaching your feed.
+
+        Chooses "Hide posts by" from one of their posts. The person is not
+        told. Someone you follow is unfollowed with unfollow_person instead,
+        and this says so. The state is read from LinkedIn's settings list of
+        people unfollowed or muted, before and after: a person already there
+        is left alone and reported already_muted. Undo with unmute_person.
+
+        Args:
+            linkedin_username: LinkedIn username (e.g. "williamhgates"). A
+                profile URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, username, name (as LinkedIn's list shows it), muted
+            (true) and status: "muted" or "already_muted".
+        """
+        linkedin_username = normalize_person_identifier(linkedin_username)
+        extractor = await get_ready_extractor(ctx, tool_name="mute_person")
+        logger.info("Muting %s", linkedin_username)
+        await ctx.report_progress(
+            progress=0, total=100, message="Opening their activity"
+        )
+        result = await extractor.set_person_muted(linkedin_username, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unmute Person",
+        annotations=_FOLLOW_WRITE,
+        tags={"person", "actions"},
+    )
+    @tool_errors
+    async def unmute_person(
+        linkedin_username: str,
+        ctx: Context,
+    ) -> dict[str, Any]:
+        """
+        Unmute one person from LinkedIn's list of people unfollowed or muted.
+
+        LinkedIn's only way back is the Follow button in that list, so the
+        person is followed too. Someone not in the list is left alone and
+        reported already_unmuted. Confirmed by reading the list again.
+
+        Args:
+            linkedin_username: LinkedIn username (e.g. "williamhgates"). A
+                profile URL is accepted too.
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, username, name, muted (false) and status: "unmuted"
+            or "already_unmuted".
+        """
+        linkedin_username = normalize_person_identifier(linkedin_username)
+        extractor = await get_ready_extractor(ctx, tool_name="unmute_person")
+        logger.info("Unmuting %s", linkedin_username)
+        await ctx.report_progress(
+            progress=0, total=100, message="Opening their activity"
+        )
+        result = await extractor.set_person_muted(linkedin_username, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Settings",
+        annotations={"readOnlyHint": True, "openWorldHint": True},
+        tags={"person"},
+    )
+    @tool_errors
+    async def get_settings(
+        ctx: Context,
+        category: SettingsCategory = "account",
+    ) -> dict[str, Any]:
+        """
+        Read your LinkedIn settings, one category at a time. Changes nothing.
+
+        Each setting comes with its value where LinkedIn's category page shows
+        one (for example "Autoplay videos": "On"). Only the category page is
+        opened; no setting's own page is.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+            category: account, sign_in_and_security, visibility,
+                data_privacy, advertising_data or notifications.
+
+        Returns:
+            Dict with url, category, sections.settings (the page's text) and
+            settings: [{name, value, path}], value null where none is shown.
+        """
+        extractor = await get_ready_extractor(ctx, tool_name="get_settings")
+        logger.info("Reading settings: %s", category)
+        await ctx.report_progress(progress=0, total=100, message="Opening settings")
+        result = await extractor.read_settings(category)
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result

@@ -1,0 +1,85 @@
+{
+  "call": {
+    "arguments": {
+      "category": "account"
+    },
+    "method": "read_settings"
+  },
+  "events": [
+    {
+      "call": "read_settings",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "read_settings",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/d/categories/account/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "read_settings",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/mypreferences/d/categories/account/",
+      "requested_url": "https://www.linkedin.com/mypreferences/d/categories/account/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "read_settings",
+      "description": "goto https://www.linkedin.com/mypreferences/d/categories/account/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "read_settings",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/d/categories/account/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "read_settings",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "read_settings",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "read_settings",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "read_settings",
+      "kind": "evaluate",
+      "operation": "settings_rows",
+      "program_digest": "4e3f75e3f90a"
+    }
+  ],
+  "result": {
+    "category": "account",
+    "sections": {
+      "settings": "General preferences Autoplay videos On"
+    },
+    "settings": [
+      {
+        "name": "Autoplay videos",
+        "path": "/mypreferences/m/settings/autoplay-videos/",
+        "value": "On"
+      }
+    ],
+    "url": "https://www.linkedin.com/mypreferences/d/categories/account/"
+  },
+  "scenario": "read_settings__account",
+  "schema_version": 1
+}

@@ -36,6 +36,51 @@
     }
   },
   {
+    "name": "archive_job",
+    "title": "Archive Job",
+    "description": "Archive one job in your job tracker, moving it to its archived stage.\n\nThe job is looked for in the given tracker stage, page by page. One\nalready archived is left alone and reported already_archived.\nConfirmed by finding it in the archived stage. Read the stages with\nget_saved_jobs; undo with unarchive_job.",
+    "inputSchema": {
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL."
+        },
+        "stage": {
+          "default": "applied",
+          "enum": [
+            "saved",
+            "applied"
+          ],
+          "type": "string",
+          "description": "The tracker stage it is in: saved or applied."
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "job"
+        ]
+      }
+    }
+  },
+  {
     "name": "close_session",
     "title": "Close Session",
     "description": "Close the current browser session and clean up resources.",
@@ -101,6 +146,102 @@
         "tags": [
           "actions",
           "person"
+        ]
+      }
+    }
+  },
+  {
+    "name": "create_job_alert",
+    "title": "Create Job Alert",
+    "description": "Create a job alert for one search: LinkedIn emails and notifies you of new matches.\n\nTurns on the alert switch of the job search for these keywords and\nlocation, as search_jobs would run it. Your alerts are read first: an\nalert for the same keywords (and location, when given) is left alone\nand reported already_exists. Confirmed by reading the alerts again.\nUndo with delete_job_alert.",
+    "inputSchema": {
+      "properties": {
+        "keywords": {
+          "type": "string",
+          "description": "The search's keywords, e.g. \"software engineer intern\"."
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "Where, e.g. \"Berkeley, California, United States\".\nWithout one LinkedIn uses your own area."
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "job"
+        ]
+      }
+    }
+  },
+  {
+    "name": "delete_job_alert",
+    "title": "Delete Job Alert",
+    "description": "Delete one of your job alerts, found by its keywords.\n\nDeleted from LinkedIn's alert manager, through its confirmation. An\nalert that is not there is reported already_deleted. When several\nalerts share the keywords, give the location as get_job_alerts shows\nit. Confirmed by reading the alerts again.",
+    "inputSchema": {
+      "properties": {
+        "keywords": {
+          "type": "string",
+          "description": "The alert's keywords, as get_job_alerts shows them."
+        },
+        "location": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "description": "The alert's location, or its start, to pick one of\nseveral alerts with the same keywords."
+        }
+      },
+      "required": [
+        "keywords"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "job"
         ]
       }
     }
@@ -936,6 +1077,31 @@
     }
   },
   {
+    "name": "get_job_alerts",
+    "title": "Get Job Alerts",
+    "description": "List your job alerts, as LinkedIn's alert manager shows them.",
+    "inputSchema": {
+      "properties": {},
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "job"
+        ]
+      }
+    }
+  },
+  {
     "name": "get_job_apply_url",
     "title": "Get Job Apply URL",
     "description": "Get how a job posting takes applications, and the employer's application link.\n\nReads the posting without clicking anything.",
@@ -1737,6 +1903,45 @@
     }
   },
   {
+    "name": "get_settings",
+    "title": "Get Settings",
+    "description": "Read your LinkedIn settings, one category at a time. Changes nothing.\n\nEach setting comes with its value where LinkedIn's category page shows\none (for example \"Autoplay videos\": \"On\"). Only the category page is\nopened; no setting's own page is.",
+    "inputSchema": {
+      "properties": {
+        "category": {
+          "default": "account",
+          "enum": [
+            "account",
+            "sign_in_and_security",
+            "visibility",
+            "data_privacy",
+            "advertising_data",
+            "notifications"
+          ],
+          "type": "string",
+          "description": "account, sign_in_and_security, visibility,\ndata_privacy, advertising_data or notifications."
+        }
+      },
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "person"
+        ]
+      }
+    }
+  },
+  {
     "name": "get_sidebar_profiles",
     "title": "Get Sidebar Profiles",
     "description": "Get profile links from sidebar recommendation sections on a LinkedIn profile page.\n\nExtracts profiles from \"More profiles for you\", \"Explore premium profiles\",\nand \"People you may know\" sidebar sections. Follows \"Show all\" links to\nreturn the full list from each section. Sections that redirect to\nlinkedin.com/premium are skipped.",
@@ -1985,6 +2190,42 @@
         "tags": [
           "actions",
           "messaging"
+        ]
+      }
+    }
+  },
+  {
+    "name": "mute_person",
+    "title": "Mute Person",
+    "description": "Mute one person you do not follow: their posts stop reaching your feed.\n\nChooses \"Hide posts by\" from one of their posts. The person is not\ntold. Someone you follow is unfollowed with unfollow_person instead,\nand this says so. The state is read from LinkedIn's settings list of\npeople unfollowed or muted, before and after: a person already there\nis left alone and reported already_muted. Undo with unmute_person.",
+    "inputSchema": {
+      "properties": {
+        "linkedin_username": {
+          "type": "string",
+          "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too."
+        }
+      },
+      "required": [
+        "linkedin_username"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "person"
         ]
       }
     }
@@ -2733,6 +2974,51 @@
     }
   },
   {
+    "name": "unarchive_job",
+    "title": "Unarchive Job",
+    "description": "Move one archived job in your job tracker back to saved or in progress.\n\nA job not in the archived stage is left alone and reported\nalready_unarchived. Confirmed by the job leaving the archived stage.",
+    "inputSchema": {
+      "properties": {
+        "job_id": {
+          "type": "string",
+          "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL."
+        },
+        "stage": {
+          "default": "saved",
+          "enum": [
+            "saved",
+            "in_progress"
+          ],
+          "type": "string",
+          "description": "Where it goes back to: saved or in_progress, the two\nLinkedIn offers."
+        }
+      },
+      "required": [
+        "job_id"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "job"
+        ]
+      }
+    }
+  },
+  {
     "name": "unfollow_company",
     "title": "Unfollow Company",
     "description": "Stop following one company page on LinkedIn.\n\nLinkedIn asks to confirm, and the confirmation is accepted. A page you\ndo not follow is left alone and reported already_unfollowed. The change\nis confirmed by loading the page again. Undo with follow_company.",
@@ -2872,6 +3158,42 @@
         "tags": [
           "actions",
           "messaging"
+        ]
+      }
+    }
+  },
+  {
+    "name": "unmute_person",
+    "title": "Unmute Person",
+    "description": "Unmute one person from LinkedIn's list of people unfollowed or muted.\n\nLinkedIn's only way back is the Follow button in that list, so the\nperson is followed too. Someone not in the list is left alone and\nreported already_unmuted. Confirmed by reading the list again.",
+    "inputSchema": {
+      "properties": {
+        "linkedin_username": {
+          "type": "string",
+          "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too."
+        }
+      },
+      "required": [
+        "linkedin_username"
+      ],
+      "type": "object",
+      "additionalProperties": false
+    },
+    "outputSchema": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "annotations": {
+      "readOnlyHint": false,
+      "destructiveHint": false,
+      "idempotentHint": true,
+      "openWorldHint": true
+    },
+    "_meta": {
+      "fastmcp": {
+        "tags": [
+          "actions",
+          "person"
         ]
       }
     }

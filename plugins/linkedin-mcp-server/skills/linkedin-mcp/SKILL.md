@@ -35,10 +35,16 @@ work, health checks, or background maintenance.
 - `follow_person`, `unfollow_person`, `follow_company` and `unfollow_company`
   change whose posts reach the user's feed. Use them only for the person or
   page the user named.
+- `mute_person` and `unmute_person` change whose posts reach the user's feed;
+  `unmute_person` also follows the person, as LinkedIn's own way back does.
+  Use them only for the person the user named.
 - `ignore_invitation` removes a pending invitation for good. Use it only for
   the sender the user named.
 - `save_job` and `unsave_job` change the user's saved jobs, which only the user
-  sees. Use them only for postings the user named.
+  sees. Use them only for postings the user named. `archive_job` and
+  `unarchive_job` move a job in the user's private job tracker, and
+  `create_job_alert` and `delete_job_alert` change which searches LinkedIn
+  emails the user about: only for the job or search the user named.
 - `dismiss_job` hides a job from every later search and cannot be undone. Use
   it only for jobs the user asked to dismiss.
 - Do not retry a failed write action unless the result proves it was not sent.
@@ -62,7 +68,7 @@ instances, clear profiles, or replace the user's browser session.
 - Companies: `get_company_profile`, `get_company_posts`, `search_companies`,
   and `get_company_employees`.
 - Jobs: `search_jobs`, `get_saved_jobs`, `get_job_details`,
-  `get_job_apply_url` and `get_easy_apply_form`. `get_easy_apply_form` opens
+  `get_job_apply_url`, `get_job_alerts` and `get_easy_apply_form`. `get_easy_apply_form` opens
   the Easy Apply form, so use it only when the user is preparing an
   application.
 - Content: `get_feed`, `search_posts` and `get_post_details`, which reads one
@@ -75,7 +81,8 @@ instances, clear profiles, or replace the user's browser session.
   `get_group_details`, `get_event_details`, `search_groups` and
   `search_events`.
 - Analytics, private to the user: `get_my_dashboard`,
-  `get_search_appearances` and `get_content_analytics`.
+  `get_search_appearances` and `get_content_analytics`. `get_settings`
+  reads the user's settings, one category at a time.
 - Schools and reading: `get_school_profile`, `get_school_alumni`,
   `search_schools`, `get_saved_posts`, `get_article` and `get_newsletter`.
 - Messages: `get_inbox`, `get_conversation`, and `search_conversations`.
@@ -85,8 +92,10 @@ instances, clear profiles, or replace the user's browser session.
   `unmute_conversation`, `mark_thread_unread`, `mark_thread_read`,
   `like_post`, `react_to_post`, `unlike_post`, `save_post`, `unsave_post`,
   `follow_person`,
-  `unfollow_person`, `follow_company`, `unfollow_company`,
-  `ignore_invitation`, `save_job`, `unsave_job` and `dismiss_job`, subject to
+  `unfollow_person`, `mute_person`, `unmute_person`, `follow_company`,
+  `unfollow_company`, `ignore_invitation`, `save_job`, `unsave_job`,
+  `archive_job`, `unarchive_job`, `create_job_alert`, `delete_job_alert` and
+  `dismiss_job`, subject to
   the explicit authorization rules above.
 - Session: `get_session_status` says whether a login is saved without opening
   a browser or a login window; it does not prove LinkedIn still accepts it.

@@ -1,0 +1,248 @@
+{
+  "call": {
+    "arguments": {
+      "keywords": "software engineer intern",
+      "location": "Berkeley, California, United States",
+      "on": true
+    },
+    "method": "set_job_alert"
+  },
+  "events": [
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/jam/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs/jam/",
+      "requested_url": "https://www.linkedin.com/jobs/jam/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_job_alert",
+      "description": "goto https://www.linkedin.com/jobs/jam/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/jam/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "evaluate",
+      "operation": "job_alerts",
+      "program_digest": "a7e0ad4cc3d0"
+    },
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern&location=Berkeley%2C+California%2C+United+States",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern&location=Berkeley%2C+California%2C+United+States",
+      "requested_url": "https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern&location=Berkeley%2C+California%2C+United+States",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_job_alert",
+      "description": "goto https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern&location=Berkeley%2C+California%2C+United+States",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern&location=Berkeley%2C+California%2C+United+States",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_job_alert",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": "data-mcp-alert-switch",
+      "call": "set_job_alert",
+      "kind": "evaluate",
+      "operation": "job_alert_switch",
+      "program_digest": "5614f1e64cac"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "locator.create",
+      "locator": "alert_switch",
+      "parent": null,
+      "selector": "input[data-mcp-alert-switch]"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "locator.element_handle",
+      "locator": "alert_switch",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_job_alert",
+      "handle": "alert_switch",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_job_alert",
+      "handle": "alert_switch",
+      "kind": "handle.evaluate",
+      "operation": "dom_click",
+      "program_digest": "8a1d42823916"
+    },
+    {
+      "call": "set_job_alert",
+      "handle": "alert_switch",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-3",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/jam/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs/jam/",
+      "requested_url": "https://www.linkedin.com/jobs/jam/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_job_alert",
+      "description": "goto https://www.linkedin.com/jobs/jam/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs/jam/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_job_alert",
+      "callback_id": "callback-3",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_job_alert",
+      "kind": "evaluate",
+      "operation": "job_alerts",
+      "program_digest": "a7e0ad4cc3d0"
+    }
+  ],
+  "result": {
+    "alert": {
+      "details": [
+        "Frequency: Daily via email and notification"
+      ],
+      "keywords": "software engineer intern",
+      "location": "Berkeley, California, United States (within 25 miles)",
+      "search_url": "https://www.linkedin.com/jobs/search-results/?keywords=software+engineer+intern"
+    },
+    "keywords": "software engineer intern",
+    "location": "Berkeley, California, United States",
+    "status": "created"
+  },
+  "scenario": "set_job_alert__create",
+  "schema_version": 1
+}

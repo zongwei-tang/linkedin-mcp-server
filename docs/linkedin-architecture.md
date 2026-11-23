@@ -16,6 +16,7 @@ a page-owning collaborator.
 | Module | Canonical public owners | Source classification |
 | --- | --- | --- |
 | `__init__` | _(no public definitions)_ | `browser-free` |
+| `account_settings` | `CATEGORY_PATHS`, `SECTION`, `SETTINGS_JS`, `SettingsCategory`, `SettingsReader`, `category_url()` | `page-owning` |
 | `capture` | `CaptureMode`, `CapturePlan`, `OverlayRootNotFoundError`, `RATE_LIMIT_RETRY_DELAY`, `SectionCapture`, `capture_plan_for_url()` | `page-owning` |
 | `company` | `CompanyReader` | `browser-free` |
 | `company_actions` | `COMPANY_FOLLOW_JS`, `CompanyActions`, `CompanyFollowStatus` | `page-owning` |
@@ -32,16 +33,18 @@ a page-owning collaborator.
 | `identifiers` | `company_page_url()`, `job_id_from_path()`, `job_id_from_search_query()`, `job_view_url()`, `messaging_thread_url()`, `normalize_company_identifier()`, `normalize_job_id()`, `normalize_opaque_id()`, `normalize_person_identifier()`, `normalize_post_reference()`, `normalize_profile_urn()`, `normalize_route_reference()`, `normalize_thread_id()`, `person_profile_url()`, `post_page_url()`, `reply_thread_id()` | `browser-free` |
 | `invitation_actions` | `INVITATION_PRESENT_JS`, `INVITATION_ROW_JS`, `InvitationActions`, `ROW_KEY_PREFIX` | `page-owning` |
 | `job_actions` | `JobActions`, `SAVED_PAGES_READ`, `SAVE_BUTTON_JS`, `SaveStatus`, `SavedJobIds`, `saved_job_ids_from()` | `page-owning` |
+| `job_alerts` | `ALERTS_JS`, `ALERT_DELETE_JS`, `ALERT_SWITCH_JS`, `AlertStatus`, `JOB_ALERTS_URL`, `JobAlertActions`, `SECTION`, `matching()` | `page-owning` |
 | `job_pages` | `APPLY_READY_JS`, `APPLY_SIGNALS_JS`, `EASY_APPLY_CLOSED_JS`, `EASY_APPLY_DISCARD_SELECTOR`, `EASY_APPLY_NEXT_SELECTOR`, `EASY_APPLY_OPEN_JS`, `EASY_APPLY_STEP_JS`, `EasyApplyDraftLeftError`, `EasyApplyFormRead`, `JOB_IDS_JS`, `JobApplyRead`, `JobPageCapture`, `JobPageReader`, `ORGANIC_BEFORE_NOTICE_JS`, `PROMOTED_JOB_IDS_JS`, `SEARCH_CARD_JS`, `SearchCardOutcome` | `page-owning` |
 | `job_policy` | `ApplyType`, `EASY_APPLY_DRAFT_LEFT`, `JOB_SEARCH_PATHS`, `JobsTrackerStage`, `RESULTS_PER_LINKEDIN_PAGE`, `SAFETY_REDIRECT_PATH`, `SAVED_JOBS_PAGE_SIZE`, `SAVED_JOBS_PATHS`, `SAVED_JOBS_URL`, `SCROLL_BUDGET_TOTAL`, `SCROLL_DEADLINE_MAX`, `SEARCH_TIMEOUT_FRACTION`, `WORLDWIDE_GEO_ID`, `apply_link_missing_section_error()`, `dropped_filters_section_error()`, `dropped_offset_section_error()`, `easy_apply_draft_section_error()`, `employer_apply_url()`, `label_similar_jobs()`, `lost_keywords_section_error()`, `missing_description_section_error()`, `no_matching_jobs_section_error()`, `parse_posting_title()`, `posting_state()`, `reaches_the_public_internet()`, `reconcile_search_references()`, `route()`, `same_job_search()` | `browser-free` |
 | `jobs` | `JobReader` | `browser-free` |
 | `link_metadata` | `RawReference`, `Reference`, `ReferenceKind`, `build_references()`, `choose_reference_text()`, `classify_link()`, `clean_heading()`, `clean_label()`, `dedupe_references()`, `derive_context()`, `normalize_reference()`, `normalize_url()` | `browser-free` |
 | `message_sender` | `MessageSender` | `page-owning` |
+| `mute_actions` | `ACTIVITY_JS`, `HIDE_ITEM_JS`, `MuteActions`, `MuteStatus`, `UNFOLLOWED_JS`, `UNFOLLOWED_URL` | `page-owning` |
 | `navigation` | `PageNavigator`, `WaitUntil` | `page-owning` |
 | `network` | `CONNECTIONS_URL`, `INVITATION_URLS`, `InvitationDirection`, `NOTIFICATIONS_URL`, `NetworkReader`, `PROFILE_VIEWS_URL` | `browser-free` |
 | `pages` | `PAGE_KINDS`, `PageKind`, `PageReader`, `PageTarget`, `page_target()`, `redirected_section_error()` | `page-owning` |
 | `person` | `PersonReader` | `page-owning` |
-| `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS` | `page-owning` |
+| `person_actions` | `CONFIRM_UNFOLLOW_JS`, `FollowStatus`, `MARK_BUTTONS_JS`, `MENU_FOLLOW_JS`, `PersonActions`, `TOP_CARD_FOLLOW_JS`, `TOP_CARD_MORE_JS` | `page-owning` |
 | `post_actions` | `IN_PAGE_CLICK_JS`, `LikeStatus`, `POST_LIKE_JS`, `PostActions`, `REACTIONS`, `REACTION_CHOICE_JS`, `REACTION_MENU_PREPARE_JS`, `REACTION_TYPES`, `Reaction`, `ReactionStatus` | `page-owning` |
 | `post_reactions` | `DEFAULT_SCROLLS`, `MORE_BUTTON_JS`, `PostReactionsReader`, `REACTION_NAMES`, `REACTORS_JS`, `SCROLL_JS`, `SECTION` | `page-owning` |
 | `post_save_actions` | `MARK_CONTROLS_JS`, `POST_MENU_JS`, `PostSaveActions`, `SAVE_ITEM_JS`, `SaveStatus` | `page-owning` |
@@ -50,10 +53,12 @@ a page-owning collaborator.
 | `search_urls` | `CONTENT_DATE_POSTED_MAP`, `CONTENT_TYPE_MAP`, `EXPERIENCE_LEVEL_MAP`, `JOB_DATE_POSTED_MAP`, `JOB_TYPE_MAP`, `NETWORK_TOKENS`, `SORT_BY_MAP`, `WORK_TYPE_MAP`, `build_company_search_url()`, `build_content_search_url()`, `build_job_search_url()`, `build_people_search_url()` | `browser-free` |
 | `session` | `NAV_DELAY`, `PageSession` | `page-owning` |
 | `text` | `CONVERSATION_ACTIONS_EN_US`, `ConversationActionTextTable`, `DETAIL_CAPTURE_EN_US`, `DetailCaptureTextTable`, `JOB_APPLY_EN_US`, `JOB_POSTING_EN_US`, `JOB_SEARCH_EN_US`, `JobApplyTextTable`, `JobPostingTextTable`, `JobSearchTextTable`, `SIDEBAR_CHROME_EN`, `SidebarChromeTable`, `drop_leading_rail()`, `filter_linkedin_noise_lines()`, `strip_conversation_chrome()`, `strip_linkedin_noise()`, `truncate_linkedin_noise()` | `browser-free` |
+| `tracker_actions` | `ARCHIVE_ITEM_JS`, `ArchivableStage`, `ArchiveStatus`, `DEFAULT_PAGES`, `TRACKER_JOB_JS`, `TrackerActions`, `UNARCHIVE_DIALOG_JS`, `UNARCHIVE_STAGES`, `UnarchiveStage`, `stage_url()` | `page-owning` |
 
 ## Internal import graph
 
 - `__init__` -> `extractor`, `fields`
+- `account_settings` -> `navigation`, `session`
 - `capture` -> `content`, `contracts`, `feed_payload`, `link_metadata`, `navigation`, `session`, `text`
 - `company` -> `capture`, `contracts`, `fields`, `identifiers`, `link_metadata`, `search_urls`, `session`
 - `company_actions` -> `identifiers`, `navigation`, `session`
@@ -63,18 +68,20 @@ a page-owning collaborator.
 - `contracts` -> `identifiers`, `link_metadata`
 - `conversation_flag_actions` -> `conversations`, `identifiers`, `navigation`, `session`, `text`
 - `conversations` -> `content`, `identifiers`, `link_metadata`, `navigation`, `profile_page`, `session`, `text`
-- `extractor` -> `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversation_flag_actions`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `post_reactions`, `post_save_actions`, `posts`, `profile_page`, `session`, `text`
+- `extractor` -> `account_settings`, `capture`, `company`, `company_actions`, `connection_actions`, `content`, `contracts`, `conversation_flag_actions`, `conversations`, `feed`, `invitation_actions`, `job_actions`, `job_alerts`, `job_pages`, `job_policy`, `jobs`, `message_sender`, `mute_actions`, `navigation`, `network`, `pages`, `person`, `person_actions`, `post_actions`, `post_reactions`, `post_save_actions`, `posts`, `profile_page`, `session`, `text`, `tracker_actions`
 - `feed` -> `content`, `contracts`, `feed_payload`, `navigation`, `session`, `text`
 - `feed_payload` -> `link_metadata`
 - `fields` -> `capture`
 - `identifiers` -> _(none)_
 - `invitation_actions` -> `identifiers`, `navigation`, `network`, `session`
 - `job_actions` -> `identifiers`, `job_policy`, `jobs`, `navigation`, `session`
+- `job_alerts` -> `navigation`, `search_urls`, `session`
 - `job_pages` -> `capture`, `content`, `contracts`, `identifiers`, `job_policy`, `link_metadata`, `navigation`, `session`, `text`
 - `job_policy` -> `identifiers`, `link_metadata`, `text`
 - `jobs` -> `capture`, `contracts`, `identifiers`, `job_pages`, `job_policy`, `link_metadata`, `navigation`, `search_urls`, `session`, `text`
 - `link_metadata` -> `identifiers`
 - `message_sender` -> `contracts`, `identifiers`, `navigation`, `session`
+- `mute_actions` -> `identifiers`, `navigation`, `session`
 - `navigation` -> `session`
 - `network` -> `capture`, `connection_actions`, `contracts`
 - `pages` -> `capture`, `contracts`, `identifiers`, `session`
@@ -88,10 +95,12 @@ a page-owning collaborator.
 - `search_urls` -> `contracts`
 - `session` -> _(none)_
 - `text` -> _(none)_
+- `tracker_actions` -> `identifiers`, `job_policy`, `navigation`, `session`
 
 ## `LinkedInExtractor` public coroutine surface
 
 - `archive_conversation`
+- `archive_job`
 - `click_button_by_text`
 - `connect_with_person`
 - `dismiss_job`
@@ -113,10 +122,12 @@ a page-owning collaborator.
 - `ignore_invitation`
 - `read_company`
 - `read_job`
+- `read_job_alerts`
 - `read_page`
 - `read_person`
 - `read_post`
 - `read_post_reactions`
+- `read_settings`
 - `reply_to_conversation`
 - `search_companies`
 - `search_conversations`
@@ -125,13 +136,16 @@ a page-owning collaborator.
 - `search_posts`
 - `send_message`
 - `set_company_followed`
+- `set_job_alert`
 - `set_job_saved`
 - `set_person_followed`
+- `set_person_muted`
 - `set_post_liked`
 - `set_post_reaction`
 - `set_post_saved`
 - `set_thread_flag`
 - `set_thread_read`
+- `unarchive_job`
 
 ## `LinkedInExtractor` construction-state allowlist
 
@@ -145,8 +159,10 @@ a page-owning collaborator.
 - `_feed`
 - `_invitation_actions`
 - `_job_actions`
+- `_job_alerts`
 - `_jobs`
 - `_message_sender`
+- `_mute_actions`
 - `_network`
 - `_pages`
 - `_person`
@@ -155,6 +171,8 @@ a page-owning collaborator.
 - `_post_reactions`
 - `_post_save_actions`
 - `_posts`
+- `_settings`
+- `_tracker_actions`
 
 ## Dependency-direction violations
 

@@ -20,11 +20,17 @@ from linkedin_mcp_server.linkedin.contracts import (
 from linkedin_mcp_server.linkedin.conversations import ConversationReader
 from linkedin_mcp_server.linkedin.feed import FeedReader
 from linkedin_mcp_server.linkedin.invitation_actions import InvitationActions
+from linkedin_mcp_server.linkedin.account_settings import (
+    SettingsCategory,
+    SettingsReader,
+)
 from linkedin_mcp_server.linkedin.job_actions import JobActions, saved_job_ids_from
+from linkedin_mcp_server.linkedin.job_alerts import JobAlertActions
 from linkedin_mcp_server.linkedin.job_pages import JobPageReader
 from linkedin_mcp_server.linkedin.job_policy import JobsTrackerStage
 from linkedin_mcp_server.linkedin.jobs import JobReader
 from linkedin_mcp_server.linkedin.message_sender import MessageSender
+from linkedin_mcp_server.linkedin.mute_actions import MuteActions
 from linkedin_mcp_server.linkedin.navigation import PageNavigator
 from linkedin_mcp_server.linkedin.network import InvitationDirection, NetworkReader
 from linkedin_mcp_server.linkedin.pages import PageKind, PageReader
@@ -40,6 +46,11 @@ from linkedin_mcp_server.linkedin.conversation_flag_actions import (
 from linkedin_mcp_server.linkedin.posts import PostSearch
 from linkedin_mcp_server.linkedin.profile_page import ProfilePageReader
 from linkedin_mcp_server.linkedin.session import PageSession
+from linkedin_mcp_server.linkedin.tracker_actions import (
+    ArchivableStage,
+    TrackerActions,
+    UnarchiveStage,
+)
 from linkedin_mcp_server.linkedin.text import (
     strip_conversation_chrome as strip_conversation_chrome,
     strip_linkedin_noise as strip_linkedin_noise,
@@ -91,6 +102,10 @@ class LinkedInExtractor:
         self._job_actions = JobActions(
             session, navigator, saved_job_ids_from(self._jobs)
         )
+        self._job_alerts = JobAlertActions(session, navigator)
+        self._tracker_actions = TrackerActions(session, navigator)
+        self._mute_actions = MuteActions(session, navigator)
+        self._settings = SettingsReader(session, navigator)
         self._conversations = ConversationReader(
             session, navigator, content, profile_page
         )
@@ -320,6 +335,36 @@ class LinkedInExtractor:
     async def set_job_saved(self, job_id: str, saved: bool) -> dict[str, Any]:
         """Save or unsave one job posting, leaving it as asked."""
         return await self._job_actions.set_job_saved(job_id, saved)
+
+    async def read_job_alerts(self) -> dict[str, Any]:
+        """List the signed-in member's job alerts."""
+        return await self._job_alerts.read_job_alerts()
+
+    async def set_job_alert(
+        self, keywords: str, location: str | None, on: bool
+    ) -> dict[str, Any]:
+        """Create or delete the job alert for one search, leaving it as asked."""
+        return await self._job_alerts.set_job_alert(keywords, location, on)
+
+    async def archive_job(
+        self, job_id: str, stage: ArchivableStage = "applied"
+    ) -> dict[str, Any]:
+        """Archive one job in the job tracker."""
+        return await self._tracker_actions.archive_job(job_id, stage)
+
+    async def unarchive_job(
+        self, job_id: str, stage: UnarchiveStage = "saved"
+    ) -> dict[str, Any]:
+        """Move one archived job back to a job tracker stage."""
+        return await self._tracker_actions.unarchive_job(job_id, stage)
+
+    async def set_person_muted(self, username: str, muted: bool) -> dict[str, Any]:
+        """Mute or unmute one person, leaving them as asked."""
+        return await self._mute_actions.set_person_muted(username, muted)
+
+    async def read_settings(self, category: SettingsCategory) -> dict[str, Any]:
+        """Read one category of the signed-in member's settings."""
+        return await self._settings.read_settings(category)
 
     async def ignore_invitation(self, username: str) -> dict[str, Any]:
         """Ignore the pending invitation one person sent."""

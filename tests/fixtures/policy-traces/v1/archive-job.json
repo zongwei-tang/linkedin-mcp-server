@@ -1,0 +1,236 @@
+{
+  "call": {
+    "arguments": {
+      "job_id": "4252026496",
+      "stage": "applied"
+    },
+    "method": "archive_job"
+  },
+  "events": [
+    {
+      "call": "archive_job",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "archive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=applied",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "archive_job",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs-tracker/?stage=applied",
+      "requested_url": "https://www.linkedin.com/jobs-tracker/?stage=applied",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "archive_job",
+      "description": "goto https://www.linkedin.com/jobs-tracker/?stage=applied",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "archive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=applied",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "archive_job",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "archive_job",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "archive_job",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "archive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "archive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    },
+    {
+      "call": "archive_job",
+      "kind": "locator.create",
+      "locator": "tracker_job_button",
+      "parent": null,
+      "selector": "button[data-mcp-tracker-job]"
+    },
+    {
+      "call": "archive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_job_button",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.click",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": [
+        "data-mcp-tracker-item",
+        "box-archive-outline-medium"
+      ],
+      "call": "archive_job",
+      "kind": "evaluate",
+      "operation": "tracker_menu_item",
+      "program_digest": "4f1a3ee77d21"
+    },
+    {
+      "call": "archive_job",
+      "kind": "locator.create",
+      "locator": "tracker_archive_item",
+      "parent": null,
+      "selector": "[data-mcp-tracker-item]"
+    },
+    {
+      "call": "archive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_archive_item",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_archive_item",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_archive_item",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "archive_job",
+      "handle": "tracker_archive_item",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "archive_job",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "archive_job",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "archive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "archive_job",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "requested_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "archive_job",
+      "description": "goto https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "archive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "archive_job",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "archive_job",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "archive_job",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "archive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    }
+  ],
+  "result": {
+    "job_id": "4252026496",
+    "stage": "applied",
+    "status": "archived",
+    "url": "https://www.linkedin.com/jobs/view/4252026496"
+  },
+  "scenario": "archive_job__applied",
+  "schema_version": 1
+}

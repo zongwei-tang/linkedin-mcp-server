@@ -1,0 +1,327 @@
+{
+  "call": {
+    "arguments": {
+      "job_id": "4252026496",
+      "stage": "saved"
+    },
+    "method": "unarchive_job"
+  },
+  "events": [
+    {
+      "call": "unarchive_job",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "unarchive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "requested_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "unarchive_job",
+      "description": "goto https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "unarchive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "unarchive_job",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.create",
+      "locator": "tracker_job_button",
+      "parent": null,
+      "selector": "button[data-mcp-tracker-job]"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_job_button",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.click",
+      "timeout_ms": 3000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_job_button",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": [
+        "data-mcp-tracker-item",
+        "box-archive-open-outline-medium"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_menu_item",
+      "program_digest": "4f1a3ee77d21"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.create",
+      "locator": "tracker_unarchive_item",
+      "parent": null,
+      "selector": "[data-mcp-tracker-item]"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_unarchive_item",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_unarchive_item",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_unarchive_item",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_unarchive_item",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": [
+        0,
+        "data-mcp-tracker-stage",
+        "data-mcp-tracker-update"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_unarchive_dialog",
+      "program_digest": "151a21c1e9a5"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.create",
+      "locator": "tracker_stage_radio",
+      "parent": null,
+      "selector": "input[data-mcp-tracker-stage]"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_stage_radio",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_stage_radio",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_stage_radio",
+      "kind": "handle.evaluate",
+      "operation": "dom_click",
+      "program_digest": "8a1d42823916"
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_stage_radio",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.create",
+      "locator": "tracker_update",
+      "parent": null,
+      "selector": "button[data-mcp-tracker-update]"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "locator.element_handle",
+      "locator": "tracker_update",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_update",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_update",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "unarchive_job",
+      "handle": "tracker_update",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "unarchive_job",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "unarchive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "requested_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "unarchive_job",
+      "description": "goto https://www.linkedin.com/jobs-tracker/?stage=archived",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "unarchive_job",
+      "extra": {
+        "target_url": "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "unarchive_job",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    },
+    {
+      "call": "unarchive_job",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 1.5
+    },
+    {
+      "arg": [
+        "4252026496",
+        "data-mcp-tracker-job",
+        "data-mcp-tracker-next"
+      ],
+      "call": "unarchive_job",
+      "kind": "evaluate",
+      "operation": "tracker_job",
+      "program_digest": "46ec66d96d73"
+    }
+  ],
+  "result": {
+    "job_id": "4252026496",
+    "stage": "saved",
+    "status": "unarchived",
+    "url": "https://www.linkedin.com/jobs/view/4252026496"
+  },
+  "scenario": "unarchive_job__saved",
+  "schema_version": 1
+}

@@ -1,0 +1,357 @@
+{
+  "call": {
+    "arguments": {
+      "muted": true,
+      "username": "ada-lovelace"
+    },
+    "method": "set_person_muted"
+  },
+  "events": [
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_muted",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-1",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_person_muted",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": [
+        "ada-lovelace",
+        "data-mcp-mute-menu"
+      ],
+      "call": "set_person_muted",
+      "kind": "evaluate",
+      "operation": "mute_activity",
+      "program_digest": "753d7d39c9e6"
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "requested_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_muted",
+      "description": "goto https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-2",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "Ada L.",
+        "data-mcp-unmute"
+      ],
+      "call": "set_person_muted",
+      "kind": "evaluate",
+      "operation": "mute_list",
+      "program_digest": "9f2915ab0543"
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-3",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "requested_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_muted",
+      "description": "goto https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-3",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "call": "set_person_muted",
+      "dismissed": false,
+      "kind": "boundary.modal"
+    },
+    {
+      "arg": [
+        "ada-lovelace",
+        "data-mcp-mute-menu"
+      ],
+      "call": "set_person_muted",
+      "kind": "evaluate",
+      "operation": "mute_activity",
+      "program_digest": "753d7d39c9e6"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "locator.create",
+      "locator": "post_control_menu",
+      "parent": null,
+      "selector": "button[data-mcp-mute-menu]"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "locator.element_handle",
+      "locator": "post_control_menu",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "post_control_menu",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "post_control_menu",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "post_control_menu",
+      "kind": "handle.dispose"
+    },
+    {
+      "arg": "data-mcp-mute-item",
+      "call": "set_person_muted",
+      "kind": "evaluate",
+      "operation": "mute_hide_item",
+      "program_digest": "d5c7befc461c"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "locator.create",
+      "locator": "mute_hide_item",
+      "parent": null,
+      "selector": "[data-mcp-mute-item]"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "locator.element_handle",
+      "locator": "mute_hide_item",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "mute_hide_item",
+      "kind": "handle.evaluate",
+      "operation": "owner_document_address",
+      "program_digest": "490b522c06a3"
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "mute_hide_item",
+      "kind": "handle.click",
+      "timeout_ms": 5000
+    },
+    {
+      "call": "set_person_muted",
+      "handle": "mute_hide_item",
+      "kind": "handle.dispose"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "sleep",
+      "reason": "sleep",
+      "seconds": 2.0
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-4",
+      "event": "framenavigated",
+      "kind": "listener.add"
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-before-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "navigate",
+      "landed_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "requested_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "timeout_ms": 30000,
+      "wait_until": "domcontentloaded"
+    },
+    {
+      "call": "set_person_muted",
+      "description": "goto https://www.linkedin.com/mypreferences/m/unfollowed/",
+      "kind": "boundary.stabilize",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "extra": {
+        "target_url": "https://www.linkedin.com/mypreferences/m/unfollowed/",
+        "wait_until": "domcontentloaded"
+      },
+      "kind": "boundary.trace",
+      "label": "extractor-after-goto"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.auth_quick",
+      "result": null
+    },
+    {
+      "call": "set_person_muted",
+      "callback_id": "callback-4",
+      "event": "framenavigated",
+      "kind": "listener.remove"
+    },
+    {
+      "call": "set_person_muted",
+      "kind": "boundary.rate_limit"
+    },
+    {
+      "arg": [
+        "Ada L.",
+        "data-mcp-unmute"
+      ],
+      "call": "set_person_muted",
+      "kind": "evaluate",
+      "operation": "mute_list",
+      "program_digest": "9f2915ab0543"
+    }
+  ],
+  "result": {
+    "muted": true,
+    "name": "Ada L.",
+    "status": "muted",
+    "url": "https://www.linkedin.com/in/ada-lovelace/",
+    "username": "ada-lovelace"
+  },
+  "scenario": "set_person_muted__mute",
+  "schema_version": 1
+}

@@ -483,6 +483,205 @@ async def _post_reactions_scenario() -> dict[str, Any]:
     )
 
 
+_ALERT = {
+    "edit": "editAlertIndex__0",
+    "keywords": "software engineer intern",
+    "location": "Berkeley, California, United States (within 25 miles)",
+    "search_url": "https://www.linkedin.com/jobs/search-results/?keywords=software+engineer+intern",
+    "details": ["Frequency: Daily via email and notification"],
+}
+
+
+async def _job_alerts_scenario() -> dict[str, Any]:
+    """Read the alert manager, once it has rendered."""
+    recorder = TraceRecorder("read_job_alerts__one", _COMMON_ALLOWED)
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    page.goto_landings.append("https://www.linkedin.com/jobs/jam/")
+    page.script(
+        "evaluate:job_alerts",
+        None,
+        {"alerts": [_ALERT], "text": "Manage job alerts software engineer intern"},
+    )
+    extractor = _extractor(page)
+    async with boundaries(recorder, clock):
+        with recorder.context("read_job_alerts"):
+            result = await extractor.read_job_alerts()
+    page.assert_clean()
+    return recorder.trace({"method": "read_job_alerts", "arguments": {}}, result)
+
+
+async def _create_job_alert_scenario() -> dict[str, Any]:
+    """Create an alert: manager read, the search's switch turned on, read again."""
+    recorder = TraceRecorder(
+        "set_job_alert__create",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.evaluate"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    jam = "https://www.linkedin.com/jobs/jam/"
+    search = (
+        "https://www.linkedin.com/jobs/search/?keywords=software+engineer+intern"
+        "&location=Berkeley%2C+California%2C+United+States"
+    )
+    page.goto_landings.extend([jam, search, jam])
+    page.declare_locator("input[data-mcp-alert-switch]", "alert_switch")
+    page.script(
+        "evaluate:job_alerts",
+        {"alerts": [], "text": "You have no job alerts yet"},
+        {"alerts": [_ALERT], "text": "software engineer intern"},
+    )
+    page.script("evaluate:job_alert_switch", {"switches": 1, "on": False})
+    page.script("alert_switch.evaluate:dom_click", None)
+    extractor = _extractor(page)
+    arguments = {
+        "keywords": "software engineer intern",
+        "location": "Berkeley, California, United States",
+        "on": True,
+    }
+    async with boundaries(recorder, clock):
+        with recorder.context("set_job_alert"):
+            result = await extractor.set_job_alert(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "set_job_alert", "arguments": arguments}, result)
+
+
+async def _archive_job_scenario() -> dict[str, Any]:
+    """Archive a job found on its stage's first page; confirmed in archived."""
+    recorder = TraceRecorder(
+        "archive_job__applied",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    page.goto_landings.extend(
+        [
+            "https://www.linkedin.com/jobs-tracker/?stage=applied",
+            "https://www.linkedin.com/jobs-tracker/?stage=archived",
+        ]
+    )
+    page.declare_locator("button[data-mcp-tracker-job]", "tracker_job_button")
+    page.declare_locator("[data-mcp-tracker-item]", "tracker_archive_item")
+    row = "opportunityTrackerOverflowMenuButton_table_4252026496"
+    page.script(
+        "evaluate:tracker_job",
+        {"rendered": True, "found": True, "next": False, "first": row},
+        {"rendered": True, "found": True, "next": False, "first": row},
+        {"rendered": True, "found": True, "next": False, "first": row},
+    )
+    page.script("evaluate:tracker_menu_item", {"items": 3, "archive": 1})
+    extractor = _extractor(page)
+    arguments = {"job_id": "4252026496", "stage": "applied"}
+    async with boundaries(recorder, clock):
+        with recorder.context("archive_job"):
+            result = await extractor.archive_job(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "archive_job", "arguments": arguments}, result)
+
+
+async def _unarchive_job_scenario() -> dict[str, Any]:
+    """Unarchive to saved: menu item, the stage dialog, gone from archived."""
+    recorder = TraceRecorder(
+        "unarchive_job__saved",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click", "handle.evaluate"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    archived = "https://www.linkedin.com/jobs-tracker/?stage=archived"
+    page.goto_landings.extend([archived, archived])
+    page.declare_locator("button[data-mcp-tracker-job]", "tracker_job_button")
+    page.declare_locator("[data-mcp-tracker-item]", "tracker_unarchive_item")
+    page.declare_locator("input[data-mcp-tracker-stage]", "tracker_stage_radio")
+    page.declare_locator("button[data-mcp-tracker-update]", "tracker_update")
+    row = "opportunityTrackerOverflowMenuButton_table_4252026496"
+    other = "opportunityTrackerOverflowMenuButton_table_4252026000"
+    page.script(
+        "evaluate:tracker_job",
+        {"rendered": True, "found": True, "next": False, "first": row},
+        {"rendered": True, "found": True, "next": False, "first": row},
+        {"rendered": True, "found": False, "next": False, "first": other},
+        {"rendered": True, "found": False, "next": False, "first": other},
+    )
+    page.script("evaluate:tracker_menu_item", {"items": 2, "archive": 1})
+    page.script(
+        "evaluate:tracker_unarchive_dialog",
+        {"dialogs": 1, "radios": 2, "buttons": 2, "ready": True},
+    )
+    page.script("tracker_stage_radio.evaluate:dom_click", None)
+    extractor = _extractor(page)
+    arguments = {"job_id": "4252026496", "stage": "saved"}
+    async with boundaries(recorder, clock):
+        with recorder.context("unarchive_job"):
+            result = await extractor.unarchive_job(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "unarchive_job", "arguments": arguments}, result)
+
+
+async def _mute_person_scenario() -> dict[str, Any]:
+    """Mute: name from the activity page, list read, hide item, list again."""
+    recorder = TraceRecorder(
+        "set_person_muted__mute",
+        _COMMON_ALLOWED | {"locator.element_handle", "handle.click"},
+    )
+    clock = FakeClock(recorder)
+    page = _page(recorder)
+    activity = "https://www.linkedin.com/in/ada-lovelace/recent-activity/all/"
+    listed = "https://www.linkedin.com/mypreferences/m/unfollowed/"
+    page.goto_landings.extend([activity, listed, activity, listed])
+    page.declare_locator("button[data-mcp-mute-menu]", "post_control_menu")
+    page.declare_locator("[data-mcp-mute-item]", "mute_hide_item")
+    page.script(
+        "evaluate:mute_activity",
+        {"name": "Ada L.", "menus": 3},
+        {"name": "Ada L.", "menus": 3},
+    )
+    page.script(
+        "evaluate:mute_list",
+        {"names": ["Grace H."], "hits": 0, "stated": 1},
+        {"names": ["Grace H.", "Ada L."], "hits": 1, "stated": 2},
+    )
+    page.script("evaluate:mute_hide_item", {"items": 7, "hide": 1, "unfollow": 0})
+    extractor = _extractor(page)
+    arguments = {"username": "ada-lovelace", "muted": True}
+    async with boundaries(recorder, clock):
+        with recorder.context("set_person_muted"):
+            result = await extractor.set_person_muted(**arguments)
+    page.assert_clean()
+    return recorder.trace(
+        {"method": "set_person_muted", "arguments": arguments}, result
+    )
+
+
+async def _settings_scenario() -> dict[str, Any]:
+    """Read one settings category page's settings links."""
+    recorder = TraceRecorder("read_settings__account", _COMMON_ALLOWED)
+    clock = FakeClock(recorder)
+    url = "https://www.linkedin.com/mypreferences/d/categories/account/"
+    page = _page(recorder)
+    page.goto_landings.append(url)
+    page.url = url
+    page.script(
+        "evaluate:settings_rows",
+        {
+            "rows": [
+                {
+                    "name": "Autoplay videos",
+                    "value": "On",
+                    "path": "/mypreferences/m/settings/autoplay-videos/",
+                }
+            ],
+            "text": "General preferences Autoplay videos On",
+        },
+    )
+    extractor = _extractor(page)
+    arguments = {"category": "account"}
+    async with boundaries(recorder, clock):
+        with recorder.context("read_settings"):
+            result = await extractor.read_settings(**arguments)
+    page.assert_clean()
+    return recorder.trace({"method": "read_settings", "arguments": arguments}, result)
+
+
 async def _react_to_post_scenario() -> dict[str, Any]:
     recorder = TraceRecorder(
         "set_post_reaction__celebrate",
@@ -1644,6 +1843,12 @@ TOOL_FACADE_METHODS = {
     "set_post_liked",
     "set_post_saved",
     "read_post_reactions",
+    "read_job_alerts",
+    "set_job_alert",
+    "archive_job",
+    "unarchive_job",
+    "set_person_muted",
+    "read_settings",
     "ignore_invitation",
     "set_post_reaction",
     "set_person_followed",
@@ -1684,6 +1889,12 @@ async def build_policy_traces() -> dict[str, dict[str, Any]]:
         "like-post.json": await _like_post_scenario(),
         "save-post.json": await _save_post_scenario(),
         "post-reactions.json": await _post_reactions_scenario(),
+        "job-alerts.json": await _job_alerts_scenario(),
+        "create-job-alert.json": await _create_job_alert_scenario(),
+        "archive-job.json": await _archive_job_scenario(),
+        "unarchive-job.json": await _unarchive_job_scenario(),
+        "mute-person.json": await _mute_person_scenario(),
+        "settings.json": await _settings_scenario(),
         "ignore-invitation.json": await _ignore_invitation_scenario(),
         "react-to-post.json": await _react_to_post_scenario(),
         "unfollow-person.json": await _unfollow_person_scenario(),

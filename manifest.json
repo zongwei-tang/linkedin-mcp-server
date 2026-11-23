@@ -109,6 +109,26 @@
       "description": "Remove a LinkedIn job posting from your saved jobs"
     },
     {
+      "name": "archive_job",
+      "description": "Archive a job in your LinkedIn job tracker; a job already archived is left alone"
+    },
+    {
+      "name": "unarchive_job",
+      "description": "Move an archived job in your LinkedIn job tracker back to saved or in progress"
+    },
+    {
+      "name": "get_job_alerts",
+      "description": "List your LinkedIn job alerts, each with its search and frequency"
+    },
+    {
+      "name": "create_job_alert",
+      "description": "Create a LinkedIn job alert for a search; an alert that exists is left alone"
+    },
+    {
+      "name": "delete_job_alert",
+      "description": "Delete one of your LinkedIn job alerts, found by its keywords"
+    },
+    {
       "name": "dismiss_job",
       "description": "Dismiss a job from job search so later searches no longer show it"
     },
@@ -239,6 +259,18 @@
     {
       "name": "unfollow_person",
       "description": "Stop following a person on LinkedIn"
+    },
+    {
+      "name": "mute_person",
+      "description": "Hide a LinkedIn member's posts from your feed; they are not told"
+    },
+    {
+      "name": "unmute_person",
+      "description": "Unmute a LinkedIn member, which LinkedIn does by following them again"
+    },
+    {
+      "name": "get_settings",
+      "description": "Read your LinkedIn settings, one category at a time, with their values"
     },
     {
       "name": "react_to_post",

@@ -16,6 +16,10 @@
         "coroutine": true,
         "signature": "(self, thread_id: 'str') -> 'dict[str, Any]'"
       },
+      "archive_job": {
+        "coroutine": true,
+        "signature": "(self, job_id: 'str', stage: 'ArchivableStage' = 'applied') -> 'dict[str, Any]'"
+      },
       "click_button_by_text": {
         "coroutine": true,
         "signature": "(self, text: 'str', *, scope: 'str' = 'main', timeout: 'int' = 5000) -> 'bool'"
@@ -100,6 +104,10 @@
         "coroutine": true,
         "signature": "(self, job_id: 'str') -> 'dict[str, Any]'"
       },
+      "read_job_alerts": {
+        "coroutine": true,
+        "signature": "(self) -> 'dict[str, Any]'"
+      },
       "read_page": {
         "coroutine": true,
         "signature": "(self, kind: 'PageKind', reference: 'str | None' = None, max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
@@ -115,6 +123,10 @@
       "read_post_reactions": {
         "coroutine": true,
         "signature": "(self, post: 'str', max_scrolls: 'int | None' = None) -> 'dict[str, Any]'"
+      },
+      "read_settings": {
+        "coroutine": true,
+        "signature": "(self, category: 'SettingsCategory') -> 'dict[str, Any]'"
       },
       "reply_to_conversation": {
         "coroutine": true,
@@ -148,6 +160,10 @@
         "coroutine": true,
         "signature": "(self, company: 'str', followed: 'bool') -> 'dict[str, Any]'"
       },
+      "set_job_alert": {
+        "coroutine": true,
+        "signature": "(self, keywords: 'str', location: 'str | None', on: 'bool') -> 'dict[str, Any]'"
+      },
       "set_job_saved": {
         "coroutine": true,
         "signature": "(self, job_id: 'str', saved: 'bool') -> 'dict[str, Any]'"
@@ -155,6 +171,10 @@
       "set_person_followed": {
         "coroutine": true,
         "signature": "(self, username: 'str', followed: 'bool') -> 'dict[str, Any]'"
+      },
+      "set_person_muted": {
+        "coroutine": true,
+        "signature": "(self, username: 'str', muted: 'bool') -> 'dict[str, Any]'"
       },
       "set_post_liked": {
         "coroutine": true,
@@ -175,10 +195,15 @@
       "set_thread_read": {
         "coroutine": true,
         "signature": "(self, thread_id: 'str', read: 'bool') -> 'dict[str, Any]'"
+      },
+      "unarchive_job": {
+        "coroutine": true,
+        "signature": "(self, job_id: 'str', stage: 'UnarchiveStage' = 'saved') -> 'dict[str, Any]'"
       }
     },
     "tool_methods": [
       "archive_conversation",
+      "archive_job",
       "connect_with_person",
       "dismiss_job",
       "extract_feed",
@@ -198,10 +223,12 @@
       "ignore_invitation",
       "read_company",
       "read_job",
+      "read_job_alerts",
       "read_page",
       "read_person",
       "read_post",
       "read_post_reactions",
+      "read_settings",
       "reply_to_conversation",
       "search_companies",
       "search_conversations",
@@ -210,13 +237,16 @@
       "search_posts",
       "send_message",
       "set_company_followed",
+      "set_job_alert",
       "set_job_saved",
       "set_person_followed",
+      "set_person_muted",
       "set_post_liked",
       "set_post_reaction",
       "set_post_saved",
       "set_thread_flag",
-      "set_thread_read"
+      "set_thread_read",
+      "unarchive_job"
     ],
     "tool_schemas": {
       "archive_conversation": {
@@ -230,6 +260,34 @@
           },
           "required": [
             "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "archive_job": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+              "type": "string"
+            },
+            "stage": {
+              "default": "applied",
+              "description": "The tracker stage it is in: saved or applied.",
+              "enum": [
+                "saved",
+                "applied"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id"
           ],
           "type": "object"
         },
@@ -272,6 +330,68 @@
           },
           "required": [
             "linkedin_username"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "create_job_alert": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "keywords": {
+              "description": "The search's keywords, e.g. \"software engineer intern\".",
+              "type": "string"
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "Where, e.g. \"Berkeley, California, United States\".\nWithout one LinkedIn uses your own area."
+            }
+          },
+          "required": [
+            "keywords"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "delete_job_alert": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "keywords": {
+              "description": "The alert's keywords, as get_job_alerts shows them.",
+              "type": "string"
+            },
+            "location": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "default": null,
+              "description": "The alert's location, or its start, to pick one of\nseveral alerts with the same keywords."
+            }
+          },
+          "required": [
+            "keywords"
           ],
           "type": "object"
         },
@@ -821,6 +941,17 @@
           "type": "object"
         }
       },
+      "get_job_alerts": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {},
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_job_apply_url": {
         "input": {
           "additionalProperties": false,
@@ -1356,6 +1487,31 @@
           "type": "object"
         }
       },
+      "get_settings": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "category": {
+              "default": "account",
+              "description": "account, sign_in_and_security, visibility,\ndata_privacy, advertising_data or notifications.",
+              "enum": [
+                "account",
+                "sign_in_and_security",
+                "visibility",
+                "data_privacy",
+                "advertising_data",
+                "notifications"
+              ],
+              "type": "string"
+            }
+          },
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "get_sidebar_profiles": {
         "input": {
           "additionalProperties": false,
@@ -1488,6 +1644,25 @@
           },
           "required": [
             "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "mute_person": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "linkedin_username": {
+              "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "linkedin_username"
           ],
           "type": "object"
         },
@@ -2022,6 +2197,34 @@
           "type": "object"
         }
       },
+      "unarchive_job": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "job_id": {
+              "description": "LinkedIn job ID (e.g. \"4252026496\"), or a posting URL.",
+              "type": "string"
+            },
+            "stage": {
+              "default": "saved",
+              "description": "Where it goes back to: saved or in_progress, the two\nLinkedIn offers.",
+              "enum": [
+                "saved",
+                "in_progress"
+              ],
+              "type": "string"
+            }
+          },
+          "required": [
+            "job_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
       "unfollow_company": {
         "input": {
           "additionalProperties": false,
@@ -2090,6 +2293,25 @@
           },
           "required": [
             "thread_id"
+          ],
+          "type": "object"
+        },
+        "output": {
+          "additionalProperties": true,
+          "type": "object"
+        }
+      },
+      "unmute_person": {
+        "input": {
+          "additionalProperties": false,
+          "properties": {
+            "linkedin_username": {
+              "description": "LinkedIn username (e.g. \"williamhgates\"). A\nprofile URL is accepted too.",
+              "type": "string"
+            }
+          },
+          "required": [
+            "linkedin_username"
           ],
           "type": "object"
         },

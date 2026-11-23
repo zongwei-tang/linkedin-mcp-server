@@ -15,6 +15,10 @@ from linkedin_mcp_server.config.schema import DEFAULT_TOOL_TIMEOUT_SECONDS
 from linkedin_mcp_server.dependencies import get_ready_extractor, tool_errors
 from linkedin_mcp_server.linkedin.identifiers import normalize_job_id
 from linkedin_mcp_server.linkedin.job_policy import JobsTrackerStage
+from linkedin_mcp_server.linkedin.tracker_actions import (
+    ArchivableStage,
+    UnarchiveStage,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -405,5 +409,183 @@ def register_job_tools(
         logger.info("Unsaving job %s", job_id)
         await ctx.report_progress(progress=0, total=100, message="Reading saved jobs")
         result = await extractor.set_job_saved(job_id, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Get Job Alerts",
+        annotations={"readOnlyHint": True, "openWorldHint": True},
+        tags={"job"},
+    )
+    @tool_errors
+    async def get_job_alerts(ctx: Context) -> dict[str, Any]:
+        """
+        List your job alerts, as LinkedIn's alert manager shows them.
+
+        Args:
+            ctx: FastMCP context for progress reporting
+
+        Returns:
+            Dict with url, sections.job_alerts (the manager's text) and
+            job_alerts: [{keywords, location, details, search_url}], where
+            details holds the frequency line.
+        """
+        extractor = await get_ready_extractor(ctx, tool_name="get_job_alerts")
+        logger.info("Reading job alerts")
+        await ctx.report_progress(progress=0, total=100, message="Opening job alerts")
+        result = await extractor.read_job_alerts()
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Create Job Alert",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def create_job_alert(
+        keywords: str,
+        ctx: Context,
+        location: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Create a job alert for one search: LinkedIn emails and notifies you of new matches.
+
+        Turns on the alert switch of the job search for these keywords and
+        location, as search_jobs would run it. Your alerts are read first: an
+        alert for the same keywords (and location, when given) is left alone
+        and reported already_exists. Confirmed by reading the alerts again.
+        Undo with delete_job_alert.
+
+        Args:
+            keywords: The search's keywords, e.g. "software engineer intern".
+            ctx: FastMCP context for progress reporting
+            location: Where, e.g. "Berkeley, California, United States".
+                Without one LinkedIn uses your own area.
+
+        Returns:
+            Dict with keywords, location, status ("created" or
+            "already_exists") and alert, the alert as get_job_alerts shows it.
+        """
+        extractor = await get_ready_extractor(ctx, tool_name="create_job_alert")
+        logger.info("Creating job alert: %s", keywords)
+        await ctx.report_progress(progress=0, total=100, message="Reading job alerts")
+        result = await extractor.set_job_alert(keywords, location, True)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Delete Job Alert",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def delete_job_alert(
+        keywords: str,
+        ctx: Context,
+        location: str | None = None,
+    ) -> dict[str, Any]:
+        """
+        Delete one of your job alerts, found by its keywords.
+
+        Deleted from LinkedIn's alert manager, through its confirmation. An
+        alert that is not there is reported already_deleted. When several
+        alerts share the keywords, give the location as get_job_alerts shows
+        it. Confirmed by reading the alerts again.
+
+        Args:
+            keywords: The alert's keywords, as get_job_alerts shows them.
+            ctx: FastMCP context for progress reporting
+            location: The alert's location, or its start, to pick one of
+                several alerts with the same keywords.
+
+        Returns:
+            Dict with keywords, location, status ("deleted" or
+            "already_deleted") and alert (null).
+        """
+        extractor = await get_ready_extractor(ctx, tool_name="delete_job_alert")
+        logger.info("Deleting job alert: %s", keywords)
+        await ctx.report_progress(progress=0, total=100, message="Reading job alerts")
+        result = await extractor.set_job_alert(keywords, location, False)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Archive Job",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def archive_job(
+        job_id: str,
+        ctx: Context,
+        stage: ArchivableStage = "applied",
+    ) -> dict[str, Any]:
+        """
+        Archive one job in your job tracker, moving it to its archived stage.
+
+        The job is looked for in the given tracker stage, page by page. One
+        already archived is left alone and reported already_archived.
+        Confirmed by finding it in the archived stage. Read the stages with
+        get_saved_jobs; undo with unarchive_job.
+
+        Args:
+            job_id: LinkedIn job ID (e.g. "4252026496"), or a posting URL.
+            ctx: FastMCP context for progress reporting
+            stage: The tracker stage it is in: saved or applied.
+
+        Returns:
+            Dict with url, job_id, stage and status: "archived" or
+            "already_archived".
+        """
+        job_id = normalize_job_id(job_id)
+        extractor = await get_ready_extractor(ctx, tool_name="archive_job")
+        logger.info("Archiving job %s from %s", job_id, stage)
+        await ctx.report_progress(
+            progress=0, total=100, message="Opening the job tracker"
+        )
+        result = await extractor.archive_job(job_id, stage)
+        await ctx.report_progress(progress=100, total=100, message="Complete")
+        return result
+
+    @mcp.tool(
+        timeout=tool_timeout,
+        title="Unarchive Job",
+        annotations=_SAVE_WRITE,
+        tags={"job", "actions"},
+    )
+    @tool_errors
+    async def unarchive_job(
+        job_id: str,
+        ctx: Context,
+        stage: UnarchiveStage = "saved",
+    ) -> dict[str, Any]:
+        """
+        Move one archived job in your job tracker back to saved or in progress.
+
+        A job not in the archived stage is left alone and reported
+        already_unarchived. Confirmed by the job leaving the archived stage.
+
+        Args:
+            job_id: LinkedIn job ID (e.g. "4252026496"), or a posting URL.
+            ctx: FastMCP context for progress reporting
+            stage: Where it goes back to: saved or in_progress, the two
+                LinkedIn offers.
+
+        Returns:
+            Dict with url, job_id, stage and status: "unarchived" or
+            "already_unarchived".
+        """
+        job_id = normalize_job_id(job_id)
+        extractor = await get_ready_extractor(ctx, tool_name="unarchive_job")
+        logger.info("Unarchiving job %s to %s", job_id, stage)
+        await ctx.report_progress(
+            progress=0, total=100, message="Opening the job tracker"
+        )
+        result = await extractor.unarchive_job(job_id, stage)
         await ctx.report_progress(progress=100, total=100, message="Complete")
         return result
