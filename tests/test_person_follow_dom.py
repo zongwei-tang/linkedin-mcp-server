@@ -307,3 +307,106 @@ async def test_two_top_card_follow_buttons_are_not_guessed_between(dom_page):
     with pytest.raises(LinkedInOperationError, match="Nothing was clicked"):
         await act(dom_page, html, True)
     assert await log(dom_page) == []
+
+
+# Measured 2026-11-23: a third-degree member's top card shows no follow button;
+# its More menu holds it, a menuitem around the same icons, and unfollowing
+# from there asks the same confirmation.
+MENU_SCRIPT = """(() => {
+const log = (what) => {
+    const entries = JSON.parse(document.body.dataset.log || '[]');
+    entries.push(what);
+    document.body.dataset.log = JSON.stringify(entries);
+};
+let followed = document.body.dataset.followed === 'true';
+document.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape') return;
+    log('escape');
+    for (const m of document.querySelectorAll('[role="menu"]')) m.remove();
+});
+const item = (icon, words, who) => '<div role="menuitem" data-who="' + who + '"><svg id="'
+    + icon + '"></svg><span>' + words + '</span></div>';
+document.querySelector('[data-who="more"]').addEventListener('click', () => {
+    log('more');
+    const menu = document.createElement('div');
+    menu.setAttribute('role', 'menu');
+    menu.innerHTML = item('paper-plane-diagonal-outline-medium', 'Profil senden', 'send')
+        + (document.body.hasAttribute('data-no-item') ? ''
+           : item(followed ? 'check-outline-small' : 'plus-outline-small',
+                  followed ? 'Folge ich' : 'Folgen', 'item'))
+        + item('flag-outline-medium', 'Melden', 'report');
+    menu.addEventListener('click', (event) => {
+        const who = event.target.closest('[role="menuitem"]')?.dataset.who;
+        if (!who) return;
+        log(who);
+        menu.remove();
+        if (who !== 'item') return;
+        if (!followed) { followed = true; return; }
+        const dialog = document.createElement('div');
+        dialog.innerHTML = '<button data-who="close"><svg id="xmark-outline-medium"></svg></button>'
+            + '<p>Ada entfolgen?</p><button data-who="cancel">Abbrechen</button>'
+            + '<button data-who="unfollow">Nicht mehr folgen</button>';
+        dialog.addEventListener('click', (event) => {
+            const who = event.target.closest('button')?.dataset.who;
+            if (!who) return;
+            log(who);
+            if (who === 'unfollow') followed = false;
+            dialog.remove();
+        });
+        document.body.appendChild(dialog);
+    });
+    document.body.appendChild(menu);
+});
+})();"""
+
+
+def profile_with_menu(followed: bool) -> str:
+    return (
+        "<main><section><div><h1>Ada</h1>"
+        '<button aria-expanded="false" data-who="more">Mehr</button>'
+        '<button aria-label="Mehr Aktionen"><svg id="ellipses-horizontal-fill-small"></svg></button>'
+        "</div></section>"
+        '<aside><div><button aria-label="Grace folgen">'
+        f'{PLUS}Folgen</button><button aria-expanded="false"></button></div></aside>'
+        f"</main><script>document.body.dataset.followed = '{str(followed).lower()}';"
+        f"{MENU_SCRIPT}</script>"
+    )
+
+
+@pytest.fixture
+def _menu_at_once(monkeypatch):
+    monkeypatch.setattr(person_actions, "_MENU_FALLBACK_AFTER", 0.0)
+    monkeypatch.setattr(person_actions, "_MENU_TIMEOUT", 0.3)
+    # Long enough to open the menu again, which must not happen.
+    monkeypatch.setattr(person_actions, "_PROFILE_READY_TIMEOUT", 1.5)
+
+
+@pytest.mark.usefixtures("_menu_at_once")
+async def test_unfollowing_from_the_more_menu_confirms_and_rereads_it(dom_page):
+    result = await act(dom_page, profile_with_menu(True), False)
+
+    assert result["status"] == "unfollowed"
+    assert await log(dom_page) == ["more", "item", "unfollow", "more", "escape"]
+
+
+@pytest.mark.usefixtures("_menu_at_once")
+async def test_following_from_the_more_menu(dom_page):
+    result = await act(dom_page, profile_with_menu(False), True)
+
+    assert result["status"] == "followed"
+    assert await log(dom_page) == ["more", "item", "more", "escape"]
+
+
+@pytest.mark.usefixtures("_menu_at_once")
+async def test_the_more_menu_state_is_left_alone_when_it_is_already_so(dom_page):
+    result = await act(dom_page, profile_with_menu(False), False)
+
+    assert result["status"] == "already_unfollowed"
+    assert await log(dom_page) == ["more", "escape"]
+
+
+@pytest.mark.usefixtures("_menu_at_once")
+async def test_a_more_menu_without_follow_is_closed_with_nothing_clicked(dom_page):
+    with pytest.raises(LinkedInOperationError, match="More menu. Nothing was clicked"):
+        await act(dom_page, profile_with_menu(True), False, body_attrs=["data-no-item"])
+    assert await log(dom_page) == ["more", "escape"]

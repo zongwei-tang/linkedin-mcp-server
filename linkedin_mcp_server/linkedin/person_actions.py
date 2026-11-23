@@ -16,6 +16,11 @@ locale:
   plain buttons), so the confirmation is the one container close above its
   buttons that holds its icon close button and exactly two plain ones.
 
+- A profile whose top card shows no follow button (measured 2026-11-23 on
+  third-degree members) keeps it in the top card's More menu: a
+  `role="menuitem"` around the same two icons. Unfollowing from it asks the
+  same confirmation.
+
 The icon names are identifiers, not words, and the confirmation is read by
 position, so no label is read.
 
@@ -50,7 +55,12 @@ FollowStatus = Literal[
 _FOLLOW_MARK = "data-mcp-follow"
 _BEFORE_MARK = "data-mcp-before-confirm"
 _CONFIRM_MARK = "data-mcp-confirm"
+_MORE_MARK = "data-mcp-follow-more"
 _PROFILE_READY_TIMEOUT = 10.0
+#: How long the top card may show no follow button before its More menu is
+#: looked in, and how long that menu may take to open.
+_MENU_FALLBACK_AFTER = 4.0
+_MENU_TIMEOUT = 5.0
 _FOLLOW_TIMEOUT = 6.0
 _POLL = 0.25
 
@@ -95,6 +105,40 @@ TOP_CARD_FOLLOW_JS = r"""(mark) => {
         }
     }
     return result;
+}"""
+
+# The top card's More button, marked, when the top card shows no follow button
+# of its own: the first `button[aria-expanded]` without an aria-label and
+# without the ellipsis icon in <main>, outside <aside>.
+TOP_CARD_MORE_JS = r"""(mark) => {
+    for (const old of document.querySelectorAll('[' + mark + ']')) {
+        old.removeAttribute(mark);
+    }
+    const main = document.querySelector('main');
+    if (!main) return 0;
+    const more = [...main.querySelectorAll('button[aria-expanded]:not([aria-label])')]
+        .filter((b) => !b.closest('aside'))
+        .filter((b) => !b.querySelector('svg[id^="ellipses"], [data-test-icon^="ellipses"]'))
+        .filter((b) => b.getClientRects().length > 0);
+    if (more.length) more[0].setAttribute(mark, '');
+    return more.length;
+}"""
+
+# The open More menu's follow item: the one menu item around the follow icons,
+# marked, and which state its icon shows.
+MENU_FOLLOW_JS = r"""(mark) => {
+    for (const old of document.querySelectorAll('[' + mark + ']')) {
+        old.removeAttribute(mark);
+    }
+    const STATES = {'check-outline-small': true, 'plus-outline-small': false};
+    const items = [...document.querySelectorAll('[role="menu"] [role="menuitem"]')]
+        .filter((el) => el.getClientRects().length > 0);
+    const hits = items.map((el) => [el, [...el.querySelectorAll('svg[id], [data-test-icon]')]
+        .map((n) => n.id || n.getAttribute('data-test-icon')).find((n) => n in STATES)])
+        .filter(([, icon]) => icon);
+    if (hits.length !== 1) return {items: items.length, followed: null};
+    hits[0][0].setAttribute(mark, '');
+    return {items: items.length, followed: STATES[hits[0][1]]};
 }"""
 
 MARK_BUTTONS_JS = r"""(before) => {
@@ -167,6 +211,8 @@ class PersonActions:
         url = person_profile_url(username, "/")
         before = await self._open_and_read(url)
         if before["followed"] == followed:
+            if before.get("via_menu"):
+                await self._session.page.keyboard.press("Escape")
             status: FollowStatus = (
                 "already_followed" if followed else "already_unfollowed"
             )
@@ -175,10 +221,15 @@ class PersonActions:
         page = self._session.page
         if not followed:
             await page.evaluate(MARK_BUTTONS_JS, _BEFORE_MARK)
-        await self._click(f"button[{_FOLLOW_MARK}]")
+        # The More menu's item is a menuitem, not a button.
+        await self._click(
+            f"[{_FOLLOW_MARK}]" if before.get("via_menu") else f"button[{_FOLLOW_MARK}]"
+        )
         if not followed:
             await self._confirm_unfollow(url)
-        if not await self._wait_for(followed):
+        # A menu choice leaves no top card button to watch: the reload below
+        # confirms it.
+        if not before.get("via_menu") and not await self._wait_for(followed):
             # Whatever the click left open goes, so nothing stays half-asked.
             await page.keyboard.press("Escape")
             raise ActionOutcomeError(
@@ -187,6 +238,8 @@ class PersonActions:
             )
         await self._session.delay(NAV_DELAY)
         after = await self._open_and_read(url, clicked=True)
+        if after.get("via_menu"):
+            await page.keyboard.press("Escape")
         if after["followed"] != followed:
             raise ActionOutcomeError(
                 f"{url} showed the change after the click, but not after a "
@@ -222,9 +275,21 @@ class PersonActions:
         await self._navigator._navigate_to_page(url)
         await self._session.check_rate_limit()
         await self._session.dismiss_modal()
-        deadline = self._session.monotonic() + _PROFILE_READY_TIMEOUT
+        start = self._session.monotonic()
+        deadline = start + _PROFILE_READY_TIMEOUT
         found = await self._read()
+        tried_menu = False
         while found["followed"] is None and self._session.monotonic() < deadline:
+            if (
+                not tried_menu
+                and not found["candidates"]
+                and self._session.monotonic() - start >= _MENU_FALLBACK_AFTER
+            ):
+                # Once: a menu without the item is not opened again.
+                tried_menu = True
+                menu = await self._read_more_menu()
+                if menu is not None:
+                    return menu
             await self._session.delay(_POLL)
             found = await self._read()
         if clicked and (found["followed"] is None or found["candidates"] != 1):
@@ -237,9 +302,8 @@ class PersonActions:
             )
         if found["followed"] is None:
             raise LinkedInOperationError(
-                f"The follow button of {url} could not be found in its top card. "
-                "A first-degree connection keeps Follow under the More menu, "
-                "which this does not open. Nothing was clicked."
+                f"The follow button of {url} could not be found in its top card "
+                "or its More menu. Nothing was clicked."
             )
         if found["candidates"] != 1:
             raise LinkedInOperationError(
@@ -248,6 +312,28 @@ class PersonActions:
                 "clicked."
             )
         return found
+
+    async def _read_more_menu(self) -> dict[str, Any] | None:
+        """Open the top card's More menu and read its follow item, if any.
+
+        Measured 2026-11-23: a profile whose top card shows no follow button
+        (a third-degree member's, a first-degree connection's) keeps it in the
+        More menu, as a menu item around the same icons. The menu is left open
+        with the item marked; None, with the menu closed, when it has none.
+        """
+        page = self._session.page
+        if not await page.evaluate(TOP_CARD_MORE_JS, _MORE_MARK):
+            return None
+        await self._click(f"button[{_MORE_MARK}]")
+        deadline = self._session.monotonic() + _MENU_TIMEOUT
+        item = await page.evaluate(MENU_FOLLOW_JS, _FOLLOW_MARK)
+        while item["followed"] is None and self._session.monotonic() < deadline:
+            await self._session.delay(_POLL)
+            item = await page.evaluate(MENU_FOLLOW_JS, _FOLLOW_MARK)
+        if item["followed"] is None:
+            await page.keyboard.press("Escape")
+            return None
+        return {"candidates": 1, "followed": item["followed"], "via_menu": True}
 
     async def _confirm_unfollow(self, url: str) -> None:
         page = self._session.page
